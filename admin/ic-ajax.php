@@ -17,7 +17,40 @@ class IC_ajax{
 		add_action( 'wp_ajax_presentation_file', array( &$this, 'presentation_file'));
 		add_action( 'wp_ajax_save_settings', array( &$this, 'save_settings'));
 		add_action( 'wp_ajax_delete_presentation_file', array( &$this, 'delete_presentation_file'));
+		add_action( 'wp_ajax_save_ppt', array( &$this, 'save_ppt'));
     }
+	
+	function save_ppt()
+	{
+		$data = $_POST['data'];
+		$file = explode("?", $data)[1];
+		file_put_contents(IC_PLUGIN_DIR."/zip_files/$file.zip", file_get_contents($data));
+
+		$zip = new ZipArchive;
+		$res = $zip->open(IC_PLUGIN_DIR."/zip_files/$file.zip");
+		if ($res === TRUE) {
+		  $zip->extractTo(IC_PLUGIN_DIR."/extract/$file/");
+		  $zip->close();
+			$files = array();
+			$i = 0;
+			if (is_dir(IC_PLUGIN_DIR."/extract/$file/")){
+					  if ($dh = opendir(IC_PLUGIN_DIR."/extract/$file/")){
+						while (($filee = readdir($dh)) !== false){
+						  if($i > 1)
+						  $files[] = $filee;
+						  $i++;
+						}
+						closedir($dh);
+					  }
+			}
+			echo json_encode(array('folder' => $file, 'files' => $files));
+		} else {
+		  echo 'error';
+		}
+		
+		die(0);
+		exit;
+	}
 	
 	function delete_presentation_file()
 	{

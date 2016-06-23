@@ -57,12 +57,13 @@ $token = $_GET['token'];
 				z-index:11;
             }
 			.slider1{margin-bottom:20px;z-index:10;}
-			.sub_menu{position:absolute;left:100%;display:none;top:0;background-color:#A13535;width:300px;}
+			.sub_menu{position:absolute;left:100%;display:none;top:0;background-color:#A13535;width:300px;padding:10px 0 ;}
 			.side_menu ul li:hover .sub_menu{display:block;}
 			.sub_menu h3{margin:0;font-size:16px;background-color:#790303;padding: 16px 5px;}
 			.sub_menu input[type='text']{background:none;border:none;border-bottom:1px solid #fff;width:100%;}
 			.sub_menu ul{margin:20px 0;}
 			.client_view .OT_panel{display:none;}
+			.side_menu button{color:#790303;}
          </style>
 		 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
     </head>
@@ -85,7 +86,7 @@ $token = $_GET['token'];
 							<h3>Presentations</h3>
 							<span><input ng-model="psearch"></span>
 							<ul>
-								<li ng-repeat="p in presentation_files track by $index" ng-click="selected_file(p.folder, p.files)">{{p.name}}</li>
+								<li ng-repeat="p in presentation_files | filter:psearch track by $index" ng-click="selected_file(p.folder, p.files)">{{p.name}}</li>
 							</ul>
 							<div class="menu_bottom">
 								<input id="convert_ppt" type="file" >
@@ -96,14 +97,14 @@ $token = $_GET['token'];
 						<i class="fa fa-youtube-play" ng-click="presentation=false;users=false;video=true;signal('video');"></i>
 						<div class="sub_menu">
 							<h3>Youtube</h3>
-							<span><input ng-model="vsearch"></span>
+							<span><input ng-model="vsearch.name"></span>
 							<ul>
-								<li ng-repeat="p in youtube_list | filter:vsearch track by $index " ng-click="change_video(p)">{{p}} <i ng-click="deletevideo($event, $index)" class="fa fa-trash"></i></li>
+								<li ng-repeat="p in youtube_list | filter:vsearch track by $index " ng-click="change_video(p.url)">{{p.name}} <i ng-click="deletevideo($event, $index)" class="fa fa-trash"></i></li>
 							</ul>
-							<span><input ng-model="newvideo" ><button ng-click="addnew_video()">Add</button></span>
+							<span><input ng-model="newvideo.name" placeholder="title"><input ng-model="newvideo.url" placeholder="url"><button ng-click="addnew_video()">Add</button></span>
 						</div>
 					</li>
-					<li ng-class="{selected:video}">
+					<li ng-class="{selected:users}">
 						<i class="fa fa-user" ng-click="presentation=false;users=true;video=false;"></i>
 					</li>
 					

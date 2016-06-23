@@ -115,6 +115,7 @@
 					player.stopVideo();
 					$scope.video = true;
 					$scope.presentation = false;
+					$scope.users=false;
 					if(admin === undefined)
 						$scope.signal({type: 'video_change', video: p}, true);
 				};
@@ -213,19 +214,24 @@
 				
 				$scope.selected_file = function(folder, files, admin)
 				{
-					$(".slider1").slick('unslick');
-					$(".slider2").slick('unslick');
-					$(".slider1").empty();
-					$(".slider2").empty();
-					angular.forEach(files, function(v,k){
-						$('.slider1').append("<div><img width='700' height='400' src='extract/"+folder+"/"+v+"'></div>");
-						$('.slider2').append("<div><img width='100' height='150' src='extract/"+folder+"/"+v+"'></div>");
-					});
-					
-					if(admin === undefined)
-						$scope.signal({type: 'presentation_change', folder: folder, files: files}, true);
-					$scope.clear();
-					$scope.construct_slider();
+					$scope.presentation=true;
+					$scope.users=false;
+					$scope.video=false;
+					$timeout(function(){
+						$(".slider1").slick('unslick');
+						$(".slider2").slick('unslick');
+						$(".slider1").empty();
+						$(".slider2").empty();
+						angular.forEach(files, function(v,k){
+							$('.slider1').append("<div><img width='700' height='400' src='<?= IC_PLUGIN_URL;?>/extract/"+folder+"/"+v+"'></div>");
+							$('.slider2').append("<div><img width='100' height='150' src='<?= IC_PLUGIN_URL;?>/extract/"+folder+"/"+v+"'></div>");
+						});
+						
+						if(admin === undefined)
+							$scope.signal({type: 'presentation_change', folder: folder, files: files}, true);
+						$scope.clear();
+						$scope.construct_slider();
+					}, 1000);
 				}
 				
 				$scope.gravatar = function(email){

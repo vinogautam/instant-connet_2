@@ -106,7 +106,8 @@ class IC_admin{
 							</li>
 						</ul>
 						<p ng-if="selected_participants.length">
-							<input id="submit" class="button button-primary" ng-click="create_meeting()" type="submit" value="Join Meeting" name="submit">
+							<input id="submit" class="button button-primary" ng-click="create_meeting(0)" type="submit" value="Join Chat" name="submit">
+							<input id="submit" class="button button-primary" ng-click="create_meeting(1)" type="submit" value="Join Meeting" name="submit">
 						</p>
 					</div>
 				</form>
@@ -204,9 +205,9 @@ class IC_admin{
 									});
 								};
 								
-								$scope.create_meeting = function()
+								$scope.create_meeting = function(st)
 								{
-									$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=create_new_meeting', 
+									$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=create_new_meeting&st='+st, 
 									{data: $scope.selected_participants}).then(function(res){
 										
 										console.log(res['data']);

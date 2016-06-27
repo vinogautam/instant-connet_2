@@ -29,6 +29,7 @@ class IC_front{
 					$user_current_status = get_user_meta($general['agent'], 'user_current_status', true);
 		?>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js" type="text/javascript" charset="utf-8"></script>
 		<script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
 		<style>
 		<?php if($option == 1){?>
@@ -67,11 +68,11 @@ class IC_front{
 		.instant_connect_form.submitted{opacity:0.7; cursor_pointer:none;}
 		.instant_connect_form.submitted .submit_btn img{display:inline-block}
 		</style>
-		<div class="chat_icon">
+		<div class="chat_icon hide_when_start">
 			<i class="fa fa-comments"></i>
 		</div>
-		<div class="instant_connect_form">
-			<form id="instant_connect_form" onSubmit="return false;">
+		<div class="instant_connect_form hide_when_start" >
+			<form  id="instant_connect_form" onSubmit="return false;">
 				<?php if($is_waiting == 0){?>
 				<p>
 					<label>Name</label>
@@ -98,69 +99,129 @@ class IC_front{
 					<p>Hello <?php echo $wuser->name;?>, Please wait for a meeting.</p>
 				<?php }?>
 			</form>
+			
 		</div>
+		<div ng-app="demo" ng-controller="ActionController" class="text_chat_container" style="display:none;position: absolute; top: 30px; right:0;width: 300px; height: 250px; overflow: auto; background: rgb(255, 255, 255) none repeat scroll 0% 0%;">
+			{{chat}}
+						<div id="messagesDiv" style="height:250px;overflow:auto;">
+							<p ng-repeat="c in chat track by $index" ng-class="{align_right: c.email != data.email}">
+								<img ng-if="c.email == data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
+								{{c.msg}}
+								<img ng-if="c.email != data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
+							</p>
+						</div>
+						<p ng-show="noti">{{noti.name}} is typing...<p>
+						<form>
+							<input size="43" type="text" ng-model="data.name" placeholder="Name">
+							<input size="43" type="text" ng-model="data.email" placeholder="Email">
+							<textarea rows="2" cols="33" ng-model="data.msg" ng-keyup="send_noti()" placeholder="Message" ng-enter="add();"></textarea>
+							<button ng-click="add();">Post</button>
+						</form>
+			</div>
+			
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/core.js'></script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/md5-min.js'></script>
 		<script>
 			
 			
-			var count = 0;
+			var count = 0,textchatref,scope;
 			jQuery(document).ready(function(){
+				
 				jQuery(".chat_icon").click(function(){
-					jQuery(".instant_connect_form").toggleClass("join_chat");
-				});
-				
-				//http://45.58.38.227/bigbluebutton/api/join?meetingID=Demo+Meeting&fullName=&password=mp&checksum=54dd35ccbc2e1377ab5667ae7d84d6ed815af332
-				
-				<?php if($is_waiting){?>
-				
-				var myDataRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_user');
-				myDataRef.update({ count:<?php echo $is_waiting;?>});
-				
-				var statusRef = new Firebase('https://vinogautam.firebaseio.com/pusher/status_change');
-				statusRef.on('value', function(snapshot) {
-					jQuery.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=get_status', function(res){
-						jQuery("#agent_status").text(res);
-						jQuery(".instant_connect_form").addClass("join_chat");
+						jQuery(".instant_connect_form").toggleClass("join_chat");
 					});
-				});
-				jQuery(".instant_connect_form").addClass("join_chat");
-				
-				var meetingRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_meeting');
-				var meetingstatus = 0;
-				meetingRef.on('value', function(snapshot) {
-					meetingstatus++;
-					if(meetingstatus != 1)
-					{
-						jQuery.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=check_meeing&participants=<?php echo $is_waiting;?>&meeting_id='+snapshot.val().id, function(res){
-							if(res)
-								window.location.assign(res);
-						});
-					}
 					
-				});
-				
-				var online_status = new Firebase('https://vinogautam.firebaseio.com/pusher/online_status');
-				cccnt = 1;
-				setInterval(function(){
-					online_status.update({ count:"<?php echo $is_waiting;?>-"+cccnt++});
-				}, 5000);
-				
-				<?php }else{?>
-				
-				//var myDataRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_user');
-				jQuery("#instant_connect_formsubmit").click(function(){
-					jQuery(".instant_connect_form").addClass("submitted");
-					jQuery.post('<?php echo site_url();?>/wp-admin/admin-ajax.php',jQuery("#instant_connect_form").serialize(), function(res){
-						//var name = jQuery('#nameInput').val();
-						//var email = jQuery('#emailInput').val();
-						//myDataRef.push({name: name, email: email});
-						console.log(res);
-						//myDataRef.update({ count:res});
-						setTimeout(function(){location.reload();}, 3000);
+					//http://45.58.38.227/bigbluebutton/api/join?meetingID=Demo+Meeting&fullName=&password=mp&checksum=54dd35ccbc2e1377ab5667ae7d84d6ed815af332
+					
+					<?php if($is_waiting){?>
+					
+					var myDataRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_user');
+					myDataRef.update({ count:<?php echo $is_waiting;?>});
+					
+					var statusRef = new Firebase('https://vinogautam.firebaseio.com/pusher/status_change');
+					statusRef.on('value', function(snapshot) {
+						jQuery.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=get_status', function(res){
+							jQuery("#agent_status").text(res);
+							jQuery(".instant_connect_form").addClass("join_chat");
+						});
 					});
-				});
-				
-				<?php }?>
+					jQuery(".instant_connect_form").addClass("join_chat");
+					
+					var meetingRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_meeting');
+					var meetingstatus = 0;
+					meetingRef.on('value', function(snapshot) {
+						meetingstatus++;
+						if(meetingstatus != 1)
+						{
+							jQuery.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=check_meeing&participants=<?php echo $is_waiting;?>&meeting_id='+snapshot.val().id, function(res){
+								if(!res) return;
+								res = JSON.parse(res);
+								console.log(res);
+								if(res.status == 3)
+									window.location.assign("<?= site_url();?>/meeting/?sessionId="+res.sessionId+"&token="+res.token);
+								else if(res.status == 2)
+								{	
+									jQuery(".text_chat_container").show();
+									jQuery(".hide_when_start").hide();
+									scope = angular.element(jQuery(".text_chat_container")).scope();
+									console.log(scope);
+									scope.$apply(function(){scope.start_chating(res);});
+									
+								}
+							});
+						}
+						
+					});
+					
+					var online_status = new Firebase('https://vinogautam.firebaseio.com/pusher/online_status');
+					cccnt = 1;
+					setInterval(function(){
+						online_status.update({ count:"<?php echo $is_waiting;?>-"+cccnt++});
+					}, 5000);
+					
+					<?php }else{?>
+					
+					//var myDataRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_user');
+					jQuery("#instant_connect_formsubmit").click(function(){
+						jQuery(".instant_connect_form").addClass("submitted");
+						jQuery.post('<?php echo site_url();?>/wp-admin/admin-ajax.php',jQuery("#instant_connect_form").serialize(), function(res){
+							//var name = jQuery('#nameInput').val();
+							//var email = jQuery('#emailInput').val();
+							//myDataRef.push({name: name, email: email});
+							console.log(res);
+							//myDataRef.update({ count:res});
+							setTimeout(function(){location.reload();}, 3000);
+						});
+					});
+					
+					<?php }?>
 			});
+			
+			angular.module('demo', [])
+			.controller('ActionController', ['$scope', '$timeout', '$http', function($scope, token, $timeout, $http) {
+					
+					$scope.chat = [];
+					$scope.start_chating = function(res){
+						console.log("start cghat");
+						textchatref = new Firebase('https://vinogautam.firebaseio.com/opentok/'+res.sessionId);
+								textchatref.on('child_added', function(snapshot) {
+									//angular.forEach(snapshot.val(), function(v,k){
+										v = snapshot.val();
+										if(v.noti === undefined)
+										{
+											hn = v.email ? v.email : v.name;
+											v.hash = CryptoJS.MD5(hn).toString();
+											$scope.$apply(function(){$scope.chat.push(v)});
+										}
+									//});
+								});
+					};
+					
+					$scope.add = function(){
+						textchatref.push($scope.data);
+						$scope.data.msg = '';
+					};
+			}]);
 		</script>
 		<?php
 	}

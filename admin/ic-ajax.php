@@ -146,11 +146,11 @@ class IC_ajax{
 			
 			$meeting = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting where id=".$meeting_id);
 			
-			$results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where status = 2 and meeting_id=".$meeting_id." and id=".$participants);
+			$results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where (status = 2 or status = 3) and meeting_id=".$meeting_id." and id=".$participants);
 			
 			if(count($results))
 			{
-				echo site_url()."/meeting/?sessionId=$meeting->session_id&token=$meeting->token";
+				echo json_encode(array("sessionId" => $meeting->session_id, "token" => $meeting->token, "status" => $results->status, "name" => $results->name, "email" => $results->email));
 				setcookie("instant_connect_waiting_id", "", time()-3600, "/");
 			}	
 			
@@ -181,13 +181,13 @@ class IC_ajax{
 		$meeting_id = $wpdb->insert_id;
 		
 		$opentok['id'] = $meeting_id;
-		
+		$status = $_GET['st'] ? 3 : 2;
 		foreach(json_decode(file_get_contents('php://input'))->data as $d)
 		{
 			$wpdb->update($wpdb->prefix . "meeting_participants", 
 						array(	'meeting_id' => $meeting_id, 
 								'meeting_date' => date("Y-m-d H:i:s"),
-								'status' => 2
+								'status' => $status
 							),
 						array("id" => $d)
 			);

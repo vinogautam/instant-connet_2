@@ -110,6 +110,15 @@
 					}
 				};
 				
+				
+				$scope.deletevideo = function(e, ind){
+					e.stopPropagation();
+					$scope.youtube_list.splice(ind,1);
+					setCookie('youtube_list', JSON.stringify($scope.youtube_list));
+				};
+				
+				<?php }?>
+				
 				$scope.change_video = function(p, admin){
 					player.loadVideoById(p.split("?v=")[1], 0, "default");
 					player.stopVideo();
@@ -119,14 +128,6 @@
 					if(admin === undefined)
 						$scope.signal({type: 'video_change', video: p}, true);
 				};
-				
-				$scope.deletevideo = function(e, ind){
-					e.stopPropagation();
-					$scope.youtube_list.splice(ind,1);
-					setCookie('youtube_list', JSON.stringify($scope.youtube_list));
-				};
-				
-				<?php }?>
 				
 				var statusRef = new Firebase('https://vinogautam.firebaseio.com/opentok/<?= $sessionId?>');
 				statusRef.on('child_added', function(snapshot) {

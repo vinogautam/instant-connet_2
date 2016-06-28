@@ -217,7 +217,7 @@ class IC_admin{
 										$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=waiting_participants').then(function(res){
 											$scope.participants = res['data'];
 										});
-										window.open("<?= site_url(); ?>/meeting/?id="+res['data']['id']+"&admin&sessionId="+res['data']['sessionId']+"&token="+res['data']['token'], '_blank');
+										window.open("<?= site_url(); ?>/meeting/?id="+res['data']['id']+"&admin", '_blank');
 									});
 								};
 								

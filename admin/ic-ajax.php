@@ -126,10 +126,15 @@ class IC_ajax{
 		global $wpdb;
 		
 		$id = $_GET['id'];
-		$wpdb->update($wpdb->prefix . "meeting_participants", 
+		$ree = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id = ".$id);
+		if($ree->status == 1)
+		{
+			$wpdb->update($wpdb->prefix . "meeting_participants", 
 						array('status' => 0),
 						array("id" => $id)
-		);
+			);
+		}
+		
 		$results = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where status = 1");
 		
 		echo json_encode($results);
@@ -150,7 +155,7 @@ class IC_ajax{
 			
 			if(count($results))
 			{
-				echo json_encode(array("sessionId" => $meeting->session_id, "token" => $meeting->token, "status" => $results->status, "name" => $results->name, "email" => $results->email));
+				echo json_encode(array("sessionId" => $meeting->session_id, "token" => $meeting->token, "status" => $results->status, "name" => $results->name, "email" => $results->email, "pid" => $participants, "mid" => $meeting_id));
 				setcookie("instant_connect_waiting_id", "", time()-3600, "/");
 			}	
 			

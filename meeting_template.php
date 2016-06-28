@@ -4,8 +4,13 @@ Template Name: Meeting Template
 */
 ?>
 <?php
-$sessionId = $_GET['sessionId']; 
-$token = $_GET['token'];
+
+$meeting_id = $_GET['id'];
+
+global $wpdb; $results = $meeting = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting where id=".$meeting_id);
+$sessionId = $meeting->session_id; 
+$token = $meeting->token;
+
  ?>
 <!DOCTYPE html>
 <html ng-app="demo">
@@ -130,13 +135,14 @@ $token = $_GET['token'];
 								<img ng-if="c.email == data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
 								{{c.msg}}
 								<img ng-if="c.email != data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
+								<hr>
 							</p>
 						</div>
 						<p ng-show="noti">{{noti.name}} is typing...<p>
 						<form>
 							<input size="43" type="text" ng-model="data.name" placeholder="Name">
 							<input size="43" type="text" ng-model="data.email" placeholder="Email">
-							<textarea rows="2" cols="33" ng-model="data.msg" ng-keyup="send_noti()" placeholder="Message" ng-enter="add();"></textarea>
+							<textarea rows="2" cols="33" ng-model="data.msg" placeholder="Message" ng-enter="add();"></textarea>
 							<button ng-click="add();">Post</button>
 						</form>
 					</div>
@@ -168,6 +174,12 @@ $token = $_GET['token'];
 							
 							<div ng-show="users">
 								<ul>
+									<li ng-repeat="part in joined_user" >
+										<img ng-src="{{get_avatar(part)}}">
+										#{{part.id}} {{part.name}} 
+										<i ng-if="part.status == '2'" class="fa fa-comment-o" ></i><span ng-click="switchtomeeting(part.id)">Switch to meeting</span>
+										<i ng-if="part.status == '3'" class="fa fa-desktop"></i>
+									</li>
 									<li ng-repeat="part in participants" ng-click="selected(part.id)" ng-class="{selected:check_selected(part.id)}" ng-init="part.diff = part.diff === undefined ? 0 : part.diff; autotimer(part);">
 										
 										<img ng-src="{{get_avatar(part)}}">

@@ -69,6 +69,10 @@
 				$scope.youtube_list = getCookie('youtube_list') ? JSON.parse(getCookie('youtube_list')) : [];
 				$scope.presentation_files = getCookie('presentation') ? JSON.parse(getCookie('presentation')) : [];
 				<?php if(isset($_GET['admin'])){?>
+				
+				<?php global $wpdb; $results = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where meeting_id=".$meeting_id);?>
+				$scope.joined_user = <?= json_encode($results); ?>;
+				console.log($scope.joined_user);
 				$scope.participants = [];
 				$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=waiting_participants').then(function(res){
 					$scope.participants = res['data'];
@@ -143,7 +147,8 @@
 						}
 						else
 						{
-							v.hash = CryptoJS.MD5(v.email).toString();
+							hn = v.email ? v.email : v.name;
+							v.hash = CryptoJS.MD5(hn).toString();
 							$scope.chat.push(v);
 							$timeout(function(){
 								jQuery("#messagesDiv").scrollTop(jQuery("#messagesDiv")[0].scrollHeight);
@@ -240,10 +245,14 @@
 					return "https://www.gravatar.com/avatar/"+encrypt+"?s=40";
 				};
 				
-				$scope.send_noti = function()
+				$scope.switchtomeeting = function(id)
 				{
-					console.log("noti send");
-					statusRef.push({name: $scope.data.name, email: $scope.data.email, noti:true, ts: new Date().getTime()});
+					$scope.send_noti("switchtomeeting_"+id);
+				};
+				
+				$scope.send_noti = function(noti)
+				{
+					statusRef.push({noti:noti, ts: new Date().getTime()});
 				};
 				
 				$scope.add = function(){

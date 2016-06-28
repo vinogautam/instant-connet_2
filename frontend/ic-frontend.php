@@ -101,21 +101,23 @@ class IC_front{
 			</form>
 			
 		</div>
-		<div ng-app="demo" ng-controller="ActionController" class="text_chat_container" style="display:none;position: absolute; top: 30px; right:0;width: 300px; height: 250px; overflow: auto; background: rgb(255, 255, 255) none repeat scroll 0% 0%;">
-			{{chat}}
+		<div ng-app="demo" ng-controller="ActionController" class="text_chat_container" style="display:none;position: absolute; top: 30px; right:0;width: 300px; background: rgb(255, 255, 255) none repeat scroll 0% 0%;border:1px solid #000;">
 						<div id="messagesDiv" style="height:250px;overflow:auto;">
 							<p ng-repeat="c in chat track by $index" ng-class="{align_right: c.email != data.email}">
 								<img ng-if="c.email == data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
 								{{c.msg}}
 								<img ng-if="c.email != data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
+								<hr>
 							</p>
 						</div>
 						<p ng-show="noti">{{noti.name}} is typing...<p>
 						<form>
-							<input size="43" type="text" ng-model="data.name" placeholder="Name">
-							<input size="43" type="text" ng-model="data.email" placeholder="Email">
+							<input size="43" type="hidden" ng-model="data.name" placeholder="Name">
+							<input size="43" type="hidden" ng-model="data.email" placeholder="Email">
 							<textarea rows="2" cols="33" ng-model="data.msg" ng-keyup="send_noti()" placeholder="Message" ng-enter="add();"></textarea>
-							<button ng-click="add();">Post</button>
+							<div style="text-align:center;">
+								<button ng-click="add();">Post</button>
+							</div>
 						</form>
 			</div>
 			
@@ -158,14 +160,15 @@ class IC_front{
 								res = JSON.parse(res);
 								console.log(res);
 								if(res.status == 3)
-									window.location.assign("<?= site_url();?>/meeting/?sessionId="+res.sessionId+"&token="+res.token);
+									window.location.assign("<?= site_url();?>/meeting/?sessionId="+res.sessionId+"&token="+res.token+"&name="+res.name+"&email="+res.email);
 								else if(res.status == 2)
 								{	
 									jQuery(".text_chat_container").show();
 									jQuery(".hide_when_start").hide();
 									scope = angular.element(jQuery(".text_chat_container")).scope();
-									console.log(scope);
-									scope.$apply(function(){scope.start_chating(res);});
+									scope.$apply(function(){
+										scope.start_chating(res);
+									});
 									
 								}
 							});
@@ -201,9 +204,14 @@ class IC_front{
 			.controller('ActionController', ['$scope', '$timeout', '$http', function($scope, token, $timeout, $http) {
 					
 					$scope.chat = [];
+					$scope.data = {name:"", email:"", msg:""};
+					$scope.meeting = {};
 					$scope.start_chating = function(res){
 						console.log("start cghat");
 						textchatref = new Firebase('https://vinogautam.firebaseio.com/opentok/'+res.sessionId);
+							$scope.data.name = res.name;
+							$scope.data.email = res.email;
+							$scope.meeting = res;
 								textchatref.on('child_added', function(snapshot) {
 									//angular.forEach(snapshot.val(), function(v,k){
 										v = snapshot.val();
@@ -211,13 +219,26 @@ class IC_front{
 										{
 											hn = v.email ? v.email : v.name;
 											v.hash = CryptoJS.MD5(hn).toString();
-											$scope.$apply(function(){$scope.chat.push(v)});
+											if(!$scope.$$phase) {
+											$scope.$apply(function(){
+												$scope.chat.push(v);
+											});
+											}
+											else
+											{
+												$scope.chat.push(v);
+											}
+										}
+										else if(v.noti.indexOf("switchtomeeting") != -1 && v.noti.split("switchtomeeting_")[1] == $scope.meeting.pid)
+										{
+											window.location.assign("<?= site_url();?>/meeting/?id="+$scope.meeting.mid+"&pid="+$scope.meeting.pid);
 										}
 									//});
 								});
 					};
 					
 					$scope.add = function(){
+						console.log($scope.data);
 						textchatref.push($scope.data);
 						$scope.data.msg = '';
 					};

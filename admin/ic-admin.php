@@ -150,7 +150,9 @@ class IC_admin{
 										$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=new_participants&id='+snapshot.val().count).then(function(res){
 											jQuery("#notification_audio").trigger('play');
 											$scope.recent = res['data'];
-											$scope.participants.push($scope.recent);
+											$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=waiting_participants').then(function(res){
+												$scope.participants = res['data'];
+											});
 											
 											$timeout(function(){
 												$scope.recent = {};

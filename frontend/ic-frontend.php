@@ -152,15 +152,16 @@ class IC_front{
 					var meetingRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_meeting');
 					var meetingstatus = 0;
 					meetingRef.on('value', function(snapshot) {
+						mid = snapshot.val().id.split("-")[0];
 						meetingstatus++;
 						if(meetingstatus != 1)
 						{
-							jQuery.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=check_meeing&participants=<?php echo $is_waiting;?>&meeting_id='+snapshot.val().id, function(res){
+							jQuery.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=check_meeing&participants=<?php echo $is_waiting;?>&meeting_id='+mid, function(res){
 								if(!res) return;
 								res = JSON.parse(res);
 								console.log(res);
 								if(res.status == 3)
-									window.location.assign("<?= site_url();?>/meeting/?sessionId="+res.sessionId+"&token="+res.token+"&name="+res.name+"&email="+res.email);
+									window.location.assign("<?= site_url();?>/meeting/?id="+res.mid+"&pid="+res.pid);
 								else if(res.status == 2)
 								{	
 									jQuery(".text_chat_container").show();

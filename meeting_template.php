@@ -173,17 +173,20 @@ $token = $meeting->token;
 							<iframe ng-show="video" <?php if(!isset($_GET['admin'])){?>style="pointer-events:none;"<?php }?> id="youtube-player" width="640" height="360" src="//www.youtube.com/embed/geTgZcHrXTc?enablejsapi=1&version=3&playerapiid=ytplayer" frameborder="0" allowfullscreen="true" allowscriptaccess="always"></iframe>
 							
 							<div ng-show="users">
+								<h4>Users in meeting</h4>
 								<ul>
 									<li ng-repeat="part in joined_user" >
 										<img ng-src="{{get_avatar(part)}}">
 										#{{part.id}} {{part.name}} 
-										<i ng-if="part.status == '2'" class="fa fa-comment-o" ></i><span ng-click="switchtomeeting(part.id)">Switch to meeting</span>
+										<i ng-if="part.status == '2'" class="fa fa-comment-o" ><span ng-click="switchtomeeting(part.id)">Switch to meeting</span></i>
 										<i ng-if="part.status == '3'" class="fa fa-desktop"></i>
 									</li>
+								</ul>
+								<h4>Waiting users</h4>
+								<ul>
 									<li ng-repeat="part in participants" ng-click="selected(part.id)" ng-class="{selected:check_selected(part.id)}" ng-init="part.diff = part.diff === undefined ? 0 : part.diff; autotimer(part);">
-										
 										<img ng-src="{{get_avatar(part)}}">
-										#{{part.id}} {{part.name}} 
+										#{{part.id}} {{part.name}} <span ng-click="join_new_user_to_meeting(part.id, 2);">Join to chat</span><span ng-click="join_new_user_to_meeting(part.id, 3);">Join to meeting</span>
 									</li>
 								</ul>
 							</div>

@@ -2,6 +2,9 @@
 		
 		  var player;
 		  var scope;
+		  var myDataRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_user');
+		  var meetingRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_meeting');
+				
 		  function onYouTubeIframeAPIReady() {
 			scope = angular.element($("body")).scope();
 			player = new YT.Player( 'youtube-player', {
@@ -60,9 +63,8 @@
 				});
 			};
 		})
-            .controller('MyCtrl', ['$scope', 'OTSession', 'apiKey', 'sessionId', 'token', '$timeout', '$http', function($scope, OTSession, apiKey, sessionId, token, $timeout, $http) {
-                var myDataRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_user');
-				$scope.chat = [];
+            .controller('MyCtrl', ['$scope', 'OTSession', 'apiKey', 'sessionId', 'token', '$timeout', '$http', '$interval', function($scope, OTSession, apiKey, sessionId, token, $timeout, $http, $interval) {
+                $scope.chat = [];
 				$scope.noti = false;
 				$scope.presentation = true;
 				
@@ -77,12 +79,26 @@
 				$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=waiting_participants').then(function(res){
 					$scope.participants = res['data'];
 				});
+				
+				$scope.join_new_user_to_meeting = function(pid, status){
+					$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=new_user_to_meeting',
+					{mid:<?= $meeting_id?>, pid:pid, status:status}
+					).then(function(res){
+						$scope.joined_user = res['data']['joined_user'];
+						$scope.participants = res['data']['participants'];
+						meetingRef.update({ id:"<?= $meeting_id.'-'?>"+new Date().getTime()});
+					});
+				};
+				
 				$scope.tmp_check = false;
+				$scope.selected_participants = [];
 				myDataRef.on('value', function(snapshot) {
 					if($scope.tmp_check)
 					{
 						$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=new_participants&id='+snapshot.val().count).then(function(res){
-							$scope.participants.push($scope.recent);
+							$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=waiting_participants').then(function(res){
+								$scope.participants = res['data'];
+							});
 						});
 					}
 					$scope.tmp_check = true;
@@ -247,7 +263,14 @@
 				
 				$scope.switchtomeeting = function(id)
 				{
-					$scope.send_noti("switchtomeeting_"+id);
+					$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=new_user_to_meeting',
+					{mid:<?= $meeting_id?>, pid:id, status:status}
+					).then(function(res){
+						$scope.joined_user = res['data']['joined_user'];
+						$scope.participants = res['data']['participants'];
+						$scope.send_noti("switchtomeeting_"+id);
+					});
+					
 				};
 				
 				$scope.send_noti = function(noti)

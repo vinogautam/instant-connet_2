@@ -65,9 +65,10 @@
 		})
             .controller('MyCtrl', ['$scope', 'OTSession', 'apiKey', 'sessionId', 'token', '$timeout', '$http', '$interval', function($scope, OTSession, apiKey, sessionId, token, $timeout, $http, $interval) {
                 $scope.chat = [];
+				$scope.data = {active_menu:"presentation", active_presentation:{files:"", folder:""}, active_slide:"", active_video:"", video_status:false};
 				$scope.noti = false;
 				$scope.presentation = true;
-				
+				$scope.is_admin = <?= isset($_GET['admin']) ? 1 : 0;?>;
 				$scope.youtube_list = getCookie('youtube_list') ? JSON.parse(getCookie('youtube_list')) : [];
 				$scope.presentation_files = getCookie('presentation') ? JSON.parse(getCookie('presentation')) : [];
 				<?php if(isset($_GET['admin'])){?>
@@ -140,6 +141,7 @@
 				<?php }?>
 				
 				$scope.change_video = function(p, admin){
+					$scope.data.active_video = p;
 					player.loadVideoById(p.split("?v=")[1], 0, "default");
 					player.stopVideo();
 					$scope.video = true;
@@ -236,9 +238,14 @@
 				
 				$scope.selected_file = function(folder, files, admin)
 				{
+					
 					$scope.presentation=true;
 					$scope.users=false;
 					$scope.video=false;
+					$scope.data.active_menu = 'presentation';
+					$scope.data.active_menu.folder = folder;
+					$scope.data.active_menu.files = files;
+					
 					$timeout(function(){
 						$(".slider1").slick('unslick');
 						$(".slider2").slick('unslick');
@@ -284,6 +291,7 @@
 				};
 				
 				$scope.video_noti = function(st){
+					$scope.data.video_status = st;
 					OTSession.session.signal( 
 							{  type: 'youtube-player',
 							   data: st
@@ -363,43 +371,103 @@
 				
 				$scope.construct_slider();
 				
-				<?php if(isset($_GET['admin'])){?>
 				OTSession.session.on({
                     sessionConnected: function() {
-						$scope.$apply(function(){$scope.slide_menu = true;});
-						$('.slider1').on('afterChange', function(event, slick, currentSlide){
-						  console.log(currentSlide);
-						  OTSession.session.signal( 
-							{  type: 'presentationControl',
-							   data: {slide:currentSlide}
-							}, 
-							function(error) {
-								if (error) {
-								  console.log("signal error ("
-											   + error.code
-											   + "): " + error.message);
-								} else {
-								  console.log("signal sent.");
-								}
-							});
-							$scope.clear();
+						if($scope.is_admin)
+						{
+								$scope.$apply(function(){$scope.slide_menu = true;});
+								$('.slider1').on('afterChange', function(event, slick, currentSlide){
+								  console.log(currentSlide);
+								  $scope.$apply(function(){$scope.data.active_slide = currentSlide;});
+								  OTSession.session.signal( 
+									{  type: 'presentationControl',
+									   data: {slide:currentSlide}
+									}, 
+									function(error) {
+										if (error) {
+										  console.log("signal error ("
+													   + error.code
+													   + "): " + error.message);
+										} else {
+										  console.log("signal sent.");
+										}
+									});
+									$scope.clear();
+									OTSession.session.signal( 
+									{  type: 'otWhiteboard_clear'
+									}, 
+									function(error) {
+										if (error) {
+										  console.log("signal error ("
+													   + error.code
+													   + "): " + error.message);
+										} else {
+										  console.log("signal sent.");
+										}
+									});
+								});
+						}
+						else
+						{
 							OTSession.session.signal( 
-							{  type: 'otWhiteboard_clear'
-							}, 
-							function(error) {
-								if (error) {
-								  console.log("signal error ("
-											   + error.code
-											   + "): " + error.message);
-								} else {
-								  console.log("signal sent.");
-								}
-							});
-						});
-						
+									{  type: 'joined_meeting',
+									   data: {}
+									}, 
+									function(error) {
+										
+									});
+						}
                     }
 				});
-				<?php }else{?>
+				
+				if($scope.is_admin)
+				{
+					OTSession.session.on('signal:joined_meeting', function (event) {
+						OTSession.session.signal( 
+									{  type: 'active_datas',
+									   data: $scope.data
+									}, 
+									function(error) {
+										
+									});
+					});
+				}
+				
+				OTSession.session.on('signal:active_datas', function (event) {
+					console.log(event);
+					if(event.data.active_menu == "video")
+					{
+						$scope.$apply(function(){
+							if(event.data.active_video)
+							$scope.change_video(event.data.active_video, 1);
+							$scope.presentation = false;
+							$scope.video = true;
+							$timeout(function(){
+								if(event.data.video_status == 'start')
+									player.playVideo();
+								if(event.data.video_status == 'pause')
+									player.pauseVideo();
+							});
+						});
+					}
+					else if(event.data.active_menu == "presentation")
+					{
+						$scope.$apply(function(){
+							$scope.presentation = true;
+							$scope.video = false;
+							$scope.selected_file(event.data.active_presentation.folder, event.data.active_presentation.files, 1);
+							if(event.data.active_slide)
+							$('.slider1').slick('slickGoTo', event.data.active_slide);
+						});
+					}
+				});
+				
+				OTSession.session.on('signal:presentationControl', function (event) {
+					console.log(event);
+					//var currentSlide = $('.slider1').slick('slickCurrentSlide');
+					$('.slider1').slick('slickGoTo', event.data.slide);
+				});
+				
 				OTSession.session.on('signal:presentationControl', function (event) {
 					console.log(event);
 					//var currentSlide = $('.slider1').slick('slickCurrentSlide');
@@ -444,7 +512,6 @@
 					}
 					
 				});
-				<?php }?>
 			}])
 			.value({
                 apiKey: '45609232',

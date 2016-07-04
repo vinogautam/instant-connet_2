@@ -10,9 +10,8 @@ $meeting_id = $_GET['id'];
 global $wpdb; $results = $meeting = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting where id=".$meeting_id);
 $sessionId = $meeting->session_id; 
 $token = $meeting->token;
-if (!isset($_GET['finonce']) || !wp_verify_nonce($_GET['finonce'], 'finonce')) {
+if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GET['finonce'], 'finonce'))) {
 	die("Invaid meeting url");
-	
 }
  ?>
 <!DOCTYPE html>
@@ -89,7 +88,7 @@ if (!isset($_GET['finonce']) || !wp_verify_nonce($_GET['finonce'], 'finonce')) {
 				<ul>
 					<li>Fi</li>
 					<li ng-class="{selected:presentation}">
-						<i class="fa fa-desktop"  ng-click="presentation=true;users=false;video=false;signal('presentation');"></i>
+						<i class="fa fa-desktop"  ng-click="presentation=true;users=false;video=false;signal('presentation');data.active_menu='presentation'"></i>
 						<div class="sub_menu">
 							<h3>Presentations</h3>
 							<span><input ng-model="psearch"></span>
@@ -102,7 +101,7 @@ if (!isset($_GET['finonce']) || !wp_verify_nonce($_GET['finonce'], 'finonce')) {
 						</div>
 					</li>
 					<li ng-class="{selected:video}" >
-						<i class="fa fa-youtube-play" ng-click="presentation=false;users=false;video=true;signal('video');"></i>
+						<i class="fa fa-youtube-play" ng-click="presentation=false;users=false;video=true;signal('video');data.active_menu='video'"></i>
 						<div class="sub_menu">
 							<h3>Youtube</h3>
 							<span><input ng-model="vsearch.name"></span>

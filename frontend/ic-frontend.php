@@ -152,7 +152,10 @@ class IC_front{
 					var meetingRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_meeting');
 					var meetingstatus = 0;
 					meetingRef.on('value', function(snapshot) {
-						mid = snapshot.val().id.split("-")[0];
+						mid = snapshot.val().id;
+						if(typeof mid != "number")
+							mid = mid.split("-")[0];
+						
 						meetingstatus++;
 						if(meetingstatus != 1)
 						{
@@ -161,7 +164,7 @@ class IC_front{
 								res = JSON.parse(res);
 								console.log(res);
 								if(res.status == 3)
-									window.location.assign("<?= site_url();?>/meeting/?id="+res.mid+"&pid="+res.pid);
+									window.location.assign("<?= wp_nonce_url(site_url("/meeting/"),'finonce','finonce');?>&id="+res.mid+"&pid="+res.pid);
 								else if(res.status == 2)
 								{	
 									jQuery(".text_chat_container").show();
@@ -232,7 +235,7 @@ class IC_front{
 										}
 										else if(v.noti.indexOf("switchtomeeting") != -1 && v.noti.split("switchtomeeting_")[1] == $scope.meeting.pid)
 										{
-											window.location.assign("<?= site_url();?>/meeting/?id="+$scope.meeting.mid+"&pid="+$scope.meeting.pid);
+											window.location.assign("<?= wp_nonce_url(site_url("/meeting/"),'finonce','finonce');?>&id="+$scope.meeting.mid+"&pid="+$scope.meeting.pid);
 										}
 									//});
 								});

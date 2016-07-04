@@ -10,7 +10,10 @@ $meeting_id = $_GET['id'];
 global $wpdb; $results = $meeting = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting where id=".$meeting_id);
 $sessionId = $meeting->session_id; 
 $token = $meeting->token;
-
+if (!isset($_GET['finonce']) || !wp_verify_nonce($_GET['finonce'], 'finonce')) {
+	die("Invaid meeting url");
+	
+}
  ?>
 <!DOCTYPE html>
 <html ng-app="demo">

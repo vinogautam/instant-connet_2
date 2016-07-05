@@ -74,6 +74,7 @@
 				<?php if(isset($_GET['admin'])){?>
 				
 				<?php global $wpdb; $results = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where meeting_id=".$meeting_id);?>
+				$scope.data2 = {name:"admin", email:"<?= bloginfo('admin_email');?>", msg:""};
 				$scope.joined_user = <?= json_encode($results); ?>;
 				console.log($scope.joined_user);
 				$scope.participants = [];
@@ -138,6 +139,11 @@
 					setCookie('youtube_list', JSON.stringify($scope.youtube_list));
 				};
 				
+				<?php }else{?>
+				
+				<?php global $wpdb; $results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$_GET['pid']);?>
+				$scope.data2 = {name:"<?= $results->name;?>", email:"<?= $results->email;?>", msg:""};
+				
 				<?php }?>
 				
 				$scope.change_video = function(p, admin){
@@ -147,6 +153,7 @@
 					$scope.video = true;
 					$scope.presentation = false;
 					$scope.users=false;
+					$scope.data.active_menu = 'video';
 					if(admin === undefined)
 						$scope.signal({type: 'video_change', video: p}, true);
 				};
@@ -243,8 +250,8 @@
 					$scope.users=false;
 					$scope.video=false;
 					$scope.data.active_menu = 'presentation';
-					$scope.data.active_menu.folder = folder;
-					$scope.data.active_menu.files = files;
+					$scope.data.active_presentation.folder = folder;
+					$scope.data.active_presentation.files = files;
 					
 					$timeout(function(){
 						$(".slider1").slick('unslick');
@@ -286,8 +293,8 @@
 				};
 				
 				$scope.add = function(){
-					statusRef.push($scope.data);
-					$scope.data.msg = '';
+					statusRef.push($scope.data2);
+					$scope.data2.msg = '';
 				};
 				
 				$scope.video_noti = function(st){
@@ -432,35 +439,39 @@
 									});
 					});
 				}
-				
-				OTSession.session.on('signal:active_datas', function (event) {
-					console.log(event);
-					if(event.data.active_menu == "video")
-					{
-						$scope.$apply(function(){
-							if(event.data.active_video)
-							$scope.change_video(event.data.active_video, 1);
-							$scope.presentation = false;
-							$scope.video = true;
-							$timeout(function(){
-								if(event.data.video_status == 'start')
-									player.playVideo();
-								if(event.data.video_status == 'pause')
-									player.pauseVideo();
+				else{
+					OTSession.session.on('signal:active_datas', function (event) {
+						console.log(event);
+						if(event.data.active_menu == "video")
+						{
+							$scope.$apply(function(){
+								if(event.data.active_video)
+								$scope.change_video(event.data.active_video, 1);
+								$scope.presentation = false;
+								$scope.video = true;
+								$timeout(function(){
+									if(event.data.video_status == 'start')
+										player.playVideo();
+									if(event.data.video_status == 'pause')
+										player.pauseVideo();
+								}, 500);
 							});
-						});
-					}
-					else if(event.data.active_menu == "presentation")
-					{
-						$scope.$apply(function(){
-							$scope.presentation = true;
-							$scope.video = false;
-							$scope.selected_file(event.data.active_presentation.folder, event.data.active_presentation.files, 1);
-							if(event.data.active_slide)
-							$('.slider1').slick('slickGoTo', event.data.active_slide);
-						});
-					}
-				});
+						}
+						else if(event.data.active_menu == "presentation")
+						{
+							$scope.$apply(function(){
+								$scope.presentation = true;
+								$scope.video = false;
+								$scope.selected_file(event.data.active_presentation.folder, event.data.active_presentation.files, 1);
+								$timeout(function(){
+									if(event.data.active_slide)
+										$('.slider1').slick('slickGoTo', event.data.active_slide);
+								}, 1000);
+							});
+						}
+					});
+				}
+				
 				
 				OTSession.session.on('signal:presentationControl', function (event) {
 					console.log(event);

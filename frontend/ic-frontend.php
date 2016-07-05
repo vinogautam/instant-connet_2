@@ -205,6 +205,19 @@ class IC_front{
 			});
 			
 			angular.module('demo', [])
+			.directive('ngEnter', function() {
+			return function(scope, element, attrs) {
+				element.bind("keydown keypress", function(event) {
+					if(event.which === 13) {
+							scope.$apply(function(){
+									scope.$eval(attrs.ngEnter);
+							});
+							
+							event.preventDefault();
+					}
+				});
+			};
+		})
 			.controller('ActionController', ['$scope', '$timeout', '$http', function($scope, token, $timeout, $http) {
 					
 					$scope.chat = [];

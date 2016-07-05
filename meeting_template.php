@@ -133,18 +133,18 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 					</div>
 					<div class="text_chat_container" ng-class="{visible:visible}">
 						<div id="messagesDiv" style="height:250px;overflow:auto;">
-							<p ng-repeat="c in chat" ng-class="{align_right: c.email != data.email}">
-								<img ng-if="c.email == data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
+							<p ng-repeat="c in chat" ng-class="{align_right: c.email != data2.email}" ng-if="c.msg">
+								<img ng-if="c.email == data2.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
 								{{c.msg}}
-								<img ng-if="c.email != data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
+								<img ng-if="c.email != data2.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
 								<hr>
 							</p>
 						</div>
 						<p ng-show="noti">{{noti.name}} is typing...<p>
 						<form>
-							<input size="43" type="text" ng-model="data.name" placeholder="Name">
-							<input size="43" type="text" ng-model="data.email" placeholder="Email">
-							<textarea rows="2" cols="33" ng-model="data.msg" placeholder="Message" ng-enter="add();"></textarea>
+							<input size="43" type="hidden" ng-model="data2.name" placeholder="Name">
+							<input size="43" type="hidden" ng-model="data2.email" placeholder="Email">
+							<textarea rows="2" cols="33" ng-model="data2.msg" placeholder="Message" ng-enter="add();"></textarea>
 							<button ng-click="add();">Post</button>
 						</form>
 					</div>

@@ -298,20 +298,23 @@
 				};
 				
 				$scope.video_noti = function(st){
-					$scope.data.video_status = st;
-					OTSession.session.signal( 
-							{  type: 'youtube-player',
-							   data: st
-							}, 
-							function(error) {
-								if (error) {
-								  console.log("signal error ("
-											   + error.code
-											   + "): " + error.message);
-								} else {
-								  console.log("signal sent.");
-								}
-							});
+					if($scope.is_admin)
+					{
+						$scope.data.video_status = st;
+						OTSession.session.signal( 
+								{  type: 'youtube-player',
+								   data: st
+								}, 
+								function(error) {
+									if (error) {
+									  console.log("signal error ("
+												   + error.code
+												   + "): " + error.message);
+									} else {
+									  console.log("signal sent.");
+									}
+								});
+					}
 				};
 				
 				$('#stop').on('click', function() {
@@ -470,59 +473,61 @@
 							});
 						}
 					});
+					
+					OTSession.session.on('signal:presentationControl', function (event) {
+						console.log(event);
+						//var currentSlide = $('.slider1').slick('slickCurrentSlide');
+						$('.slider1').slick('slickGoTo', event.data.slide);
+					});
+					
+					OTSession.session.on('signal:presentationControl', function (event) {
+						console.log(event);
+						//var currentSlide = $('.slider1').slick('slickCurrentSlide');
+						$('.slider1').slick('slickGoTo', event.data.slide);
+					});
+					OTSession.session.on('signal:youtube-player', function (event) {
+						console.log(event);
+						if(event.data == 'start')
+							player.playVideo();
+						else
+							player.pauseVideo();
+					});
+					OTSession.session.on('signal:admin-signal', function (event) {
+						console.log(event);
+						if(event.data.type == 'video_change')
+						{
+							$scope.$apply(function(){
+								$scope.change_video(event.data.video, 1);
+							});
+						}
+						else if(event.data.type == 'presentation_change')
+						{
+							$scope.$apply(function(){
+								$scope.selected_file(event.data.folder, event.data.files, 1);
+							});
+						}
+						else if(event.data.type == 'presentation')
+						{
+							$scope.$apply(function(){
+								$scope.presentation = true;
+								$scope.video = false;
+							});
+							player.pauseVideo();
+						}
+						else if(event.data.type == 'video')
+						{
+							$scope.$apply(function(){
+								$scope.presentation = false;
+								$scope.video = true;
+							});
+							player.stopVideo();
+						}
+						
+					});
 				}
 				
 				
-				OTSession.session.on('signal:presentationControl', function (event) {
-					console.log(event);
-					//var currentSlide = $('.slider1').slick('slickCurrentSlide');
-					$('.slider1').slick('slickGoTo', event.data.slide);
-				});
 				
-				OTSession.session.on('signal:presentationControl', function (event) {
-					console.log(event);
-					//var currentSlide = $('.slider1').slick('slickCurrentSlide');
-					$('.slider1').slick('slickGoTo', event.data.slide);
-				});
-				OTSession.session.on('signal:youtube-player', function (event) {
-					console.log(event);
-					if(event.data == 'start')
-						player.playVideo();
-					else
-						player.pauseVideo();
-				});
-				OTSession.session.on('signal:admin-signal', function (event) {
-					console.log(event);
-					if(event.data.type == 'video_change')
-					{
-						$scope.$apply(function(){
-							$scope.change_video(event.data.video, 1);
-						});
-					}
-					else if(event.data.type == 'presentation_change')
-					{
-						$scope.$apply(function(){
-							$scope.selected_file(event.data.folder, event.data.files, 1);
-						});
-					}
-					else if(event.data.type == 'presentation')
-					{
-						$scope.$apply(function(){
-							$scope.presentation = true;
-							$scope.video = false;
-						});
-						player.pauseVideo();
-					}
-					else if(event.data.type == 'video')
-					{
-						$scope.$apply(function(){
-							$scope.presentation = false;
-							$scope.video = true;
-						});
-						player.stopVideo();
-					}
-					
-				});
 			}])
 			.value({
                 apiKey: '45609232',

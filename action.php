@@ -63,6 +63,19 @@
 				});
 			};
 		})
+		.directive('onFinishRender', function ($timeout) {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attr) {
+            if (scope.$last === true) {
+                $timeout(function () {
+                    //scope.$emit(attr.onFinishRender);
+					jQuery("#messagesDiv").scrollTop(jQuery("#messagesDiv")[0].scrollHeight);
+                });
+            }
+        }
+    }
+})
             .controller('MyCtrl', ['$scope', 'OTSession', 'apiKey', 'sessionId', 'token', '$timeout', '$http', '$interval', function($scope, OTSession, apiKey, sessionId, token, $timeout, $http, $interval) {
                 $scope.chat = [];
 				$scope.data = {active_menu:"presentation", active_presentation:{files:"", folder:""}, active_slide:"", active_video:"", video_status:false};
@@ -175,9 +188,6 @@
 							hn = v.email ? v.email : v.name;
 							v.hash = CryptoJS.MD5(hn).toString();
 							$scope.chat.push(v);
-							$timeout(function(){
-								jQuery("#messagesDiv").scrollTop(jQuery("#messagesDiv")[0].scrollHeight);
-							}, 100);
 							$scope.visible = true;
 						}
 					//});
@@ -252,7 +262,7 @@
 					$scope.data.active_menu = 'presentation';
 					$scope.data.active_presentation.folder = folder;
 					$scope.data.active_presentation.files = files;
-					
+					player.stopVideo();
 					$timeout(function(){
 						$(".slider1").slick('unslick');
 						$(".slider2").slick('unslick');

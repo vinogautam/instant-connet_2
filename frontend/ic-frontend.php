@@ -103,7 +103,7 @@ class IC_front{
 		</div>
 		<div ng-app="demo" ng-controller="ActionController" class="text_chat_container" style="display:none;position: absolute; top: 30px; right:0;width: 300px; background: rgb(255, 255, 255) none repeat scroll 0% 0%;border:1px solid #000;">
 						<div id="messagesDiv" style="height:250px;overflow:auto;">
-							<p ng-repeat="c in chat track by $index" ng-class="{align_right: c.email != data.email}">
+							<p ng-repeat="c in chat track by $index" on-finish-render ng-class="{align_right: c.email != data.email}" ng-if="c.msg">
 								<img ng-if="c.email == data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
 								{{c.msg}}
 								<img ng-if="c.email != data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
@@ -218,6 +218,19 @@ class IC_front{
 				});
 			};
 		})
+		.directive('onFinishRender', function ($timeout) {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attr) {
+            if (scope.$last === true) {
+                $timeout(function () {
+                    //scope.$emit(attr.onFinishRender);
+					jQuery("#messagesDiv").scrollTop(jQuery("#messagesDiv")[0].scrollHeight);
+                });
+            }
+        }
+    }
+})
 			.controller('ActionController', ['$scope', '$timeout', '$http', function($scope, token, $timeout, $http) {
 					
 					$scope.chat = [];

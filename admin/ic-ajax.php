@@ -19,7 +19,25 @@ class IC_ajax{
 		add_action( 'wp_ajax_delete_presentation_file', array( &$this, 'delete_presentation_file'));
 		add_action( 'wp_ajax_save_ppt', array( &$this, 'save_ppt'));
 		add_action( 'wp_ajax_new_user_to_meeting', array( &$this, 'new_user_to_meeting'));
+		add_action( 'wp_ajax_usercontrol', array( &$this, 'usercontrol'));
     }
+	
+	function usercontrol()
+	{
+		global $wpdb;
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+		$wpdb->update($wpdb->prefix . "meeting_participants", 
+						array($_POST['type'] => $_POST['status']),
+						array("id" => $_POST['pid'])
+			);
+		$joined_user = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where meeting_id=".$_POST['mid']);
+		$participants = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where status = 1");
+		
+		echo json_encode(array('joined_user' => $joined_user, 'participants' => $participants));
+		
+		die(0);
+		exit;
+	}
 	
 	function new_user_to_meeting()
 	{

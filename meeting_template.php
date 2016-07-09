@@ -69,7 +69,10 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 			.sub_menu h3{margin:0;font-size:16px;background-color:#790303;padding: 16px 5px;}
 			.sub_menu input[type='text']{background:none;border:none;border-bottom:1px solid #fff;width:100%;}
 			.sub_menu ul{margin:20px 0;}
+			.client_view .presentation_container{pointer-events:none;}
+			.client_view .show_whitebord_1.presentation_container{pointer-events:auto;}
 			.client_view .OT_panel{display:none;}
+			.client_view .show_whitebord_1 .OT_panel{display:block;}
 			.side_menu button{color:#790303;}
          </style>
 		 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
@@ -121,6 +124,16 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 										#{{part.id}} {{part.name}} 
 										<i ng-if="part.status == '2'" class="fa fa-comment-o" ><span ng-click="switchtomeeting(part.id)">Switch to meeting</span></i>
 										<i ng-if="part.status == '3'" class="fa fa-desktop"></i>
+										<span ng-if="part.video == 0" class="fa-stack fa-lg" ng-click="usercontrol(part.id, 'video', 1)">
+										  <i class="fa fa-video-camera fa-stack-1x"></i>
+										  <i class="fa fa-ban fa-stack-2x text-danger"></i>
+										</span>
+										<i ng-if="part.video == 1" class="fa fa-video-camera" ng-click="usercontrol(part.id, 'video', 0)"></i>
+										<span ng-if="part.status == '3' && part.whiteboard == 0" class="fa-stack fa-lg" ng-click="usercontrol(part.id, 'whiteboard', 1)">
+										  <i class="fa fa-television fa-stack-1x"></i>
+										  <i class="fa fa-ban fa-stack-2x text-danger"></i>
+										</span>
+										<i ng-if="part.status == '3' && part.whiteboard == 1" class="fa fa-television" ng-click="usercontrol(part.id, 'whiteboard', 0)"></i>
 									</li>
 								</ul>
 								<h4>Waiting users</h4>
@@ -138,7 +151,7 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 			<?php }?>
 			<div class="row">
 				<div class="col-sm-12 col-md-3 col-lg-3" ng-cloak>
-					<div class="video_container" >
+					<div class="video_container" ng-if="show_video">
 						<ot-layout props="{animate:true}">
 							<ot-subscriber ng-repeat="stream in streams" 
 								stream="stream" 
@@ -170,8 +183,8 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 				<div class="col-sm-12 col-md-9 col-lg-9">
 					<div class="row">
 						<div class="col-sm-12 col-md-12 col-lg-12 overall_container">
-							<div class="presentation_container" ng-show="presentation">
-								<ot-whiteboard width="1280" height="720"></ot-whiteboard>
+							<div class="presentation_container show_whitebord_{{show_whiteboard}}" ng-show="presentation" >
+								<ot-whiteboard  width="1280" height="720"></ot-whiteboard>
 								<section class=" slider1">
 									<?php for($i=1;$i<=6;$i++){?>
 									<div>

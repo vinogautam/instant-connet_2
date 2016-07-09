@@ -87,6 +87,8 @@
 				<?php if(isset($_GET['admin'])){?>
 				
 				<?php global $wpdb; $results = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where meeting_id=".$meeting_id);?>
+				$scope.show_video = 1;
+				$scope.show_whiteboard = 1;
 				$scope.data2 = {name:"admin", email:"<?= bloginfo('admin_email');?>", msg:""};
 				$scope.joined_user = <?= json_encode($results); ?>;
 				console.log($scope.joined_user);
@@ -156,7 +158,8 @@
 				
 				<?php global $wpdb; $results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$_GET['pid']);?>
 				$scope.data2 = {name:"<?= $results->name;?>", email:"<?= $results->email;?>", msg:""};
-				
+				$scope.show_video = 0;
+				$scope.show_whiteboard = 0;
 				<?php }?>
 				
 				$scope.change_video = function(p, admin){
@@ -175,7 +178,7 @@
 				statusRef.on('child_added', function(snapshot) {
 					//angular.forEach(snapshot.val(), function(v,k){
 						v = snapshot.val();
-						if(v.noti)
+						if(v.noti == true)
 						{
 							$scope.noti = v;
 							console.log("fdgdfg tert");
@@ -183,6 +186,22 @@
 								$scope.noti = false;
 							}, 3000);
 						}
+						<?php if(!isset($_GET['admin'])){?>
+						else if(typeof v.noti != "undefined" && v.noti.indexOf("video") != -1 && parseInt(v.noti.split("_")[2]) == <?= $_GET['pid'];?>)
+						{
+							console.log(v.noti.split("_"));
+							$scope.$apply(function(){
+								$scope.show_video = parseInt(v.noti.split("_")[1]);
+							});
+						}
+						else if(typeof v.noti != "undefined" && v.noti.indexOf("whiteboard") != -1 && parseInt(v.noti.split("_")[2]) == <?= $_GET['pid'];?>)
+						{
+							console.log(v.noti.split("_"));
+							$scope.$apply(function(){
+								$scope.show_whiteboard = parseInt(v.noti.split("_")[1]);
+							});
+						}
+						<?php }?>
 						else
 						{
 							hn = v.email ? v.email : v.name;
@@ -293,6 +312,18 @@
 						$scope.joined_user = res['data']['joined_user'];
 						$scope.participants = res['data']['participants'];
 						$scope.send_noti("switchtomeeting_"+id);
+					});
+					
+				};
+				
+				$scope.usercontrol = function(id, type, status)
+				{
+					$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=usercontrol',
+					{mid:<?= $meeting_id?>, pid:id, type:type, status:status}
+					).then(function(res){
+						$scope.joined_user = res['data']['joined_user'];
+						$scope.participants = res['data']['participants'];
+						$scope.send_noti(type+"_"+status+"_"+id);
 					});
 					
 				};
@@ -475,7 +506,8 @@
 							$scope.$apply(function(){
 								$scope.presentation = true;
 								$scope.video = false;
-								$scope.selected_file(event.data.active_presentation.folder, event.data.active_presentation.files, 1);
+								if(event.data.active_presentation.folder && event.data.active_presentation.files)
+									$scope.selected_file(event.data.active_presentation.folder, event.data.active_presentation.files, 1);
 								$timeout(function(){
 									if(event.data.active_slide)
 										$('.slider1').slick('slickGoTo', event.data.active_slide);

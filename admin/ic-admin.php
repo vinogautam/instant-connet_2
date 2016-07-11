@@ -209,6 +209,10 @@ class IC_admin{
 								
 								$scope.create_meeting = function(st)
 								{
+									angular.forEach($scope.selected_participants, function(v,k){
+										$interval.cancel(intervals[v]);
+									});
+
 									$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=create_new_meeting&st='+st, 
 									{data: $scope.selected_participants}).then(function(res){
 										
@@ -224,11 +228,13 @@ class IC_admin{
 								};
 								
 								var intervals = [];
+								var interval_diff = [];
 								
 								$scope.autotimer = function(part)
 								{
+									if(typeof intervals[part.id] != "undefined") return;
 									intervals[part.id] = $interval(function(){
-										if(part.diff > 2)
+										if(interval_diff[part.id] > 3)
 										{
 											$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=update_user_offline&id='+part.id).then(function(res){
 												$scope.participants = res['data'];
@@ -236,8 +242,9 @@ class IC_admin{
 											$interval.cancel(intervals[part.id]);
 										}
 										else
-											part.diff++;
+											interval_diff[part.id]++;
 									}, 5000);
+									interval_diff[part.id] = 0;
 								}
 								
 								var online_statusstatus = 0;
@@ -246,12 +253,7 @@ class IC_admin{
 									if(online_statusstatus != 1)
 									{
 										vall = snapshot.val().count.split("-");
-										angular.forEach($scope.participants, function(v,k){
-											if(v.id == vall[0])
-											{
-												v.diff = 0;
-											}
-										});
+										interval_diff[vall[0]] = 0;
 									}
 									
 								});

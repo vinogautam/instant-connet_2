@@ -151,13 +151,13 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 			<?php }?>
 			<div class="row">
 				<div class="col-sm-12 col-md-3 col-lg-3" ng-cloak>
-					<div class="video_container" ng-if="show_video">
+					<div class="video_container" >
 						<ot-layout props="{animate:true}">
 							<ot-subscriber ng-repeat="stream in streams" 
 								stream="stream" 
 								props="{style: {nameDisplayMode: 'off'}}">
 							</ot-subscriber>
-							<ot-publisher id="publisher" 
+							<ot-publisher ng-if="show_video" id="publisher" 
 								props="{style: {nameDisplayMode: 'off'}, resolution: '500x300', frameRate: 30}">
 							</ot-publisher>
 						</ot-layout>

@@ -178,6 +178,7 @@
 				statusRef.on('child_added', function(snapshot) {
 					//angular.forEach(snapshot.val(), function(v,k){
 						v = snapshot.val();
+						console.log(v);
 						if(v.noti == true)
 						{
 							$scope.noti = v;
@@ -200,6 +201,15 @@
 							$scope.$apply(function(){
 								$scope.show_whiteboard = parseInt(v.noti.split("_")[1]);
 							});
+						}
+						else if(typeof v.noti != "undefined" && v.noti.indexOf("exituser") != -1 && parseInt(v.noti.split("_")[1]) == <?= $_GET['pid'];?>)
+						{
+							console.log(v.noti.split("_"));
+							window.location.assign(v.noti.split("_")[2]);
+						}
+						else if(typeof v.noti != "undefined" && v.noti.indexOf("exitalluser") != -1)
+						{
+							window.location.assign(v.noti.split("_")[1]);
 						}
 						<?php }?>
 						else
@@ -307,7 +317,7 @@
 				$scope.switchtomeeting = function(id)
 				{
 					$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=new_user_to_meeting',
-					{mid:<?= $meeting_id?>, pid:id, status:status}
+					{mid:<?= $meeting_id?>, pid:id, status:"3"}
 					).then(function(res){
 						$scope.joined_user = res['data']['joined_user'];
 						$scope.participants = res['data']['participants'];
@@ -316,6 +326,30 @@
 					
 				};
 				
+				$scope.exit_user_page = function(){
+					if($scope.exit_user == "all")
+					{
+						$scope.send_noti("exitalluser_"+$scope.selected_page);
+						$timeout(function(){
+							//window.location.assign("<?= site_url();?>");
+							window.close();
+						}, 500);
+					}
+					else
+					{
+						$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=new_user_to_meeting',
+						{mid:<?= $meeting_id?>, pid:$scope.exit_user, status:"4"}
+						).then(function(res){
+							$scope.joined_user = res['data']['joined_user'];
+							$scope.participants = res['data']['participants'];
+							$scope.send_noti("exituser_"+$scope.exit_user+"_"+$scope.selected_page);
+							$scope.selected_page = "";
+						});
+					}
+					$("#myModal").modal("hide");
+					
+				};
+
 				$scope.usercontrol = function(id, type, status)
 				{
 					$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=usercontrol',

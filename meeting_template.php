@@ -43,6 +43,7 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 			header .fa{font-size:16px;width:16px;height:16px;position:absolute;margin:auto;top:0;bottom:0;color:#fff;}
 			header .fa.fa-bars{left:1%;}
 			header .fa.fa-times{right:1%;}
+			header .fa.fa-sign-out{right:3%;}
 			.overall_container{height:500px;}
 			.side_menu li.selected{background-color:#790303;border:1px solid #790303;}
 			.side_menu{position:absolute;top:40px;bottom:0;left:0;background-color:#890101;z-index:99;}
@@ -83,6 +84,7 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 			<div class="row">
 				<header>
 					<i class="fa fa-bars"></i>
+					<i class="fa fa-sign-out" ng-click="exit_user = 'all'" data-toggle="modal" data-target="#myModal"></i>
 					<i class="fa fa-times"></i>
 				</header>
 			</div>
@@ -134,6 +136,7 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 										  <i class="fa fa-ban fa-stack-2x text-danger"></i>
 										</span>
 										<i ng-if="part.status == '3' && part.whiteboard == 1" class="fa fa-television" ng-click="usercontrol(part.id, 'whiteboard', 0)"></i>
+										<i class="fa fa-sign-out" ng-click="$parent.exit_user = part.id" data-toggle="modal" data-target="#myModal"></i>
 									</li>
 								</ul>
 								<h4>Waiting users</h4>
@@ -149,6 +152,33 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 				</ul>
 			</div>
 			<?php }?>
+
+			<div id="myModal" class="modal fade" role="dialog">
+			  <div class="modal-dialog">
+
+			    <!-- Modal content-->
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <button type="button" class="close" data-dismiss="modal">&times;</button>
+			        <h4 class="modal-title">Select a page to redirect user</h4>
+			      </div>
+			      <div class="modal-body">{{selected_page}}
+			        <select ng-model="selected_page" ng-change="exit_user_page()" ng-init="selected_page=''">
+						<option value="">Select Page</option>
+						<?php foreach (get_pages() as $key => $value) {?>
+						<option value="<?= get_permalink($value->ID);?>"><?= $value->post_title;?></option>
+						<?php }?>
+					</select>
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			      </div>
+			    </div>
+
+			  </div>
+			</div>
+
+			
 			<div class="row">
 				<div class="col-sm-12 col-md-3 col-lg-3" ng-cloak>
 					<div class="video_container" >

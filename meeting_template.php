@@ -32,12 +32,22 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 			}
 			.slick-slide{text-align:center;}
 			.slick-slide img{display:inline-block;max-width:100%;}
-			.OT_publisher, .OT_subscriber {
-				height: 200px !important;
+			.video1 .OT_publisher, .video1 .OT_subscriber {
+				height: 100% !important;
 				position: relative !important;
 				width: 100% !important;
 				left:0 !important;
 			}
+			.video2 .OT_publisher, .video2 .OT_subscriber {
+				height: 50% !important;
+				left: 0 !important;
+			    margin: 0 1% !important;
+			    position: relative !important;
+			    top: 0 !important;
+			    width: 45% !important;
+			}
+			.video_container{position: relative;height: 200px;margin-left: 40px;}
+			.video_container.maximize{position: fixed;width: 100%;top:0;left:0;height: 100%;z-index:1000;margin-left: 0;}
 			.OT_widget-container{border-radius:5%;}
 			header{background-color:#790303;width:100%; height:40px;margin-bottom:15px;position:relative;}
 			header .fa{font-size:16px;width:16px;height:16px;position:absolute;margin:auto;top:0;bottom:0;color:#fff;}
@@ -181,7 +191,7 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 			
 			<div class="row">
 				<div class="col-sm-12 col-md-3 col-lg-3" ng-cloak>
-					<div class="video_container" >
+					<div style="background:#000;" class="video_container" ng-class="{video1:streams.length == 0, video2:streams.length > 0, maximize:maximize}">
 						<ot-layout props="{animate:true}">
 							<ot-subscriber ng-repeat="stream in streams" 
 								stream="stream" 
@@ -191,8 +201,9 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 								props="{style: {nameDisplayMode: 'off'}, resolution: '500x300', frameRate: 30}">
 							</ot-publisher>
 						</ot-layout>
+						<i ng-click="maximize=!maximize;" class="fa fa-arrows-alt" style="position: absolute; right: 5px; bottom: 5px; font-size: 20px; color: rgb(255, 255, 255);"></i>
 					</div>
-					<div class="text_chat_container" ng-class="{visible:visible}">
+					<div style="margin-left: 40px;" class="text_chat_container" ng-class="{visible:visible}">
 						<div id="messagesDiv" style="height:250px;overflow:auto;">
 							<p ng-repeat="c in chat" on-finish-render ng-class="{align_right: c.email != data2.email}" ng-if="c.msg">
 								<img ng-if="c.email == data2.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 

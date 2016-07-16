@@ -48,7 +48,6 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 			}
 			.video_container{position: relative;height: 200px;margin-left: 40px;}
 			.video_container.maximize{position: fixed;width: 100%;top:0;left:0;height: 100%;z-index:1000;margin-left: 0;}
-			.OT_widget-container{border-radius:5%;}
 			header{background-color:#790303;width:100%; height:40px;margin-bottom:15px;position:relative;}
 			header .fa{font-size:16px;width:16px;height:16px;position:absolute;margin:auto;top:0;bottom:0;color:#fff;}
 			header .fa.fa-bars{left:1%;}
@@ -85,6 +84,7 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 			.client_view .OT_panel{display:none;}
 			.client_view .show_whitebord_1 .OT_panel{display:block;}
 			.side_menu button{color:#790303;}
+			.align_right{text-align: right;}
          </style>
 		 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
     </head>
@@ -187,11 +187,10 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 
 			  </div>
 			</div>
-
 			
 			<div class="row">
 				<div class="col-sm-12 col-md-3 col-lg-3" ng-cloak>
-					<div style="background:#000;" class="video_container" ng-class="{video1:streams.length == 0, video2:streams.length > 0, maximize:maximize}">
+					<div style="background:#000;" class="video_container {{pvideo}}" ng-class="{video1:streams.length+pvideo == 1, video2:streams.length+pvideo > 1, maximize:maximize}">
 						<ot-layout props="{animate:true}">
 							<ot-subscriber ng-repeat="stream in streams" 
 								stream="stream" 

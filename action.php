@@ -193,6 +193,8 @@
 							console.log(v.noti.split("_"));
 							$scope.$apply(function(){
 								$scope.show_video = parseInt(v.noti.split("_")[1]);
+								if($scope.show_video == 0)
+									$scope.pvideo = 0;
 							});
 						}
 						else if(typeof v.noti != "undefined" && v.noti.indexOf("whiteboard") != -1 && parseInt(v.noti.split("_")[2]) == <?= $_GET['pid'];?>)
@@ -216,8 +218,17 @@
 						{
 							hn = v.email ? v.email : v.name;
 							v.hash = CryptoJS.MD5(hn).toString();
-							$scope.chat.push(v);
-							$scope.visible = true;
+							if(!$scope.$$phase) {
+								$scope.$apply(function(){
+									$scope.chat.push(v);
+									$scope.visible = true;
+								});
+							}
+							else
+							{
+								$scope.chat.push(v);
+								$scope.visible = true;
+							}
 						}
 					//});
 				});
@@ -405,7 +416,11 @@
 					}
 				});
 				$scope.streams = OTSession.streams;
-				
+				$scope.pvideo = 0;
+				$scope.$on("otAccessAllowed", function(){
+					$scope.$apply(function () {$scope.pvideo = 1;});
+				});
+
 				$scope.signal = function(data, isobj){
 					
 					data = isobj === undefined ? {type: data} : data;

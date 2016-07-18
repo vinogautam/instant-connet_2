@@ -2,7 +2,7 @@
 class IC_admin{
     
     function __construct() {
-        //add_action( 'admin_menu', array( $this, 'add_plugin_pages' ) );
+        add_action( 'admin_menu', array( $this, 'add_plugin_pages' ) );
 		add_action('admin_footer', array( $this, 'admin_common_lobby'));
     }
 	
@@ -300,9 +300,9 @@ class IC_admin{
         
         if(is_multisite() && is_super_admin() || current_user_can('manage_options')) {
              
-            add_menu_page( 'Instant Connect', 'Instant Connect', 'manage_options', 'instant_connect', array( $this, 'instant_connect' ));
+            add_menu_page( 'Instant Connect', 'Instant Connect', 'manage_options', 'instant_connect', array( $this, 'settingsPage' ));
 			
-			add_submenu_page( 'instant_connect', 'Endorsements', 'Settings',  9, 'ic_settings', array( &$this, 'settingsPage'));		
+			//add_submenu_page( 'instant_connect', 'Endorsements', 'Settings',  9, 'ic_settings', array( &$this, 'settingsPage'));		
         
         } else {
             
@@ -325,137 +325,15 @@ class IC_admin{
         }
         
         echo '</h2>';
-    }
-	
-    public function instant_connect()
-    { 
-		$option = get_option('pusher');
-		$general = get_option('general');
-		global $current_user;
-		
-		$status = get_user_meta($current_user->ID, 'user_current_status', true);
-		$arr = array(1 => 'Online', 2 => 'Offline', 3 => 'Meeting', 4 => 'Away');
-		?>
-		<style>
-		.members_list .selected{background:#0073AA;color:#fff;}
-		.members_list p {padding:5px;}
-		.members_list p img{vertical-align:middle;}
-		</style>
-		<div class="wrap" ng-app="instant_connect" ng-controller="ICCtrl">
-            <h2>Instant Connect Lobby</h2>   
-			<div style="width: 15%; float: left;text-align:center;">
-				<div style="display: inline-block; overflow: hidden; border-radius: 50%; border: 5px solid rgb(204, 204, 204); width: 150px; height: 150px;">
-					<?php echo get_avatar( $current_user->user_email, 150 ); ?>
-				</div>
-				<select name="user_current_status" id="user_current_status">
-					<?php foreach($arr as $st=>$lb){ $sel = $st == $status ? 'selected' : ''; ?>
-					<option <?php _e($sel);?> value="<?php _e($st);?>"><?php _e($lb);?></option>
-					<?php }?>
-				</select>
-			</div>
-			
-			<div style="width: 60%; float: left; margin-left:150px;">
-				<div style="width: 40%; float: left;">
-					<h4>Waiting Members</h4>
-					<div class="members_list">
-						<p ng-repeat="part in participants" ng-click="selected(part.id)" ng-class="{selected:check_selected(part.id)}">
-						<img ng-src="{{get_avatar(part)}}">
-						#{{part.id}} {{part.name}} <span ng-if="part.email">({{part.name}})</span>
-						</p>
-					</div>
-				</div>
-				<div style="width: 40%; float: left;margin-left:10%;">
-					<h4>Selected Members</h4>
-					<div class="members_list">
-						<p ng-repeat="part in participants" ng-click="selected(part.id)" ng-if="check_selected(part.id)">
-						<img ng-src="{{get_avatar(part)}}">
-						#{{part.id}} {{part.name}} <span ng-if="part.email">({{part.name}})</span>
-						</p>
-					</div>
-					<p ng-if="selected_participants.length">
-						<input id="submit" class="button button-primary" ng-click="create_meeting()" type="submit" value="Join Meeting" name="submit">
-					</p>
-				</div>
-			</div>
-			<script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0-rc.1/angular.min.js'></script>
-			<script src='https://cdn.firebase.com/js/client/2.2.4/firebase.js'></script>
-			<script src="https://cdn.firebase.com/libs/angularfire/1.1.3/angularfire.min.js"></script>
-			<script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/md5.js"></script>
-			  <script>
-				    var app = angular.module("instant_connect", ["firebase"]);
-					    app.controller("ICCtrl", function($scope, $firebaseObject, $http) {
-								var myDataRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_user');
-								var statusRef = new Firebase('https://vinogautam.firebaseio.com/pusher/status_change');
-								var meetingRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_meeting');
-								var status_count = 0;
-								
-								$scope.participants = [];
-								
-								$scope.selected_participants = [];
-								
-								myDataRef.on('value', function(snapshot) {
-									$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=waiting_participants').then(function(res){
-										$scope.participants = res['data'];
-									});
-								});
-								
-								statusRef.once('value', function(snapshot) {
-									status_count = parseInt(snapshot.val().count);
-								});
-								
-								$scope.selected = function(id)
-								{
-									ind = jQuery.inArray(id, $scope.selected_participants);
-									if(ind == -1)
-										$scope.selected_participants.push(id);
-									else
-										$scope.selected_participants.splice(ind, 1);
-								};
-								
-								$scope.check_selected = function(id)
-								{
-									return jQuery.inArray(id, $scope.selected_participants) == -1 ? false : true;
-								};
-								
-								$scope.get_avatar = function(row)
-								{
-									str = row.email ? row.email : row.name;
-									hash = CryptoJS.MD5(str).toString();
-									return 'http://2.gravatar.com/avatar/'+hash+'?s=20&d=mm&r=g';
-								}
-								
-								jQuery("#user_current_status").change(function()
-								{
-									$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=update_agent_status&status='+jQuery(this).val()).then(function(res){
-										statusRef.update({ count:status_count++});
-									});
-								});
-								
-								$scope.create_meeting = function()
-								{
-									$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=create_new_meeting', 
-									{data: $scope.selected_participants}).then(function(res){
-										meetingRef.update({ id:res['data']});
-										$scope.selected_participants = [];
-										$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=waiting_participants').then(function(res){
-											$scope.participants = res['data'];
-										});
-										window.open('<?php echo $general['bbb'];?>?username=agent&action=create', '_blank');
-									});
-								};
-						});
-			  </script>
-        </div>
-		<?php
-	}	
+    }	
     /**
      * admin page callback
      */
     public function settingsPage()
     {   global $pagenow, $current_user, $ntm_mail;
-		if ( isset ( $_GET['tab'] ) ) $current = $_GET['tab']; else $current = 'general';
+		if ( isset ( $_GET['tab'] ) ) $current = $_GET['tab']; else $current = 'youtube';
 		
-		$tabs = array('general' => 'General', 'pusher' => 'Pusher',  'chat_icon' => 'Chat Icon Settings');
+		$tabs = array('youtube' => 'Youtube link', 'presentations' => 'Presentations');
 		$current_page = $tabs[$current];
 		$current_tab = $current.'_page';
 		
@@ -467,7 +345,7 @@ class IC_admin{
             <h2><?php echo $current_page;?></h2>           
             <?php 
 				if(isset($error)) echo $error;
-				$this->adminTabs($tabs, 'general', 'ic_settings');
+				$this->adminTabs($tabs, 'general', 'instant_connect');
 				$this->$current_tab();
 			?>
         </div>
@@ -475,30 +353,148 @@ class IC_admin{
         
     }
 	
-	public function general_page()
+	public function youtube_page()
     {
+    	$option = get_option('youtube_videos');
+
 		if(isset($_POST['general-save']))
-			update_option('general', $_POST['general']);
+		{	
+			$option = is_array($option) ? $option : [];
+			$option[] = $_POST['general'];
+			update_option('youtube_videos', $option);
+		}
 		
-		$option = get_option('general');
-		
-		$args = array('show_option_none' => 'Select Agent', 'name' => 'general[agent]', 'selected' => $option['agent']);
+		$option = get_option('youtube_videos');
+		$option = is_array($option) ? $option : [];
 		?>
 		<form method="post">
 			<table class="form-table">
 				<tbody>
 					<tr>
-						<th scope="row"><label for="blogname">Agent</label></th>
-						<td><?php wp_dropdown_users( $args ); ?></td>
+						<th scope="row"><label for="blogname">Title</label></th>
+						<td><input type="text" class="regular-text"  id="blogname" name="general[name]"></td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="blogname">BBB server</label></th>
-						<td><input type="text" class="regular-text" value="<?php echo $option['bbb'];?>" id="blogname" name="general[bbb]"></td>
+						<th scope="row"><label for="blogname">Youtube Link</label></th>
+						<td><input type="text" class="regular-text"  id="blogname" name="general[url]"></td>
 					</tr>
 				</tbody>
 			</table>
 			<?php submit_button('Save ', 'primary', 'general-save');?>
 		</form>
+		<table class="form-table">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Title</th>
+					<th>Link</th>
+					<th>Video</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach($option as $k=>$opt){?>
+				<tr>
+					<th><?= $k+1; ?></th>
+					<th><?= $opt['name']; ?></th>
+					<th><?= $opt['url']; ?></th>
+					<th><iframe width="150" height="100" src="<?= str_replace("watch?v=", "embed/", $opt['url']);?>"></iframe></th>
+				</tr>
+				<?php }?>
+			</tbody>
+		</table>
+		<?php
+	}
+
+	public function presentations_page()
+    {
+    	$option = get_option('ic_presentations');
+		$option = is_array($option) ? $option : [];
+		?>
+		<form method="post">
+			<table class="form-table">
+				<tbody>
+					<tr>
+						<th scope="row"><label for="blogname">Title</label></th>
+						<td><input id="convert_ppt" type="file" ></td>
+					</tr>
+				</tbody>
+			</table>
+			<?php //submit_button('Save ', 'primary', 'ic_presentations-save');?>
+		</form>
+		<table class="form-table">
+			<thead>
+				<tr>
+					<th width="10">#</th>
+					<th width="90">Name</th>
+					<th width="90">Image</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach($option as $k=>$opt){?>
+				<tr>
+					<th><?= $k+1; ?></th>
+					<th><?= $opt['name']; ?></th>
+					<?php foreach($opt['files'] as $f){ ?>
+					<th><img width='100' height='100' src='<?= IC_PLUGIN_URL.'/extract/'.$opt['folder'].'/'.$f;?>'></th>
+					<?php }?>
+				</tr>
+				<?php }?>
+			</tbody>
+		</table>
+		<script>
+		$ = jQuery;
+		$(document).on("change", "#convert_ppt", function(e) {
+					handleFileSelect(e, true);
+				});
+				
+				var formdata = !!window.FormData;
+
+				function handleFileSelect(evt, manual) {
+					evt.stopPropagation();
+					evt.preventDefault();
+					var files;
+					files = evt.target.files;
+					
+					for (var i = 0, f; f = files[i]; i++) {
+						if (f.type !== "") {
+							var filename = f.name;
+							var formData = formdata ? new FormData() : null;
+							formData.append('File', files[i]);
+							formData.append('OutputFormat', 'jpg');
+							formData.append('StoreFile', 'true');
+							formData.append('ApiKey', '938074523');
+							formData.append('JpgQuality', 100);
+							formData.append('AlternativeParser', 'false');
+
+							file_convert_to_jpg(formData, filename);
+						} else {
+							progress_status(random_id, 0, "Invalid File Format...");
+						}
+					}
+
+				}
+
+				function file_convert_to_jpg(formData, filename) {
+					$.ajax({
+						url: "https://do.convertapi.com/PowerPoint2Image",
+						type: "POST",
+						data: formData,
+						processData: false,
+						contentType: false,
+						success: function(response, textStatus, request) {
+							$.post("<?php echo site_url();?>/wp-admin/admin-ajax.php?action=save_ppt&name="+filename, {data:request.getResponseHeader('FileUrl')}, function(data){
+								if(data != 'error')
+								{	
+									window.location.reload();
+								}
+							});
+						},
+						error: function(jqXHR) {
+							alert("Error in file conversion");
+						}
+					});
+				}
+		</script>
 		<?php
 	}
 	

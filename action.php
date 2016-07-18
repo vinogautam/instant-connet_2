@@ -82,8 +82,21 @@
 				$scope.noti = false;
 				$scope.presentation = true;
 				$scope.is_admin = <?= isset($_GET['admin']) ? 1 : 0;?>;
-				$scope.youtube_list = getCookie('youtube_list') ? JSON.parse(getCookie('youtube_list')) : [];
-				$scope.presentation_files = getCookie('presentation') ? JSON.parse(getCookie('presentation')) : [];
+				
+				<?php 
+				$option = get_option('ic_presentations');
+				$option = is_array($option) ? $option : []; 
+				?>
+
+				$scope.presentation_files = <?= json_encode($option)?>;
+				
+				<?php 
+				$option = get_option('youtube_videos');
+				$option = is_array($option) ? $option : []; 
+				?>
+
+				$scope.youtube_list = <?= json_encode($option)?>;
+
 				<?php if(isset($_GET['admin'])){?>
 				
 				<?php global $wpdb; $results = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where meeting_id=".$meeting_id);?>
@@ -272,7 +285,7 @@
 						processData: false,
 						contentType: false,
 						success: function(response, textStatus, request) {
-							$.post("<?php echo site_url();?>/wp-admin/admin-ajax.php?action=save_ppt", {data:request.getResponseHeader('FileUrl')}, function(data){
+							$.post("<?php echo site_url();?>/wp-admin/admin-ajax.php?action=save_ppt&name"+filename, {data:request.getResponseHeader('FileUrl')}, function(data){
 								if(data != 'error')
 								{	
 									old_data = getCookie('presentation') ? JSON.parse(getCookie('presentation')) : [];
@@ -621,7 +634,7 @@
 				
 			}])
 			.value({
-                apiKey: '45609232',
+                apiKey: '<?= API_KEY;?>',
                 sessionId: '<?= $sessionId?>',
                 token: '<?= $token?>'
             })

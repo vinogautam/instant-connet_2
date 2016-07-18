@@ -82,6 +82,12 @@ class IC_ajax{
 						closedir($dh);
 					  }
 			}
+			
+			$option = get_option('ic_presentations');
+			$option = is_array($option) ? $option : [];
+			$option[] = array('folder' => $file, 'files' => $files, 'name' => $_GET['name']);
+			update_option('ic_presentations', $option);
+
 			echo json_encode(array('folder' => $file, 'files' => $files));
 		} else {
 		  echo 'error';

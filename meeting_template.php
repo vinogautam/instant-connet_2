@@ -110,7 +110,7 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 							<ul>
 								<li ng-repeat="p in presentation_files | filter:psearch track by $index" ng-click="selected_file(p.folder, p.files)">{{p.name}}</li>
 							</ul>
-							<div class="menu_bottom">
+							<div class="menu_bottom hide">
 								<input id="convert_ppt" type="file" >
 							</div>
 						</div>
@@ -123,7 +123,7 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 							<ul>
 								<li ng-repeat="p in youtube_list | filter:vsearch track by $index " ng-click="change_video(p.url)">{{p.name}} <i ng-click="deletevideo($event, $index)" class="fa fa-trash"></i></li>
 							</ul>
-							<span><input ng-model="newvideo.name" placeholder="title"><input ng-model="newvideo.url" placeholder="url"><button ng-click="addnew_video()">Add</button></span>
+							<span class="hide"><input ng-model="newvideo.name" placeholder="title"><input ng-model="newvideo.url" placeholder="url"><button ng-click="addnew_video()">Add</button></span>
 						</div>
 					</li>
 					<li>

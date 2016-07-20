@@ -83,6 +83,8 @@
     }])
             .controller('MyCtrl', ['$scope', 'OTSession', 'apiKey', 'sessionId', 'token', '$timeout', '$http', '$interval', function($scope, OTSession, apiKey, sessionId, token, $timeout, $http, $interval) {
                 
+
+
                 $scope.urlify = function(text) {
 				    var urlRegex = /(https?:\/\/[^\s]+)/g;
 				    return text.replace(urlRegex, function(url) {
@@ -183,6 +185,15 @@
 				
 				<?php }else{?>
 				
+				window.addEventListener("beforeunload", function (e) {
+				  var confirmationMessage = "\o/";
+
+				  $scope.send_noti("attempttoleave_"+<?= $_GET['pid'];?>);
+
+				  (e || window.event).returnValue = confirmationMessage; 
+				  return confirmationMessage;                            
+				});
+
 				<?php global $wpdb; $results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$_GET['pid']);?>
 				$scope.data2 = {name:"<?= $results->name;?>", email:"<?= $results->email;?>", msg:""};
 				$scope.show_video = 0;
@@ -239,6 +250,11 @@
 						else if(typeof v.noti != "undefined" && v.noti.indexOf("exitalluser") != -1)
 						{
 							window.location.assign(v.noti.split("_")[1]);
+						}
+						<?php }else{?>
+						else if(typeof v.noti != "undefined" && v.noti.indexOf("attempttoleave_") != -1)
+						{
+							alert("User "+v.noti.split("_")[1] + " left the meeting");
 						}
 						<?php }?>
 						else

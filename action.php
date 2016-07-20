@@ -76,7 +76,20 @@
         }
     }
 })
+		.filter('to_trusted', ['$sce', function($sce){
+        return function(text) {
+            return $sce.trustAsHtml(text);
+        };
+    }])
             .controller('MyCtrl', ['$scope', 'OTSession', 'apiKey', 'sessionId', 'token', '$timeout', '$http', '$interval', function($scope, OTSession, apiKey, sessionId, token, $timeout, $http, $interval) {
+                
+                $scope.urlify = function(text) {
+				    var urlRegex = /(https?:\/\/[^\s]+)/g;
+				    return text.replace(urlRegex, function(url) {
+				        return '<a target="_blank" href="' + url + '">' + url + '</a>';
+				    });
+				}
+
                 $scope.chat = [];
 				$scope.data = {active_menu:"presentation", active_presentation:{files:"", folder:""}, active_slide:"", active_video:"", video_status:false};
 				$scope.noti = false;

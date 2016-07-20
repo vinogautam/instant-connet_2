@@ -206,7 +206,7 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 						<div id="messagesDiv" style="height:250px;overflow:auto;">
 							<p ng-repeat="c in chat" on-finish-render ng-class="{align_right: c.email != data2.email}" ng-if="c.msg">
 								<img ng-if="c.email == data2.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
-								{{c.msg}}
+								<span ng-bind-html="urlify(c.msg) | to_trusted"></span>
 								<img ng-if="c.email != data2.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
 								<hr>
 							</p>

@@ -20,8 +20,24 @@ class IC_ajax{
 		add_action( 'wp_ajax_save_ppt', array( &$this, 'save_ppt'));
 		add_action( 'wp_ajax_new_user_to_meeting', array( &$this, 'new_user_to_meeting'));
 		add_action( 'wp_ajax_usercontrol', array( &$this, 'usercontrol'));
+		add_action( 'wp_ajax_addnew_video', array( &$this, 'addnew_video'));
     }
 	
+    function addnew_video()
+    {
+    	$_POST = (array) json_decode(file_get_contents('php://input'));
+    	$option = get_option('youtube_videos');
+
+		if(isset($_POST['url']))
+		{	
+			$option = is_array($option) ? $option : [];
+			$option[] = $_POST;
+			update_option('youtube_videos', $option);
+		}
+    	die(0);
+		exit;
+    }
+
 	function usercontrol()
 	{
 		global $wpdb;

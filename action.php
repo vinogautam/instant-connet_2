@@ -155,8 +155,9 @@
 					if($scope.newvideo)
 					{
 						$scope.youtube_list.push($scope.newvideo);
-						setCookie('youtube_list', JSON.stringify($scope.youtube_list));
-						$scope.newvideo = "";
+						$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=addnew_video', $scope.newvideo).then(function(){
+
+						});
 					}
 				};
 				
@@ -285,16 +286,13 @@
 						processData: false,
 						contentType: false,
 						success: function(response, textStatus, request) {
-							$.post("<?php echo site_url();?>/wp-admin/admin-ajax.php?action=save_ppt&name"+filename, {data:request.getResponseHeader('FileUrl')}, function(data){
+							$.post("<?php echo site_url();?>/wp-admin/admin-ajax.php?action=save_ppt&name="+filename, {data:request.getResponseHeader('FileUrl')}, function(data){
 								if(data != 'error')
 								{	
-									old_data = getCookie('presentation') ? JSON.parse(getCookie('presentation')) : [];
 									new_data = JSON.parse(data);
 									new_data.name = filename;
-									old_data.push(new_data);
-									setCookie('presentation', JSON.stringify(old_data), 365);
 									$scope.$apply(function(){
-										$scope.presentation_files = old_data;
+										$scope.presentation_files.push(new_data);
 										$scope.selected_file(new_data.folder, new_data.files);
 									});
 								}

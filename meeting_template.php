@@ -187,6 +187,23 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 
 			  </div>
 			</div>
+
+			<div id="userleftmodal" class="modal fade" role="dialog">
+			  <div class="modal-dialog">
+
+			    <!-- Modal content-->
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <button type="button" class="close" data-dismiss="modal">&times;</button>
+			        <h4 class="modal-title">User {{left_user}} left the meeting</h4>
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			      </div>
+			    </div>
+
+			  </div>
+			</div>
 			
 			<div class="row">
 				<div class="col-sm-12 col-md-3 col-lg-3" ng-cloak>
@@ -200,7 +217,9 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 								props="{style: {nameDisplayMode: 'off'}, resolution: '500x300', frameRate: 30}">
 							</ot-publisher>
 						</ot-layout>
+						<?php if(isset($_GET['admin'])){?>
 						<i ng-click="maximize=!maximize;" class="fa fa-arrows-alt" style="position: absolute; right: 5px; bottom: 5px; font-size: 20px; color: rgb(255, 255, 255);"></i>
+						<?php }?>
 					</div>
 					<div style="margin-left: 40px;" class="text_chat_container" ng-class="{visible:visible}">
 						<div id="messagesDiv" style="height:250px;overflow:auto;">

@@ -187,18 +187,29 @@ class IC_ajax{
 		global $wpdb;
 		
 		$id = $_GET['id'];
-		$ree = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id = ".$id);
-		if($ree->status == 1)
-		{
+		//$ree = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id = ".$id);
+		//if($ree->status == 1)
+		//{
 			$wpdb->update($wpdb->prefix . "meeting_participants", 
 						array('status' => 0),
 						array("id" => $id)
 			);
+		//}
+		
+		if(isset($_GET['meetingroom']))
+		{
+			$joined_user = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where meeting_id=".$_GET['meetingroom']);
+			$participants = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where status = 1");
+			
+			echo json_encode(array('joined_user' => $joined_user, 'participants' => $participants));
+		}
+		else
+		{
+			$results = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where status = 1");
+		
+			echo json_encode($results);
 		}
 		
-		$results = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where status = 1");
-		
-		echo json_encode($results);
 		die(0);
 		exit;
 	}

@@ -261,7 +261,7 @@ class IC_front{
 										}
 										else if(v.noti.indexOf("switchtomeeting") != -1 && v.noti.split("switchtomeeting_")[1] == $scope.meeting.pid)
 										{
-											window.location.assign("<?= wp_nonce_url(site_url("/meeting/"),'finonce','finonce');?>&id="+$scope.meeting.mid+"&pid="+$scope.meeting.pid);
+											window.location.assign("<?= wp_nonce_url(str_replace("http://financialinsiders.ca/", "https://financialinsiders.ca/", site_url("/meeting/")),'finonce','finonce');?>&id="+$scope.meeting.mid+"&pid="+$scope.meeting.pid);
 										}
 									//});
 								});

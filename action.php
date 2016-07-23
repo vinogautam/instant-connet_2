@@ -4,7 +4,7 @@
 		  var scope;
 		  var myDataRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_user');
 		  var meetingRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_meeting');
-				
+		  var allowtoleave = false;	
 		  function onYouTubeIframeAPIReady() {
 			scope = angular.element($("body")).scope();
 			player = new YT.Player( 'youtube-player', {
@@ -20,11 +20,11 @@
 					break;
 				  case 1:
 					console.log('video playing from '+player.getCurrentTime());
-					scope.video_noti('start');
+					scope.video_noti('start', player.getCurrentTime());
 					break;
 				  case 2:
 					console.log('video paused at '+player.getCurrentTime());
-					scope.video_noti('pause');
+					scope.video_noti('pause', player.getCurrentTime());
 				}
 			}
 		function setCookie(cname, cvalue, exdays) {
@@ -93,6 +93,7 @@
 				}
 
                 $scope.chat = [];
+                $scope.offine_user = [];
 				$scope.data = {active_menu:"presentation", active_presentation:{files:"", folder:""}, active_slide:"", active_video:"", video_status:false};
 				$scope.noti = false;
 				$scope.presentation = true;
@@ -186,12 +187,17 @@
 				<?php }else{?>
 				
 				window.addEventListener("beforeunload", function (e) {
-				  var confirmationMessage = "\o/";
+				  console.log(allowtoleave);
+				  if(!allowtoleave)
+				  {
+				  	  var confirmationMessage = "\o/";
 
-				  $scope.send_noti("attempttoleave_"+<?= $_GET['pid'];?>);
+					  $scope.send_noti("attempttoleave_"+<?= $_GET['pid'];?>);
 
-				  (e || window.event).returnValue = confirmationMessage; 
-				  return confirmationMessage;                            
+					  (e || window.event).returnValue = confirmationMessage; 
+					  return confirmationMessage; 
+				  }
+				                             
 				});
 
 				<?php global $wpdb; $results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$_GET['pid']);?>
@@ -212,52 +218,23 @@
 						$scope.signal({type: 'video_change', video: p}, true);
 				};
 				
+				$scope.check_user_is_offine = function(id){
+					if(typeof $scope.offine_user[id] != "undefined")
+					{
+						$scope.left_user = id;
+						$("#userleftmodal").modal("show");
+						$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=update_user_offline&meetingroom=<?= $_GET['id'] ?>&id='+id).then(function(res){
+							$scope.participants = res['data'];
+						});
+					}
+				};
+
 				var statusRef = new Firebase('https://vinogautam.firebaseio.com/opentok/<?= $sessionId?>');
 				statusRef.on('child_added', function(snapshot) {
 					//angular.forEach(snapshot.val(), function(v,k){
 						v = snapshot.val();
 						console.log(v);
-						if(v.noti == true)
-						{
-							$scope.noti = v;
-							console.log("fdgdfg tert");
-							$timeout(function(){
-								$scope.noti = false;
-							}, 3000);
-						}
-						<?php if(!isset($_GET['admin'])){?>
-						else if(typeof v.noti != "undefined" && v.noti.indexOf("video") != -1 && parseInt(v.noti.split("_")[2]) == <?= $_GET['pid'];?>)
-						{
-							console.log(v.noti.split("_"));
-							$scope.$apply(function(){
-								$scope.show_video = parseInt(v.noti.split("_")[1]);
-								if($scope.show_video == 0)
-									$scope.pvideo = 0;
-							});
-						}
-						else if(typeof v.noti != "undefined" && v.noti.indexOf("whiteboard") != -1 && parseInt(v.noti.split("_")[2]) == <?= $_GET['pid'];?>)
-						{
-							console.log(v.noti.split("_"));
-							$scope.$apply(function(){
-								$scope.show_whiteboard = parseInt(v.noti.split("_")[1]);
-							});
-						}
-						else if(typeof v.noti != "undefined" && v.noti.indexOf("exituser") != -1 && parseInt(v.noti.split("_")[1]) == <?= $_GET['pid'];?>)
-						{
-							console.log(v.noti.split("_"));
-							window.location.assign(v.noti.split("_")[2]);
-						}
-						else if(typeof v.noti != "undefined" && v.noti.indexOf("exitalluser") != -1)
-						{
-							window.location.assign(v.noti.split("_")[1]);
-						}
-						<?php }else{?>
-						else if(typeof v.noti != "undefined" && v.noti.indexOf("attempttoleave_") != -1)
-						{
-							alert("User "+v.noti.split("_")[1] + " left the meeting");
-						}
-						<?php }?>
-						else
+						if(typeof v.msg != "undefined")
 						{
 							hn = v.email ? v.email : v.name;
 							v.hash = CryptoJS.MD5(hn).toString();
@@ -415,7 +392,19 @@
 				
 				$scope.send_noti = function(noti)
 				{
-					statusRef.push({noti:noti, ts: new Date().getTime()});
+					OTSession.session.signal( 
+								{  type: 'user-notifications',
+								   data: noti
+								}, 
+								function(error) {
+									if (error) {
+									  console.log("signal error ("
+												   + error.code
+												   + "): " + error.message);
+									} else {
+									  console.log("signal sent.");
+									}
+								});
 				};
 				
 				$scope.add = function(){
@@ -423,13 +412,13 @@
 					$scope.data2.msg = '';
 				};
 				
-				$scope.video_noti = function(st){
+				$scope.video_noti = function(st, tm){
 					if($scope.is_admin)
 					{
 						$scope.data.video_status = st;
 						OTSession.session.signal( 
 								{  type: 'youtube-player',
-								   data: st
+								   data: {st:st, tm:tm}
 								}, 
 								function(error) {
 									if (error) {
@@ -560,6 +549,57 @@
                     }
 				});
 				
+				OTSession.session.on('signal:user-notifications', function (event) {
+					console.log(event);
+					<?php if(!isset($_GET['admin'])){?>
+					if(typeof event.data != "undefined" && event.data.indexOf("video") != -1 && parseInt(event.data.split("_")[2]) == <?= $_GET['pid'];?>)
+					{
+						console.log(event.data.split("_"));
+						$scope.$apply(function(){
+							$scope.show_video = parseInt(event.data.split("_")[1]);
+							if($scope.show_video == 0)
+								$scope.pvideo = 0;
+						});
+					}
+					else if(typeof event.data != "undefined" && event.data.indexOf("whiteboard") != -1 && parseInt(event.data.split("_")[2]) == <?= $_GET['pid'];?>)
+					{
+						console.log(event.data.split("_"));
+						$scope.$apply(function(){
+							$scope.show_whiteboard = parseInt(event.data.split("_")[1]);
+						});
+					}
+					else if(typeof event.data != "undefined" && event.data.indexOf("exituser") != -1 && parseInt(event.data.split("_")[1]) == <?= $_GET['pid'];?>)
+					{
+						console.log(event.data.split("_"));
+						allowtoleave = true;
+						window.location.assign(event.data.split("_")[2]);
+					}
+					else if(typeof event.data != "undefined" && event.data.indexOf("exitalluser") != -1)
+					{
+						allowtoleave = true;
+						window.location.assign(event.data.split("_")[1]);
+					}
+					else if(typeof event.data != "undefined" && event.data.indexOf("acktocheckuserison") != -1 && parseInt(event.data.split("_")[1]) == <?= $_GET['pid'];?>)
+					{
+						$scope.send_noti("imhere_"+event.data.split("_")[1]);
+					}
+					<?php }else{?>
+					if(typeof event.data != "undefined" && event.data.indexOf("attempttoleave_") != -1)
+					{
+						$timeout(function(){$scope.send_noti("acktocheckuserison_"+event.data.split("_")[1]);}, 10000);
+						$scope.offine_user[event.data.split("_")[1]] = 1;
+						$timeout(function(){
+							$scope.check_user_is_offine(event.data.split("_")[1]);
+						}, 20000);
+					}
+					else if(typeof event.data != "undefined" && event.data.indexOf("imhere") != -1)
+					{
+						delete $scope.offine_user[event.data.split("_")[1]];
+					}
+					<?php }?>
+				});
+
+
 				if($scope.is_admin)
 				{
 					OTSession.session.on('signal:joined_meeting', function (event) {
@@ -618,11 +658,13 @@
 					});
 					OTSession.session.on('signal:youtube-player', function (event) {
 						console.log(event);
-						if(event.data == 'start')
+						player.seekTo(event.data.tm, true);
+						if(event.data.st == 'start')
 							player.playVideo();
 						else
 							player.pauseVideo();
 					});
+
 					OTSession.session.on('signal:admin-signal', function (event) {
 						console.log(event);
 						if(event.data.type == 'video_change')

@@ -223,7 +223,7 @@ class IC_admin{
 										$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=waiting_participants').then(function(res){
 											$scope.participants = res['data'];
 										});
-										window.open("<?= site_url(); ?>/meeting/?id="+res['data']['id']+"&admin", '_blank');
+										window.open("<?= str_replace("http://financialinsiders.ca/", "https://financialinsiders.ca/", site_url()); ?>/meeting/?id="+res['data']['id']+"&admin", '_blank');
 									});
 								};
 								

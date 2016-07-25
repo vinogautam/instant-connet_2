@@ -5,6 +5,12 @@ Template Name: Meeting Template
 ?>
 <?php
 
+if(isset($_GET['only_video']))
+{
+	include 'only_video.php';
+	exit;
+}
+
 $meeting_id = $_GET['id'];
 
 global $wpdb; $results = $meeting = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting where id=".$meeting_id);
@@ -218,7 +224,7 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 							</ot-publisher>
 						</ot-layout>
 						<?php if(isset($_GET['admin'])){?>
-						<i ng-click="maximize=!maximize;" class="fa fa-arrows-alt" style="position: absolute; right: 5px; bottom: 5px; font-size: 20px; color: rgb(255, 255, 255);"></i>
+						<i ng-click="maximize=!maximize;send_noti('maximize_'+maximize)" class="fa fa-arrows-alt" style="position: absolute; right: 5px; bottom: 5px; font-size: 20px; color: rgb(255, 255, 255);"></i>
 						<?php }?>
 					</div>
 					<div style="margin-left: 40px;" class="text_chat_container" ng-class="{visible:visible}">

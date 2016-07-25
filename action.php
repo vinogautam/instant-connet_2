@@ -583,6 +583,12 @@
 					{
 						$scope.send_noti("imhere_"+event.data.split("_")[1]);
 					}
+					else if(typeof event.data != "undefined" && event.data.indexOf("maximize_") != -1)
+					{
+						$scope.$apply(function(){
+							$scope.maximize = event.data.split("_")[1] == "true" ? true : false;
+						});
+					}
 					<?php }else{?>
 					if(typeof event.data != "undefined" && event.data.indexOf("attempttoleave_") != -1)
 					{
@@ -597,12 +603,14 @@
 						delete $scope.offine_user[event.data.split("_")[1]];
 					}
 					<?php }?>
+					
 				});
 
 
 				if($scope.is_admin)
 				{
 					OTSession.session.on('signal:joined_meeting', function (event) {
+						$scope.data.maximize = $scope.maximize;
 						OTSession.session.signal( 
 									{  type: 'active_datas',
 									   data: $scope.data
@@ -643,6 +651,11 @@
 								}, 1000);
 							});
 						}
+
+						$scope.$apply(function(){
+							$scope.maximize = event.data.maximize;
+						});
+
 					});
 					
 					OTSession.session.on('signal:presentationControl', function (event) {

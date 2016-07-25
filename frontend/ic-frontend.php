@@ -102,6 +102,7 @@ class IC_front{
 			
 		</div>
 		<div ng-app="demo" ng-controller="ActionController" class="text_chat_container" style="display:none;position: absolute; top: 30px; right:0;width: 300px; background: rgb(255, 255, 255) none repeat scroll 0% 0%;border:1px solid #000;">
+						<iframe ng-src="{{'<?= str_replace("http://financialinsiders.ca/", "https://financialinsiders.ca/", site_url()); ?>/meeting/?id='+meeting.mid+'&only_video'}}"></iframe>
 						<div id="messagesDiv" style="height:250px;overflow:auto;">
 							<p ng-repeat="c in chat track by $index" on-finish-render ng-class="{align_right: c.email != data.email}" ng-if="c.msg">
 								<img ng-if="c.email == data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 

@@ -57,7 +57,7 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 			header{background-color:#790303;width:100%; height:40px;margin-bottom:15px;position:relative;}
 			header .fa{font-size:16px;width:16px;height:16px;position:absolute;margin:auto;top:0;bottom:0;color:#fff;}
 			header .fa.fa-bars{left:1%;}
-			header .fa.fa-times{right:1%;}
+			header .fa.fa-times1{right:5%;width:auto;}
 			header .fa.fa-sign-out{right:3%;}
 			.overall_container{height:500px;}
 			.side_menu li.selected{background-color:#790303;border:1px solid #790303;}
@@ -97,14 +97,15 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
     <body ng-controller="MyCtrl" class="<?= isset($_GET['admin']) ? 'admin_view' : 'client_view'; ?>">
         
 		<div class="container-fluid">
+			<?php if(isset($_GET['admin'])){?>
 			<div class="row">
 				<header>
 					<i class="fa fa-bars"></i>
 					<i class="fa fa-sign-out" ng-click="exit_user = 'all'" data-toggle="modal" data-target="#myModal"></i>
-					<i class="fa fa-times"></i>
+					<i ng-hide="show_video" ng-click="show_video = 1;" class="fa fa-times1">Enable Admin video</i>
+					<i ng-show="show_video" ng-click="show_video = 0;" class="fa fa-times1">Disable Admin video</i>
 				</header>
 			</div>
-			<?php if(isset($_GET['admin'])){?>
 			<div class="side_menu" ng-show="slide_menu">
 				<ul>
 					<li>Fi</li>
@@ -213,7 +214,7 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 			
 			<div class="row">
 				<div class="col-sm-12 col-md-3 col-lg-3" ng-cloak>
-					<div style="background:#000;" class="video_container {{pvideo}}" ng-class="{video1:streams.length+pvideo == 1, video2:streams.length+pvideo > 1, maximize:maximize}">
+					<div style="background:#000;" ng-show="streams.length || show_video" class="video_container {{pvideo}}" ng-class="{video1:streams.length+pvideo == 1, video2:streams.length+pvideo > 1, maximize:maximize}">
 						<ot-layout props="{animate:true}">
 							<ot-subscriber ng-repeat="stream in streams" 
 								stream="stream" 
@@ -277,6 +278,11 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 			</div>
 		</div>
 		
+		<audio id="notification_audio" controls style="display:none;">
+		  <source src="<?php _e(IC_PLUGIN_URL);?>notification.mp3" type="audio/mpeg">
+		  Your browser does not support the audio tag.
+		</audio> 
+
         <script src="https://code.jquery.com/jquery-2.2.0.min.js" type="text/javascript" charset="utf-8"></script>
         
 		

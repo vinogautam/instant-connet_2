@@ -116,7 +116,7 @@
 				<?php if(isset($_GET['admin'])){?>
 				
 				<?php global $wpdb; $results = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where meeting_id=".$meeting_id);?>
-				$scope.show_video = 1;
+				$scope.show_video = 0;
 				$scope.show_whiteboard = 1;
 				$scope.data2 = {name:"admin", email:"<?= bloginfo('admin_email');?>", msg:""};
 				$scope.joined_user = <?= json_encode($results); ?>;
@@ -144,6 +144,7 @@
 						$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=new_participants&id='+snapshot.val().count).then(function(res){
 							$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=waiting_participants').then(function(res){
 								$scope.participants = res['data'];
+								jQuery("#notification_audio").trigger('play');
 							});
 						});
 					}

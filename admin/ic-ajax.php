@@ -46,7 +46,7 @@ class IC_ajax{
 						array($_POST['type'] => $_POST['status']),
 						array("id" => $_POST['pid'])
 			);
-		$joined_user = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where meeting_id=".$_POST['mid']);
+		$joined_user = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (status = 3 or status = 2) and meeting_id=".$_POST['mid']);
 		$participants = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where status = 1");
 		
 		echo json_encode(array('joined_user' => $joined_user, 'participants' => $participants));
@@ -66,7 +66,7 @@ class IC_ajax{
 							),
 						array("id" => $_POST['pid'])
 			);
-		$joined_user = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where meeting_id=".$_POST['mid']);
+		$joined_user = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (status = 3 or status = 2) and meeting_id=".$_POST['mid']);
 		$participants = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where status = 1");
 		
 		echo json_encode(array('joined_user' => $joined_user, 'participants' => $participants));
@@ -75,6 +75,33 @@ class IC_ajax{
 		exit;
 	}
 	
+	function resize_image($file, $w, $h, $crop=FALSE) {
+		list($width, $height) = getimagesize($file);
+	    $r = $width / $height;
+	    if ($crop) {
+	        if ($width > $height) {
+	            $width = ceil($width-($width*abs($r-$w/$h)));
+	        } else {
+	            $height = ceil($height-($height*abs($r-$w/$h)));
+	        }
+	        $newwidth = $w;
+	        $newheight = $h;
+	    } else {
+	        if ($w/$h > $r) {
+	            $newwidth = $h*$r;
+	            $newheight = $h;
+	        } else {
+	            $newheight = $w/$r;
+	            $newwidth = $w;
+	        }
+	    }
+	    $src = imagecreatefromjpeg($file);
+	    $dst = imagecreatetruecolor($newwidth, $newheight);
+	    imagecopyresampled($dst, $src, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+
+	    imagejpeg($dst,$file);
+	}
+
 	function save_ppt()
 	{
 		$data = $_POST['data'];
@@ -92,7 +119,35 @@ class IC_ajax{
 					  if ($dh = opendir(IC_PLUGIN_DIR."/extract/$file/")){
 						while (($filee = readdir($dh)) !== false){
 						  if($i > 1)
-						  $files[] = $filee;
+						  {
+						  	$files[] = $filee;
+							//resize_image(IC_PLUGIN_DIR."/extract/$file/".$filee, 1600, 1200);
+							$w = 1600; $h = 1200;
+							list($width, $height) = getimagesize(IC_PLUGIN_DIR."/extract/$file/".$filee);
+						    $r = $width / $height;
+						    if ($crop) {
+						        if ($width > $height) {
+						            $width = ceil($width-($width*abs($r-$w/$h)));
+						        } else {
+						            $height = ceil($height-($height*abs($r-$w/$h)));
+						        }
+						        $newwidth = $w;
+						        $newheight = $h;
+						    } else {
+						        if ($w/$h > $r) {
+						            $newwidth = $h*$r;
+						            $newheight = $h;
+						        } else {
+						            $newheight = $w/$r;
+						            $newwidth = $w;
+						        }
+						    }
+						    $src = imagecreatefromjpeg(IC_PLUGIN_DIR."/extract/$file/".$filee);
+						    $dst = imagecreatetruecolor($newwidth, $newheight);
+						    imagecopyresampled($dst, $src, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+
+						    imagejpeg($dst,IC_PLUGIN_DIR."/extract/$file/".$filee);
+						  }
 						  $i++;
 						}
 						closedir($dh);
@@ -187,18 +242,25 @@ class IC_ajax{
 		global $wpdb;
 		
 		$id = $_GET['id'];
-		//$ree = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id = ".$id);
-		//if($ree->status == 1)
-		//{
+		$ree = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id = ".$id);
+		if($ree->status == 1)
+		{
 			$wpdb->update($wpdb->prefix . "meeting_participants", 
 						array('status' => 0),
 						array("id" => $id)
 			);
-		//}
+		}
+		/*else
+		{
+			$wpdb->update($wpdb->prefix . "meeting_participants", 
+						array('status' => 4),
+						array("id" => $id)
+			);
+		}*/
 		
 		if(isset($_GET['meetingroom']))
 		{
-			$joined_user = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where meeting_id=".$_GET['meetingroom']);
+			$joined_user = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (status = 3 or status = 2) and meeting_id=".$_GET['meetingroom']);
 			$participants = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where status = 1");
 			
 			echo json_encode(array('joined_user' => $joined_user, 'participants' => $participants));
@@ -228,7 +290,7 @@ class IC_ajax{
 			if(count($results))
 			{
 				echo json_encode(array("sessionId" => $meeting->session_id, "token" => $meeting->token, "status" => $results->status, "name" => $results->name, "email" => $results->email, "pid" => $participants, "mid" => $meeting_id));
-				setcookie("instant_connect_waiting_id", "", time()-3600, "/");
+				//setcookie("instant_connect_waiting_id", "", time()-3600, "/");
 			}	
 			
 			die(0);

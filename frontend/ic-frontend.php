@@ -15,7 +15,7 @@ class IC_front{
 		
 		if($is_waiting)
 		{
-			$wuser = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where status = 1 and id = ".$is_waiting);
+			$wuser = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where (status = 1 or status = 2) and id = ".$is_waiting);
 			if(!count($wuser))
 			{
 				$is_waiting = 0;
@@ -130,7 +130,27 @@ class IC_front{
 			var count = 0,textchatref,scope;
 			jQuery(document).ready(function(){
 				
-				jQuery(".chat_icon").click(function(){
+					<?php if(isset($wuser) && $wuser->status==2){?>
+					jQuery.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=check_meeing&participants=<?php echo $is_waiting;?>&meeting_id=<?= $wuser->meeting_id?>', function(res){
+								if(!res) return;
+								res = JSON.parse(res);
+								console.log(res);
+								if(res.status == 3)
+									window.location.assign("<?= wp_nonce_url(str_replace("http://financialinsiders.ca", "https://financialinsiders.ca", site_url("/meeting/")),'finonce','finonce');?>&id="+res.mid+"&pid="+res.pid);
+								else if(res.status == 2)
+								{	
+									jQuery(".text_chat_container").show();
+									jQuery(".hide_when_start").hide();
+									scope = angular.element(jQuery(".text_chat_container")).scope();
+									scope.$apply(function(){
+										scope.start_chating(res);
+									});
+									
+								}
+							});
+					<?php }?>
+
+					jQuery(".chat_icon").click(function(){
 						jQuery(".instant_connect_form").toggleClass("join_chat");
 					});
 					
@@ -165,7 +185,7 @@ class IC_front{
 								res = JSON.parse(res);
 								console.log(res);
 								if(res.status == 3)
-									window.location.assign("<?= wp_nonce_url(site_url("/meeting/"),'finonce','finonce');?>&id="+res.mid+"&pid="+res.pid);
+									window.location.assign("<?= wp_nonce_url(str_replace("http://financialinsiders.ca", "https://financialinsiders.ca", site_url("/meeting/")),'finonce','finonce');?>&id="+res.mid+"&pid="+res.pid);
 								else if(res.status == 2)
 								{	
 									jQuery(".text_chat_container").show();
@@ -262,7 +282,7 @@ class IC_front{
 										}
 										else if(v.noti.indexOf("switchtomeeting") != -1 && v.noti.split("switchtomeeting_")[1] == $scope.meeting.pid)
 										{
-											window.location.assign("<?= wp_nonce_url(str_replace("http://financialinsiders.ca/", "https://financialinsiders.ca/", site_url("/meeting/")),'finonce','finonce');?>&id="+$scope.meeting.mid+"&pid="+$scope.meeting.pid);
+											window.location.assign("<?= wp_nonce_url(str_replace("http://financialinsiders.ca", "https://financialinsiders.ca", site_url("/meeting/")),'finonce','finonce');?>&id="+$scope.meeting.mid+"&pid="+$scope.meeting.pid);
 										}
 									//});
 								});

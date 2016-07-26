@@ -49,7 +49,7 @@ class IC_admin{
 			<i class="fa fa-comments"></i>
 		</div>
 		
-		 <audio id="notification_audio" controls style="display:none;">
+		<audio id="notification_audio" controls style="display:none;">
 		  <source src="<?php _e(IC_PLUGIN_URL);?>notification.mp3" type="audio/mpeg">
 		  Your browser does not support the audio tag.
 		</audio> 
@@ -148,10 +148,11 @@ class IC_admin{
 									if($scope.tmp_check)
 									{
 										$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=new_participants&id='+snapshot.val().count).then(function(res){
-											jQuery("#notification_audio").trigger('play');
+											
 											$scope.recent = res['data'];
 											$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=waiting_participants').then(function(res){
 												$scope.participants = res['data'];
+												jQuery("#notification_audio").trigger('play');
 											});
 											
 											$timeout(function(){
@@ -223,7 +224,7 @@ class IC_admin{
 										$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=waiting_participants').then(function(res){
 											$scope.participants = res['data'];
 										});
-										window.open("<?= str_replace("http://financialinsiders.ca/", "https://financialinsiders.ca/", site_url()); ?>/meeting/?id="+res['data']['id']+"&admin", '_blank');
+										window.open("<?= str_replace("http://financialinsiders.ca", "https://financialinsiders.ca", site_url()); ?>/meeting/?id="+res['data']['id']+"&admin", '_blank');
 									});
 								};
 								

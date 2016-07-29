@@ -138,7 +138,7 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 						<div class="sub_menu">
 								<h4>Users in meeting</h4>
 								<ul>
-									<li ng-repeat="part in joined_user" ng-show="part.status != '4'">
+									<li ng-repeat="part in joined_user" ng-show="part.status != '4'" ng-init="autotimer(part);">
 										<img ng-src="{{get_avatar(part)}}">
 										#{{part.id}} {{part.name}} 
 										<i ng-if="part.status == '2'" class="fa fa-comment-o" ><span ng-click="switchtomeeting(part.id)">Switch to meeting</span></i>
@@ -158,7 +158,7 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 								</ul>
 								<h4>Waiting users</h4>
 								<ul>
-									<li ng-repeat="part in participants" ng-click="selected(part.id)" ng-class="{selected:check_selected(part.id)}" ng-init="part.diff = part.diff === undefined ? 0 : part.diff; autotimer(part);">
+									<li ng-repeat="part in participants" ng-click="selected(part.id)" ng-class="{selected:check_selected(part.id)}" ng-init="autotimer(part);">
 										<img ng-src="{{get_avatar(part)}}">
 										#{{part.id}} {{part.name}} <span ng-click="join_new_user_to_meeting(part.id, 2);">Join to chat</span><span ng-click="join_new_user_to_meeting(part.id, 3);">Join to meeting</span>
 									</li>

@@ -4,6 +4,7 @@
 		  var scope;
 		  var myDataRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_user');
 		  var meetingRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_meeting');
+		  var online_status = new Firebase('https://vinogautam.firebaseio.com/pusher/online_status');
 		  var allowtoleave = false;	
 		  function onYouTubeIframeAPIReady() {
 			scope = angular.element($("body")).scope();
@@ -115,6 +116,39 @@
 
 				<?php if(isset($_GET['admin'])){?>
 				
+				var intervals = [];
+				var interval_diff = [];
+				
+				$scope.autotimer = function(part)
+				{
+					if(typeof intervals[part.id] != "undefined") return;
+					intervals[part.id] = $interval(function(){
+						if(interval_diff[part.id] > 3)
+						{
+							$scope.left_user = part.name;
+							$("#userleftmodal").modal("show");
+							$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=update_user_offline&meetingroom=<?= $_GET['id'] ?>&id='+part.id).then(function(res){
+								$scope.joined_user = res['data']['joined_user'];
+								$scope.participants = res['data']['participants'];
+							});
+							$interval.cancel(intervals[part.id]);
+						}
+						else
+							interval_diff[part.id]++;
+					}, 5000);
+					interval_diff[part.id] = 0;
+				}
+				
+				var online_statusstatus = 0;
+				online_status.on('value', function(snapshot) {
+					online_statusstatus++;
+					if(online_statusstatus != 1)
+					{
+						vall = snapshot.val().count.split("-");
+						interval_diff[vall[0]] = 0;
+					}
+					
+				});
 				<?php global $wpdb; $results = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where meeting_id=".$meeting_id);?>
 				$scope.show_video = 0;
 				$scope.show_whiteboard = 1;
@@ -151,29 +185,14 @@
 					$scope.tmp_check = true;
 				});
 				
-				var intervals = [];
-								
-				$scope.autotimer = function(part)
-				{
-					intervals[part.id] = $interval(function(){
-						if(part.diff > 2)
-						{
-							$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=update_user_offline&id='+part.id).then(function(res){
-								$scope.participants = res['data'];
-							});
-							$interval.cancel(intervals[part.id]);
-						}
-						else
-							part.diff++;
-					}, 5000);
-				}
+				
 				
 				$scope.addnew_video = function(){
 					if($scope.newvideo)
 					{
-						$scope.youtube_list.push($scope.newvideo);
 						$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=addnew_video', $scope.newvideo).then(function(){
-
+							$scope.youtube_list.push($scope.newvideo);
+							$scope.newvideo = {};
 						});
 					}
 				};
@@ -182,7 +201,9 @@
 				$scope.deletevideo = function(e, ind){
 					e.stopPropagation();
 					$scope.youtube_list.splice(ind,1);
-					setCookie('youtube_list', JSON.stringify($scope.youtube_list));
+					$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=delete_video&ind='+ind).then(function(){
+
+					});
 				};
 				
 				<?php }else{?>
@@ -193,13 +214,19 @@
 				  {
 				  	  var confirmationMessage = "\o/";
 
-					  $scope.send_noti("attempttoleave_"+<?= $_GET['pid'];?>);
+					  //$scope.send_noti("attempttoleave_"+<?= $_GET['pid'];?>);
 
 					  (e || window.event).returnValue = confirmationMessage; 
 					  return confirmationMessage; 
 				  }
 				                             
 				});
+
+				
+				cccnt = 1;
+				setInterval(function(){
+					online_status.update({ count:"<?php echo $_GET['pid'];?>-"+cccnt++});
+				}, 5000);
 
 				<?php global $wpdb; $results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$_GET['pid']);?>
 				$scope.data2 = {name:"<?= $results->name;?>", email:"<?= $results->email;?>", msg:""};
@@ -225,7 +252,8 @@
 						$scope.left_user = id;
 						$("#userleftmodal").modal("show");
 						$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=update_user_offline&meetingroom=<?= $_GET['id'] ?>&id='+id).then(function(res){
-							$scope.participants = res['data'];
+							$scope.joined_user = res['data']['joined_user'];
+							$scope.participants = res['data']['participants'];
 						});
 					}
 				};

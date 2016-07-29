@@ -21,8 +21,50 @@ class IC_ajax{
 		add_action( 'wp_ajax_new_user_to_meeting', array( &$this, 'new_user_to_meeting'));
 		add_action( 'wp_ajax_usercontrol', array( &$this, 'usercontrol'));
 		add_action( 'wp_ajax_addnew_video', array( &$this, 'addnew_video'));
+		add_action( 'wp_ajax_delete_video', array( &$this, 'delete_video'));
+		add_action( 'wp_ajax_delete_presentation', array( &$this, 'delete_presentation'));
     }
 	
+    function delete_video()
+    {
+    	$option = get_option('youtube_videos');
+    	$option = is_array($option) ? $option : [];
+
+		$new_option = array();
+
+		foreach($option as $k=>$n)
+		{
+			if($k != $_GET['ind'])
+			{
+				$new_option[] = $n;
+			}
+		}
+
+		update_option('youtube_videos', $new_option);
+    	die(0);
+		exit;
+    }
+
+    function delete_presentation()
+    {
+    	$option = get_option('ic_presentations');
+    	$option = is_array($option) ? $option : [];
+
+		$new_option = array();
+
+		foreach($option as $k=>$n)
+		{
+			if($k != $_GET['ind'])
+			{
+				$new_option[] = $n;
+			}
+		}
+
+		update_option('ic_presentations', $new_option);
+    	die(0);
+		exit;
+    }
+
     function addnew_video()
     {
     	$_POST = (array) json_decode(file_get_contents('php://input'));
@@ -250,13 +292,13 @@ class IC_ajax{
 						array("id" => $id)
 			);
 		}
-		/*else
+		else
 		{
 			$wpdb->update($wpdb->prefix . "meeting_participants", 
 						array('status' => 4),
 						array("id" => $id)
 			);
-		}*/
+		}
 		
 		if(isset($_GET['meetingroom']))
 		{
@@ -392,7 +434,7 @@ class IC_ajax{
 		$wpdb->insert($wpdb->prefix . "meeting_participants", $_POST['meeting']);
 		echo $wpdb->insert_id;
 		
-		setcookie("instant_connect_waiting_id", $wpdb->insert_id, time() + (86400 * 365), "/");
+		setcookie("instant_connect_waiting_id", $wpdb->insert_id, time() + 3600, "/");
 		
 		die(0);
 		exit;

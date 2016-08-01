@@ -91,11 +91,14 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 			.client_view .show_whitebord_1 .OT_panel{display:block;}
 			.side_menu button{color:#790303;}
 			.align_right{text-align: right;}
+			.preloader_overlay{position: fixed;width: 100%;height: 100%;background: #000;opacity: 0.5;z-index: 9999999;}
+			.preloader_image{position: fixed;width: 150px;height: 150px;left: 0;right: 0;margin: auto;top:0;bottom: 0;z-index: 99999999;}
          </style>
 		 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
     </head>
     <body ng-controller="MyCtrl" class="<?= isset($_GET['admin']) ? 'admin_view' : 'client_view'; ?>">
-        
+        <div class="preloader hide preloader_overlay"></div>
+        <img class="preloader hide preloader_image" src="<?= plugin_dir_url(__FILE__); ?>8.gif">
 		<div class="container-fluid">
 			<?php if(isset($_GET['admin'])){?>
 			<div class="row">

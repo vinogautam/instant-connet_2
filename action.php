@@ -293,7 +293,7 @@
 					evt.preventDefault();
 					var files;
 					files = evt.target.files;
-					
+					$(".preloader").removeClass("hide");
 					for (var i = 0, f; f = files[i]; i++) {
 						if (f.type !== "") {
 							var filename = f.name;
@@ -330,6 +330,8 @@
 										$scope.presentation_files.push(new_data);
 										$scope.selected_file(new_data.folder, new_data.files);
 									});
+
+									$(".preloader").addClass("hide");
 								}
 							});
 						},

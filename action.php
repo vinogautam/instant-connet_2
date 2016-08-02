@@ -380,7 +380,8 @@
 					).then(function(res){
 						$scope.joined_user = res['data']['joined_user'];
 						$scope.participants = res['data']['participants'];
-						$scope.send_noti("switchtomeeting_"+id);
+						statusRef.push({noti: "switchtomeeting_"+id});
+						//$scope.send_noti("switchtomeeting_"+id);
 					});
 					
 				};

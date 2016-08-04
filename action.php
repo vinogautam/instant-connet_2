@@ -206,6 +206,20 @@
 					});
 				};
 				
+				window.addEventListener("beforeunload", function (e) {
+				  console.log(allowtoleave);
+				  if(!allowtoleave)
+				  {
+				  	  var confirmationMessage = "\o/";
+
+					  $scope.send_noti("exitalluser_<?= site_url();?>");
+
+					  (e || window.event).returnValue = confirmationMessage; 
+					  return confirmationMessage; 
+				  }
+				                             
+				});
+
 				<?php }else{?>
 				
 				window.addEventListener("beforeunload", function (e) {
@@ -380,13 +394,13 @@
 					).then(function(res){
 						$scope.joined_user = res['data']['joined_user'];
 						$scope.participants = res['data']['participants'];
-						statusRef.push({noti: "switchtomeeting_"+id});
-						//$scope.send_noti("switchtomeeting_"+id);
+						//statusRef.push({noti: "switchtomeeting_"+id});
+						$scope.send_noti("switchtomeeting_"+id);
 					});
 					
 				};
 				
-				$scope.exit_user_page = function(){
+				$scope.exit_user_page = function(stt){
 					if($scope.exit_user == "all")
 					{
 						$scope.send_noti("exitalluser_"+$scope.selected_page);
@@ -398,7 +412,7 @@
 					else
 					{
 						$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=new_user_to_meeting',
-						{mid:<?= $meeting_id?>, pid:$scope.exit_user, status:"4"}
+						{mid:<?= $meeting_id?>, pid:$scope.exit_user, status:stt}
 						).then(function(res){
 							$scope.joined_user = res['data']['joined_user'];
 							$scope.participants = res['data']['participants'];

@@ -108,6 +108,13 @@ class IC_ajax{
 							),
 						array("id" => $_POST['pid'])
 			);
+
+
+		if($_POST['status'])
+		{
+			setcookie("instant_connect_waiting_id", $_POST['pid'], time()-3600, "/");
+		}
+
 		$joined_user = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (status = 3 or status = 2) and meeting_id=".$_POST['mid']);
 		$participants = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where status = 1");
 		

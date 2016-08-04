@@ -126,6 +126,9 @@ class IC_front{
 			
 		<script src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/core.js'></script>
 		<script src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/md5-min.js'></script>
+		<script src="//static.opentok.com/v2.6/js/opentok.js" type="text/javascript" charset="utf-8"></script>
+		<script src="<?= IC_PLUGIN_URL; ?>js/opentok-layout.js" type="text/javascript" charset="utf-8"></script>
+        <script src="<?= IC_PLUGIN_URL; ?>js/opentok-angular.js" type="text/javascript" charset="utf-8"></script>
 		<script>
 			
 			
@@ -227,7 +230,7 @@ class IC_front{
 					<?php }?>
 			});
 			
-			angular.module('demo', [])
+			angular.module('demo', ['opentok'])
 			.directive('ngEnter', function() {
 			return function(scope, element, attrs) {
 				element.bind("keydown keypress", function(event) {
@@ -254,7 +257,7 @@ class IC_front{
         }
     }
 })
-			.controller('ActionController', ['$scope', '$timeout', '$http', function($scope, token, $timeout, $http) {
+			.controller('ActionController', ['$scope', '$timeout', '$http', 'OTSession', function($scope, $timeout, $http, OTSession) {
 					
 					$scope.chat = [];
 					$scope.data = {name:"", email:"", msg:""};
@@ -265,6 +268,59 @@ class IC_front{
 							$scope.data.name = res.name;
 							$scope.data.email = res.email;
 							$scope.meeting = res;
+
+							OTSession.init('<?= API_KEY;?>', $scope.meeting.sessionId, $scope.meeting.token, function (err) {
+								if (!err) {
+									console.log(OTSession.session);
+
+									OTSession.session.on('signal:user-notifications', function (event) {
+									console.log(event);
+									if(typeof event.data != "undefined" && event.data.indexOf("video") != -1 && parseInt(event.data.split("_")[2]) == $scope.meeting.pid)
+									{
+										console.log(event.data.split("_"));
+										$scope.$apply(function(){
+											$scope.show_video = parseInt(event.data.split("_")[1]);
+											if($scope.show_video == 0)
+												$scope.pvideo = 0;
+										});
+									}
+									else if(typeof event.data != "undefined" && event.data.indexOf("whiteboard") != -1 && parseInt(event.data.split("_")[2]) == $scope.meeting.pid)
+									{
+										console.log(event.data.split("_"));
+										$scope.$apply(function(){
+											$scope.show_whiteboard = parseInt(event.data.split("_")[1]);
+										});
+									}
+									else if(typeof event.data != "undefined" && event.data.indexOf("exituser") != -1 && parseInt(event.data.split("_")[1]) == $scope.meeting.pid)
+									{
+										console.log(event.data.split("_"));
+										allowtoleave = true;
+										window.location.assign(event.data.split("_")[2]);
+									}
+									else if(typeof event.data != "undefined" && event.data.indexOf("exitalluser") != -1)
+									{
+										allowtoleave = true;
+										window.location.assign(event.data.split("_")[1]);
+									}
+									else if(typeof event.data != "undefined" && event.data.indexOf("acktocheckuserison") != -1 && parseInt(event.data.split("_")[1]) == $scope.meeting.pid)
+									{
+										$scope.send_noti("imhere_"+event.data.split("_")[1]);
+									}
+									else if(typeof event.data != "undefined" && event.data.indexOf("maximize_") != -1)
+									{
+										$scope.$apply(function(){
+											$scope.maximize = event.data.split("_")[1] == "true" ? true : false;
+										});
+									}
+									else if(typeof event.data != "undefined" && event.data.indexOf("switchtomeeting") != -1 && event.data.split("switchtomeeting_")[1] == $scope.meeting.pid)
+									{
+										window.location.assign("<?= wp_nonce_url(str_replace("http://financialinsiders.ca", "https://financialinsiders.ca", site_url("/meeting/")),'finonce','finonce');?>&id="+$scope.meeting.mid+"&pid="+$scope.meeting.pid);
+									}
+									
+								});
+								}
+							});
+							
 								textchatref.on('child_added', function(snapshot) {
 									//angular.forEach(snapshot.val(), function(v,k){
 										v = snapshot.val();
@@ -282,10 +338,7 @@ class IC_front{
 												$scope.chat.push(v);
 											}
 										}
-										else if(v.noti.indexOf("switchtomeeting") != -1 && v.noti.split("switchtomeeting_")[1] == $scope.meeting.pid)
-										{
-											window.location.assign("<?= wp_nonce_url(str_replace("http://financialinsiders.ca", "https://financialinsiders.ca", site_url("/meeting/")),'finonce','finonce');?>&id="+$scope.meeting.mid+"&pid="+$scope.meeting.pid);
-										}
+										
 									//});
 								});
 					};
@@ -295,6 +348,10 @@ class IC_front{
 						textchatref.push($scope.data);
 						$scope.data.msg = '';
 					};
+
+					
+
+					
 			}]);
 		</script>
 		<?php

@@ -182,8 +182,8 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 			        <button type="button" class="close" data-dismiss="modal">&times;</button>
 			        <h4 class="modal-title">Select a page to redirect user</h4>
 			      </div>
-			      <div class="modal-body">{{selected_page}}
-			        <select ng-model="selected_page" ng-change="exit_user_page()" ng-init="selected_page=''">
+			      <div class="modal-body">
+			        <select ng-model="selected_page"  ng-init="selected_page=''">
 						<option value="">Select Page</option>
 						<?php foreach (get_pages() as $key => $value) {?>
 						<option value="<?= get_permalink($value->ID);?>"><?= $value->post_title;?></option>
@@ -191,6 +191,8 @@ if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GE
 					</select>
 			      </div>
 			      <div class="modal-footer">
+			        <button ng-show="exit_user != 'all'" type="button" class="btn btn-primary" ng-click="exit_user_page(4)" data-dismiss="modal">End Session</button>
+			        <button ng-show="exit_user != 'all'" type="button" class="btn btn-primary" ng-click="exit_user_page(2)" data-dismiss="modal">Only Redirect</button>
 			        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 			      </div>
 			    </div>

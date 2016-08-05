@@ -207,16 +207,12 @@
 				};
 				
 				window.addEventListener("beforeunload", function (e) {
-				  console.log(allowtoleave);
-				  if(!allowtoleave)
-				  {
-				  	  var confirmationMessage = "\o/";
+				 	var confirmationMessage = "\o/";
 
 					  $scope.send_noti("exitalluser_<?= site_url();?>");
 
 					  (e || window.event).returnValue = confirmationMessage; 
 					  return confirmationMessage; 
-				  }
 				                             
 				});
 
@@ -411,6 +407,7 @@
 					}
 					else
 					{
+						$interval.cancel(intervals[$scope.exit_user]);
 						$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=new_user_to_meeting',
 						{mid:<?= $meeting_id?>, pid:$scope.exit_user, status:stt}
 						).then(function(res){

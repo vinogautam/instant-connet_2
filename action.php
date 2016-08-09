@@ -5,6 +5,9 @@
 		  var myDataRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_user');
 		  var meetingRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_meeting');
 		  var online_status = new Firebase('https://vinogautam.firebaseio.com/pusher/online_status');
+		  var refresh_user_list = new Firebase('https://vinogautam.firebaseio.com/pusher/refresh_user_list');
+
+								
 		  var allowtoleave = false;	
 		  function onYouTubeIframeAPIReady() {
 			scope = angular.element($("body")).scope();
@@ -84,7 +87,17 @@
     }])
             .controller('MyCtrl', ['$scope', 'OTSession', 'apiKey', 'sessionId', 'token', '$timeout', '$http', '$interval', function($scope, OTSession, apiKey, sessionId, token, $timeout, $http, $interval) {
                 
-
+            	var refresh_user_list_status = 0;
+				refresh_user_list.on('value', function(snapshot) {
+					refresh_user_list_status++;
+					if(refresh_user_list_status != 1)
+					{
+						$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=waiting_participants').then(function(res){
+							$scope.participants = res['data'];
+						});
+					}
+					
+				});
 
                 $scope.urlify = function(text) {
 				    var urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -130,6 +143,7 @@
 							$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=update_user_offline&meetingroom=<?= $_GET['id'] ?>&id='+part.id).then(function(res){
 								$scope.joined_user = res['data']['joined_user'];
 								$scope.participants = res['data']['participants'];
+								refresh_user_list.update({ st:"user_offline_updated_"+part.id});
 							});
 							$interval.cancel(intervals[part.id]);
 						}
@@ -167,6 +181,7 @@
 						$scope.joined_user = res['data']['joined_user'];
 						$scope.participants = res['data']['participants'];
 						meetingRef.update({ id:"<?= $meeting_id.'-'?>"+new Date().getTime()});
+						refresh_user_list.update({ st:"new_meeting_created"+pid});
 					});
 				};
 				

@@ -124,7 +124,20 @@ class IC_admin{
 								var statusRef = new Firebase('https://vinogautam.firebaseio.com/pusher/status_change');
 								var meetingRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_meeting');
 								var online_status = new Firebase('https://vinogautam.firebaseio.com/pusher/online_status');
-				
+								var refresh_user_list = new Firebase('https://vinogautam.firebaseio.com/pusher/refresh_user_list');
+
+								var refresh_user_list_status = 0;
+								refresh_user_list.on('value', function(snapshot) {
+									refresh_user_list_status++;
+									if(refresh_user_list_status != 1)
+									{
+										$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=waiting_participants').then(function(res){
+											$scope.participants = res['data'];
+										});
+									}
+									console.log(refresh_user_list_status);
+								});
+
 								var status_count = 0;
 								
 								$scope.tab = 1;
@@ -224,6 +237,9 @@ class IC_admin{
 										$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=waiting_participants').then(function(res){
 											$scope.participants = res['data'];
 										});
+
+										refresh_user_list.update({ st:"new_meeting_created"+res['data']['id']});
+
 										window.open("<?= str_replace("http://financialinsiders.ca", "https://financialinsiders.ca", site_url()); ?>/meeting/?id="+res['data']['id']+"&admin", '_blank');
 									});
 								};
@@ -239,6 +255,7 @@ class IC_admin{
 										{
 											$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=update_user_offline&id='+part.id).then(function(res){
 												$scope.participants = res['data'];
+												refresh_user_list.update({ st:"user_offline_updated_"+part.id});
 											});
 											$interval.cancel(intervals[part.id]);
 										}

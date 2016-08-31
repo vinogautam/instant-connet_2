@@ -85,9 +85,12 @@
 			   name tinytext NOT NULL,
 			   email tinytext NOT NULL,
 			   meeting_date datetime NOT NULL,
-			   status int(11),
+			   status int(1),
 			   video int(1),
 			   whiteboard int(1),
+			   lead int(11),
+			   endorser int(11),
+			   gift_status int(1),
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

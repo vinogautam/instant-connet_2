@@ -23,8 +23,32 @@ class IC_ajax{
 		add_action( 'wp_ajax_addnew_video', array( &$this, 'addnew_video'));
 		add_action( 'wp_ajax_delete_video', array( &$this, 'delete_video'));
 		add_action( 'wp_ajax_delete_presentation', array( &$this, 'delete_presentation'));
+		add_action( 'wp_ajax_send_ic_gift', array( &$this, 'send_ic_gift') );
+		add_action( 'wp_ajax_nopriv_send_ic_gift', array( &$this, 'send_ic_gift') );
     }
 	
+    function send_ic_gift()
+    {
+    	global $wpdb, $ntm_mail;
+
+    	$this->fa_lead_options = get_option('fa_lead_settings');
+
+    	$results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$_GET['id']);
+
+    	$data = array(
+							'endorser_id' =>$results->endorser,
+							'amout' => $this->fa_lead_options['init_gift'],
+							'agent_id' => get_blog_option(get_current_blog_id(), 'agent_id'),
+							'created'	=> date("Y-m-d H:i:s")
+							);
+		$wpdb->insert($wpdb->prefix . "gift_transaction", $data);
+		$gift_id = $wpdb->insert_id;
+		
+		$wpdb->update($wpdb->prefix . "meeting_participants", array('gift_status' => 1), array('id' => $_GET['id']));
+
+		$ntm_mail->send_gift_mail('get_gift_mail', $results->endorser, $gift_id);
+    }
+
     function delete_video()
     {
     	$option = get_option('youtube_videos');
@@ -436,6 +460,14 @@ class IC_ajax{
 
 		$pusher->trigger('test_channel', 'my_event', $_POST);*/
 		
+		//print_r($_POST['meeting']);
+
+		if(isset($_COOKIE['endorsement_track_link']) && isset($_COOKIE['endorsement_tracked']))
+		{
+			$track_link = explode("#&$#", base64_decode(base64_decode($_COOKIE['endorsement_track_link'])));
+			$_POST['meeting']['endorser'] = $track_link[1];
+		}
+
 		global $wpdb;
 		
 		$wpdb->insert($wpdb->prefix . "meeting_participants", $_POST['meeting']);

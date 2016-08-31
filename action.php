@@ -233,6 +233,17 @@
 
 				<?php }else{?>
 				
+				
+				<?php global $wpdb; $results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$_GET['pid']);?>
+
+				<?php if($results->endorser && $results->gift_status == 0){?>
+				setTimeout(function(){
+					$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=send_ic_gift&id=$_GET['pid']').then(function(res){
+
+					});
+				}, 300000);
+				<?php }?>
+
 				window.addEventListener("beforeunload", function (e) {
 				  console.log(allowtoleave);
 				  if(!allowtoleave)
@@ -253,7 +264,6 @@
 					online_status.update({ count:"<?php echo $_GET['pid'];?>-"+cccnt++});
 				}, 5000);
 
-				<?php global $wpdb; $results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$_GET['pid']);?>
 				$scope.data2 = {name:"<?= $results->name;?>", email:"<?= $results->email;?>", msg:""};
 				$scope.show_video = 0;
 				$scope.show_whiteboard = 0;

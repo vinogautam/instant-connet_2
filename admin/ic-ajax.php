@@ -462,19 +462,33 @@ class IC_ajax{
 		
 		//print_r($_POST['meeting']);
 
+		if(isset($_POST['meeting']))
+		{
+			$meeting = $_POST['meeting'];
+		}
+		else
+		{
+			$meeting = array('name' => $_GET['name'], 'email' => $_GET['email'], 'status' => 1);
+		}
+
 		if(isset($_COOKIE['endorsement_track_link']) && isset($_COOKIE['endorsement_tracked']))
 		{
 			$track_link = explode("#&$#", base64_decode(base64_decode($_COOKIE['endorsement_track_link'])));
-			$_POST['meeting']['endorser'] = $track_link[1];
+			$meeting['endorser'] = $track_link[1];
 		}
 
 		global $wpdb;
 		
-		$wpdb->insert($wpdb->prefix . "meeting_participants", $_POST['meeting']);
-		echo $wpdb->insert_id;
+		$wpdb->insert($wpdb->prefix . "meeting_participants", $meeting);
+		
 		
 		setcookie("instant_connect_waiting_id", $wpdb->insert_id, time() + 3600, "/");
 		
+		if(isset($_GET['meeting']))
+			wp_redirect(site_url());
+		else
+			echo $wpdb->insert_id;
+
 		die(0);
 		exit;
 	}

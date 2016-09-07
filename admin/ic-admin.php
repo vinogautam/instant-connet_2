@@ -349,9 +349,9 @@ class IC_admin{
      */
     public function settingsPage()
     {   global $pagenow, $current_user, $ntm_mail;
-		if ( isset ( $_GET['tab'] ) ) $current = $_GET['tab']; else $current = 'youtube';
+		if ( isset ( $_GET['tab'] ) ) $current = $_GET['tab']; else $current = 'send_auto_meeting_link';
 		
-		$tabs = array('youtube' => 'Youtube link', 'presentations' => 'Presentations');
+		$tabs = array('send_auto_meeting_link' => 'Auto Meeting Link', 'youtube' => 'Youtube link', 'presentations' => 'Presentations');
 		$current_page = $tabs[$current];
 		$current_tab = $current.'_page';
 		
@@ -371,6 +371,34 @@ class IC_admin{
         
     }
 	
+    public function send_auto_meeting_link_page()
+    {
+    	if(isset($_POST['send_auto_meeting_link_save']))
+		{
+			$message = '<h4>Hi '.$_POST['name'].'</h4>';
+			$message .= '<p><a href="'.site_url().'/wp-admin/admin-ajax.php?meeting&action=join_chat&name='.$_POST['name'].'&email='.$_POST['email'].'">click here to join Financial Insiders meeting</a></p>';
+			NTM_mail_template::send_mail($_POST['email'], 'Financial Insiders auto meeting link.', $message);
+		}
+
+    	?>
+    	<form method="post">
+			<table class="form-table">
+				<tbody>
+					<tr>
+						<th scope="row"><label for="blogname">Name</label></th>
+						<td><input type="text" class="regular-text"  id="blogname" name="name"></td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="blogname">Email</label></th>
+						<td><input type="text" class="regular-text"  id="blogname" name="email"></td>
+					</tr>
+				</tbody>
+			</table>
+			<?php submit_button('Save ', 'primary', 'send_auto_meeting_link_save');?>
+		</form>
+    	<?php
+    }
+
 	public function youtube_page()
     {
     	$option = get_option('youtube_videos');

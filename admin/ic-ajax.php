@@ -25,11 +25,26 @@ class IC_ajax{
 		add_action( 'wp_ajax_delete_presentation', array( &$this, 'delete_presentation'));
 		add_action( 'wp_ajax_send_ic_gift', array( &$this, 'send_ic_gift') );
 		add_action( 'wp_ajax_nopriv_send_ic_gift', array( &$this, 'send_ic_gift') );
+		add_action( 'wp_ajax_send_add_chat_points', array( &$this, 'add_chat_points') );
+		add_action( 'wp_ajax_nopriv_send_add_chat_points', array( &$this, 'add_chat_points') );
     }
 	
+	function add_chat_points()
+    {
+    	global $wpdb, $ntm_mail, $endorsements;
+
+    	$results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$_GET['id']);
+
+    	$points = 25;
+		$type = 'Instant connect success meeting';
+		$new_balance = $endorsements->get_endorser_points($results->endorser) + $points;
+		$data = array('points' => $points, 'credit' => 1, 'endorser_id' => $results->endorser, 'new_balance' => $new_balance, 'transaction_on' => date("Y-m-d H:i:s"), 'type' => $type);
+		$endorsements->add_points($data);
+    }
+
     function send_ic_gift()
     {
-    	global $wpdb, $ntm_mail;
+    	global $wpdb, $ntm_mail, $endorsements;
 
     	$this->fa_lead_options = get_option('fa_lead_settings');
 
@@ -45,6 +60,12 @@ class IC_ajax{
 		$gift_id = $wpdb->insert_id;
 		
 		$wpdb->update($wpdb->prefix . "meeting_participants", array('gift_status' => 1), array('id' => $_GET['id']));
+
+		$points = 125;
+		$type = 'Instant connect success meeting';
+		$new_balance = $endorsements->get_endorser_points($results->endorser) + $points;
+		$data = array('points' => $points, 'credit' => 1, 'endorser_id' => $results->endorser, 'new_balance' => $new_balance, 'transaction_on' => date("Y-m-d H:i:s"), 'type' => $type);
+		$endorsements->add_points($data);
 
 		$ntm_mail->send_gift_mail('get_gift_mail', $results->endorser, $gift_id);
     }

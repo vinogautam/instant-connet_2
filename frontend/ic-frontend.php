@@ -264,6 +264,14 @@ class IC_front{
 					$scope.meeting = {};
 					$scope.start_chating = function(res){
 						console.log("start cghat");
+
+						setTimeout(function(){
+							$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=add_chat_points&id='+res.pid).then(function(res){
+
+							});
+						}, 300000);
+
+
 						textchatref = new Firebase('https://vinogautam.firebaseio.com/opentok/'+res.sessionId);
 							$scope.data.name = res.name;
 							$scope.data.email = res.email;

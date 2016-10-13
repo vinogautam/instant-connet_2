@@ -41,7 +41,7 @@ Instant Connect UI
   <link rel="stylesheet" type="text/css" href="<?= plugin_dir_url(__FILE__); ?>css/slick-theme.css">
   <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
   <link rel="stylesheet" href="<?= plugin_dir_url(__FILE__); ?>css/opentok-whiteboard.css" type="text/css" media="screen" charset="utf-8">
-  
+
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
   <!--[if lt IE 9]>
@@ -163,6 +163,7 @@ Instant Connect UI
 
 <div class="wrapper">
 
+  <?php if(isset($_GET['admin'])){?>
   <!-- Main Header -->
   <header class="main-header">
 
@@ -341,6 +342,7 @@ Instant Connect UI
     </nav>
   </header>
   <!-- Left side column. contains the logo and sidebar -->
+  
   <aside class="main-sidebar instant-connect-sidebar">
 
     <!-- sidebar: style can be found in sidebar.less -->
@@ -387,7 +389,7 @@ Instant Connect UI
     </section>
     <!-- /.sidebar -->
   </aside>
-
+  <?php }?>
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->

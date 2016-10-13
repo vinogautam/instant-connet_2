@@ -11,8 +11,8 @@
  define('IC_PLUGIN_URL', plugin_dir_url( __FILE__ ));
  define('IC_PLUGIN_DIR',$dir['dirname']);
 
- define("API_KEY", "45623532");
- define("API_SECRET", "ecb82f62c8f7aa2b54832fedac16d41ef30b6520");
+ define("API_KEY", "45701592");
+ define("API_SECRET", "487828bda5af8ace8ca1c55ced44411f57750f77");
  
  include 'includes.php';
  include 'pusher/pusher.php';
@@ -49,7 +49,7 @@
 	function wpa3396_page_template( $page_template )
 	{
 		if ( is_page( 'meeting' ) ) {
-			$page_template = dirname( __FILE__ ) . '/meeting_template.php';
+			$page_template = dirname( __FILE__ ) . '/meeting_template_new.php';
 		}
 		return $page_template;
 	}

@@ -1,4 +1,4 @@
- <?php
+<?php
 /*
 Template Name: Meeting Template
 */
@@ -17,7 +17,7 @@ global $wpdb; $results = $meeting = $wpdb->get_row("select * from ".$wpdb->prefi
 $sessionId = $meeting->session_id; 
 $token = $meeting->token;
 if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GET['finonce'], 'finonce'))) {
-	die("Invaid meeting url");
+	die("Invalid meeting url");
 }
  ?>
 <!DOCTYPE html>

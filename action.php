@@ -513,6 +513,12 @@
 					}
 				});
 				$scope.streams = OTSession.streams;
+				$scope.screenshare = OTSession.screenshare;
+
+				$scope.initiate_screen_sharing = function(){
+					OTSession.initiate_screenshring();
+				};
+
 				$scope.pvideo = 0;
 				$scope.$on("otAccessAllowed", function(){
 					$scope.$apply(function () {$scope.pvideo = 1;});

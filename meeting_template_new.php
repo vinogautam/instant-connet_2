@@ -186,6 +186,9 @@ Instant Connect UI
         <ul class="nav navbar-nav">
           <!-- Messages: style can be found in dropdown.less-->
           <li class="dropdown">
+            <a ng-click="initiate_screen_sharing();">Share screen</a>
+          </li>
+          <li class="dropdown">
             <a><i class="fa fa-sign-out" ng-click="exit_user = 'all'" data-toggle="modal" data-target="#myModal"></i></a>
           </li>
           <li class="dropdown">
@@ -413,6 +416,14 @@ Instant Connect UI
             <?php if(isset($_GET['admin'])){?>
             <i ng-click="maximize=!maximize;send_noti('maximize_'+maximize)" class="fa fa-arrows-alt" style="position: absolute; right: 5px; bottom: 5px; font-size: 20px; color: rgb(255, 255, 255);"></i>
             <?php }?>
+          </div>
+          <div style="background:#000;" ng-show="screenshare.length" class="maximize">
+            <ot-layout props="{animate:true}">
+              <ot-subscriber ng-repeat="screenshare in streams" 
+                stream="stream" 
+                props="{style: {nameDisplayMode: 'off'}}">
+              </ot-subscriber>
+            </ot-layout>
           </div>
           <div style="margin-left: 40px;" class="text_chat_container" ng-class="{visible:visible}">
             <div id="messagesDiv" style="height:250px;overflow:auto;">
@@ -769,6 +780,9 @@ Instant Connect UI
      Both of these plugins are recommended to enhance the
      user experience. Slimscroll is required when using the
      fixed layout. -->
+<script type="text/javascript">
+  var extensionId = 'nedllccjjngfnljgploibnpkikgmmfkc';
+</script>
 <script src="<?= plugin_dir_url(__FILE__); ?>js/slick.js" type="text/javascript" charset="utf-8"></script> 
 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js" type="text/javascript" charset="utf-8"></script>

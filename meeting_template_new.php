@@ -782,6 +782,7 @@ Instant Connect UI
      fixed layout. -->
 <script type="text/javascript">
   var extensionId = 'nedllccjjngfnljgploibnpkikgmmfkc';
+  var ffWhitelistVersion;
 </script>
 <script src="<?= plugin_dir_url(__FILE__); ?>js/slick.js" type="text/javascript" charset="utf-8"></script> 
 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>

@@ -92,9 +92,11 @@ ng.module('opentok', [])
           this.session.connect(token, function(err) {
             if (cb) cb(err, OTSession.session);
           });
-          this.trigger('init');
 
+          
           OT.registerScreenSharingExtension('chrome', extensionId, 2);
+
+          this.trigger('init');
         },
         initiate_screenshring : function(){
           OT.checkScreenSharingCapability(function(response) {
@@ -119,7 +121,7 @@ ng.module('opentok', [])
                 if (error) {
                   alert('Something went wrong: ' + error.message);
                 } else {
-                  session.publish(
+                  OTSession.session.publish(
                     screenSharingPublisher,
                     function(error) {
                       if (error) {

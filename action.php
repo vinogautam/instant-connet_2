@@ -85,7 +85,7 @@
             return $sce.trustAsHtml(text);
         };
     }])
-            .controller('MyCtrl', ['$scope', 'OTSession', 'apiKey', 'sessionId', 'token', '$timeout', '$http', '$interval', function($scope, OTSession, apiKey, sessionId, token, $timeout, $http, $interval) {
+            .controller('MyCtrl', ['$scope', 'OTSession', 'apiKey', 'sessionId', 'token', '$timeout', '$http', '$interval', '$filter', function($scope, OTSession, apiKey, sessionId, token, $timeout, $http, $interval, $filter) {
                 
             	var refresh_user_list_status = 0;
 				refresh_user_list.on('value', function(snapshot) {
@@ -203,12 +203,22 @@
 				
 				
 				$scope.addnew_video = function(){
+
+					if($scope.newvideo.split("/embed/").length == 2)
+	                    $scope.newvideo = "https://www.youtube.com/embed/"+video.split("/embed/")[1];
+	                else if($scope.newvideo.split("?v=").length == 2)
+	                    $scope.newvideo = "https://www.youtube.com/embed/"+video.split("?v=")[1];
+	                else
+	                    return;
+
 					if($scope.newvideo)
 					{
 						$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=addnew_video', $scope.newvideo).then(function(){
 							$scope.youtube_list.push($scope.newvideo);
 							$scope.newvideo = {};
 						});
+
+						$scope.reset();
 					}
 				};
 				
@@ -217,6 +227,14 @@
 					e.stopPropagation();
 					$scope.youtube_list.splice(ind,1);
 					$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=delete_video&ind='+ind).then(function(){
+
+					});
+				};
+
+				$scope.deletepresentation = function(e, ind){
+					e.stopPropagation();
+					$scope.presentation_files.splice(ind,1);
+					$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=delete_presentation&ind='+ind).then(function(){
 
 					});
 				};
@@ -271,8 +289,9 @@
 				
 				$scope.change_video = function(p, admin){
 					$scope.data.active_video = p;
-					player.loadVideoById(p.split("?v=")[1], 0, "default");
 					player.stopVideo();
+					player.loadVideoById(p.split("?v=")[1], 0, "default");
+					player.playVideo();
 					$scope.video = true;
 					$scope.presentation = false;
 					$scope.users=false;
@@ -786,7 +805,23 @@
 					});
 				}
 				
-				
+				$scope.numberOfPages=function(arr, search){
+			        return Math.ceil($filter('filter')($scope[arr], $scope[search]).length/5);                
+			    };
+
+			    $scope.numberOfPagesArray=function(arr, search){
+			        return new Array($scope.numberOfPages(arr, search));                
+			    };
+
+			    $scope.currentPage = 0;
+			    $scope.vsearch = {name:''};
+			    $scope.psearch = {name:''};
+			    $scope.reset = function()
+			    {
+			    	$scope.currentPage = 0;
+			    	$scope.vsearch = {name:''};
+			    	$scope.psearch = {name:''};
+			    };
 				
 			}])
 			.value({
@@ -806,5 +841,11 @@
 						}
 					});
 				};
+			})
+			.filter('startFrom', function() {
+			    return function(input, start) {
+			        start = +start; //parse to int
+			        return input.slice(start);
+			    }
 			});
         </script>

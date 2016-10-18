@@ -86,6 +86,7 @@ class IC_ajax{
 		}
 
 		update_option('youtube_videos', $new_option);
+		echo json_encode($new_option);
     	die(0);
 		exit;
     }
@@ -106,6 +107,8 @@ class IC_ajax{
 		}
 
 		update_option('ic_presentations', $new_option);
+
+		echo json_encode($new_option);
     	die(0);
 		exit;
     }

@@ -370,8 +370,8 @@ Instant Connect UI
       <ul class="sidebar-menu">
         <li class="header">Meeting Room Controls</li>
         <!-- Optionally, you can add icons to the links -->
-        <li ng-click="presentation=true;users=false;video=false;signal('presentation');data.active_menu='presentation'"><a href="#" data-toggle="modal" data-target="#presentationsModal"><i class="fa ion-easel"></i> <span>Presentations</span></a></li>
-        <li ng-click="presentation=false;users=false;video=true;signal('video');data.active_menu='video'"><a href="#" data-toggle="modal" data-target="#youtubeModal"><i class="fa fa-youtube-play"></i> <span>Videos</span></a></li>
+        <li ng-click="reset();presentation=true;users=false;video=false;signal('presentation');data.active_menu='presentation'"><a href="#" data-toggle="modal" data-target="#presentationsModal"><i class="fa ion-easel"></i> <span>Presentations</span></a></li>
+        <li ng-click="reset();presentation=false;users=false;video=true;signal('video');data.active_menu='video'"><a href="#" data-toggle="modal" data-target="#youtubeModal"><i class="fa fa-youtube-play"></i> <span>Videos</span></a></li>
         
         <li class="treeview">
           <a href="#"><i class="fa fi-logo"></i> <span class="folio">Financial Folios</span>
@@ -590,7 +590,7 @@ Instant Connect UI
 
               <div class="box-tools">
                 <div class="input-group input-group-sm" style="width: 200px;">
-                  <input type="text" name="table_search" class="form-control pull-right" placeholder="Search">
+                  <input type="text" ng-change="currentPage=0;" ng-model="psearch.name" name="table_search" class="form-control pull-right" placeholder="Search">
 
                   <div class="input-group-btn">
                     <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
@@ -602,12 +602,12 @@ Instant Connect UI
             <div class="box-body table-responsive no-padding">
               <table class="table table-hover">
                 
-                <tr ng-repeat="p in presentation_files | filter:psearch track by $index">
-                  <td><img src="<?= plugin_dir_url(__FILE__); ?>dist/img/ppt-thumb.jpg" width="60" /></td>
+                <tr ng-repeat="p in presentation_files | filter:psearch | startFrom:currentPage*5 | limitTo:5  track by $index">
+                  <td><img width='100' ng-src="{{'<?= IC_PLUGIN_URL;?>/extract/'+p.folder+'/'+p.files[0]}}"></td>
                   <td>{{p.name}}</td>
                 
                   <td>
-                    <a class="btn btn-app modal-app-btn" data-toggle="tooltip" data-placement="bottom" data-animation="delay 2" title="Remove"><i class="fa fa-trash"></i></a>
+                    <a ng-click="deletepresentation($event, $index)" class="btn btn-app modal-app-btn" data-toggle="tooltip" data-placement="bottom" data-animation="delay 2" title="Remove"><i class="fa fa-trash"></i></a>
                     <a ng-click="selected_file(p.folder, p.files)" class="btn btn-app modal-app-btn" data-toggle="tooltip" data-placement="bottom" title="Open" data-dismiss="modal"><i class="fa fa-angle-double-right"></i></a>
                   </td>
                 </tr>
@@ -622,15 +622,13 @@ Instant Connect UI
         </div>
       </div>
 
-      <div class="box-footer clearfix">
-              <ul class="pagination pagination-sm no-margin pull-right">
-                <li><a href="#">«</a></li>
-                <li><a href="#">1</a></li>
-                <li><a href="#">2</a></li>
-                <li><a href="#">3</a></li>
-                <li><a href="#">»</a></li>
-              </ul>
-            </div>
+      <div class="box-footer clearfix" ng-show="(presentation_files | filter:psearch).length > 5">
+        <ul class="pagination pagination-sm no-margin pull-right">
+          <li ><a ng-style="{opacity:currentPage == 0 ? 0.5 : 1, 'pointer-events':currentPage == 0 ? 'none' : 'auto'}" ng-click="currentPage=currentPage-1" href="#">«</a></li>
+          <li ng-repeat="pp in numberOfPagesArray('presentation_files', 'psearch') track by $index" ng-disabled="currentPage == $index" ng-click="$parent.currentPage=$index"><a href="#">{{$index+1}}</a></li>
+          <li ng-style="{opacity:currentPage >= (presentation_files | filter:psearch ).length/5 - 1 ? 0.5 : 1, 'pointer-events':currentPage >= (presentation_files | filter:psearch).length/5 - 1 ? 'none' : 'auto'}" ng-click="currentPage=currentPage+1"><a href="#">»</a></li>
+        </ul>
+      </div>
           
 
 
@@ -692,7 +690,7 @@ Instant Connect UI
             <div class="box-body table-responsive no-padding">
               <table class="table table-hover">
                 
-                <tr ng-repeat="p in youtube_list | filter:vsearch track by $index ">
+                <tr ng-repeat="p in youtube_list | filter:vsearch | startFrom:currentPage*5 | limitTo:5  track by $index ">
                   <td><img src="<?= plugin_dir_url(__FILE__); ?>dist/img/ppt-thumb.jpg" width="60" /></td>
                   <td>{{p.name}}</td>
                 
@@ -712,15 +710,13 @@ Instant Connect UI
         </div>
       </div>
 
-      <div class="box-footer clearfix">
-              <ul class="pagination pagination-sm no-margin pull-right">
-                <li><a href="#">«</a></li>
-                <li><a href="#">1</a></li>
-                <li><a href="#">2</a></li>
-                <li><a href="#">3</a></li>
-                <li><a href="#">»</a></li>
-              </ul>
-            </div>
+      <div class="box-footer clearfix" ng-show="(youtube_list | filter:vsearch).length > 5">
+        <ul class="pagination pagination-sm no-margin pull-right">
+          <li ><a ng-style="{opacity:currentPage == 0 ? 0.5 : 1, 'pointer-events':currentPage == 0 ? 'none' : 'auto'}" ng-click="currentPage=currentPage-1" href="#">«</a></li>
+          <li ng-repeat="pp in numberOfPagesArray('youtube_list', 'vsearch') track by $index" ng-disabled="currentPage == $index" ng-click="$parent.currentPage=$index"><a href="#">{{$index+1}}</a></li>
+          <li ng-style="{opacity:currentPage >= youtube_list.length/5 - 1 ? 0.5 : 1, 'pointer-events':currentPage >= youtube_list.length/5 - 1 ? 'none' : 'auto'}" ng-click="currentPage=currentPage+1"><a href="#">»</a></li>
+        </ul>
+      </div>
           
 
 
@@ -750,7 +746,7 @@ Instant Connect UI
         </form>
         
                
-                <button ng-click="addnew_video()" class="btn btn-red pull-right">Add Video</button>
+                <button ng-click="addnew_video();" class="btn btn-red pull-right">Add Video</button>
               
       
       </div>

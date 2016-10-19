@@ -200,14 +200,22 @@
 					$scope.tmp_check = true;
 				});
 				
-				
+				$scope.getvideobyID = function(url)
+				{
+					if(url.split("/embed/").length == 2)
+	                    return url.split("/embed/")[1];
+	                else if(url.split("?v=").length == 2)
+	                    return url.split("?v=")[1];
+	                else
+	                    return;
+				};
 				
 				$scope.addnew_video = function(){
 
-					if($scope.newvideo.split("/embed/").length == 2)
-	                    $scope.newvideo = "https://www.youtube.com/embed/"+video.split("/embed/")[1];
-	                else if($scope.newvideo.split("?v=").length == 2)
-	                    $scope.newvideo = "https://www.youtube.com/embed/"+video.split("?v=")[1];
+					if($scope.newvideo.url.split("/embed/").length == 2)
+	                    $scope.newvideo.url = "https://www.youtube.com/embed/"+$scope.newvideo.url.split("/embed/")[1];
+	                else if($scope.newvideo.url.split("?v=").length == 2)
+	                    $scope.newvideo.url = "https://www.youtube.com/embed/"+$scope.newvideo.url.split("?v=")[1];
 	                else
 	                    return;
 
@@ -291,7 +299,7 @@
 					$scope.data.active_video = p;
 					player.stopVideo();
 					player.loadVideoById(p.split("?v=")[1], 0, "default");
-					player.playVideo();
+					setTimeout(function(){player.playVideo();}, 500);
 					$scope.video = true;
 					$scope.presentation = false;
 					$scope.users=false;

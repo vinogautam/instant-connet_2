@@ -355,7 +355,6 @@
 					evt.preventDefault();
 					var files;
 					files = evt.target.files;
-					$(".preloader").removeClass("hide");
 					for (var i = 0, f; f = files[i]; i++) {
 						if (f.type !== "") {
 							var filename = f.name;
@@ -376,6 +375,11 @@
 				}
 
 				function file_convert_to_jpg(formData, filename) {
+					$(".upload-preload .upload_percentage").text("0%");
+					$(".upload-preload .progress-bar").width("0%");
+					$(".upload-preload .file-name").text(filename);
+					$(".upload-preload").removeClass("hide");
+
 					$.ajax({
 						url: "https://do.convertapi.com/PowerPoint2Image",
 						type: "POST",
@@ -383,6 +387,10 @@
 						processData: false,
 						contentType: false,
 						success: function(response, textStatus, request) {
+
+							$(".upload-preload .upload_percentage").text("50%");
+							$(".upload-preload .progress-bar").width("50%");
+
 							$.post("<?php echo site_url();?>/wp-admin/admin-ajax.php?action=save_ppt&name="+filename, {data:request.getResponseHeader('FileUrl')}, function(data){
 								if(data != 'error')
 								{	
@@ -393,7 +401,12 @@
 										$scope.selected_file(new_data.folder, new_data.files);
 									});
 
-									$(".preloader").addClass("hide");
+									$(".upload-preload .upload_percentage").text("100%");
+									$(".upload-preload .progress-bar").width("100%");
+									
+									$timeout(function(){
+										$(".upload-preload").addClass("hide");
+									}, 500);
 								}
 							});
 						},

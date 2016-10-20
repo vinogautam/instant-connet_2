@@ -18,11 +18,13 @@ class IC_ajax{
 		add_action( 'wp_ajax_save_settings', array( &$this, 'save_settings'));
 		add_action( 'wp_ajax_delete_presentation_file', array( &$this, 'delete_presentation_file'));
 		add_action( 'wp_ajax_save_ppt', array( &$this, 'save_ppt'));
+		add_action( 'wp_ajax_nopriv_save_ppt', array( &$this, 'save_ppt'));
 		add_action( 'wp_ajax_new_user_to_meeting', array( &$this, 'new_user_to_meeting'));
 		add_action( 'wp_ajax_usercontrol', array( &$this, 'usercontrol'));
 		add_action( 'wp_ajax_addnew_video', array( &$this, 'addnew_video'));
 		add_action( 'wp_ajax_delete_video', array( &$this, 'delete_video'));
 		add_action( 'wp_ajax_delete_presentation', array( &$this, 'delete_presentation'));
+		add_action( 'wp_ajax_nopriv_delete_presentation', array( &$this, 'delete_presentation'));
 		add_action( 'wp_ajax_send_ic_gift', array( &$this, 'send_ic_gift') );
 		add_action( 'wp_ajax_nopriv_send_ic_gift', array( &$this, 'send_ic_gift') );
 		add_action( 'wp_ajax_send_add_chat_points', array( &$this, 'add_chat_points') );

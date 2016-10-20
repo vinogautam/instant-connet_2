@@ -637,7 +637,7 @@ Instant Connect UI
       <div class="hide upload-preload row no-margin">
 
       <div class="col-xs-2 file-loader"><i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i></div>
-      <div class="col-xs-10"><span class="file-name">Presentation 1.ppt</span> <span class="converting">Converting...</span> <span class="label label-danger pull-right">70%</span>
+      <div class="col-xs-10"><span class="file-name">Presentation 1.ppt</span> <span class="converting">Converting...</span> <span class="label label-danger pull-right upload_percentage">70%</span>
       <div class="progress progress-xxs">
                 <div class="progress-bar progress-bar-danger" style="width: 70%"></div>
       </div>

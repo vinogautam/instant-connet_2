@@ -108,7 +108,7 @@
 
                 $scope.chat = [];
                 $scope.offine_user = [];
-				$scope.data = {active_menu:"presentation", active_presentation:{files:"", folder:""}, active_slide:"", active_video:"", video_status:false};
+				$scope.data = {active_menu:"presentation", active_presentation:{files:"", folder:""}, active_slide:0, active_video:"", video_status:false};
 				$scope.noti = false;
 				$scope.presentation = true;
 				$scope.is_admin = <?= isset($_GET['admin']) ? 1 : 0;?>;
@@ -614,13 +614,16 @@
 				
 				$scope.construct_slider();
 				
+				$scope.slide_image = [];
+
 				OTSession.session.on({
                     sessionConnected: function() {
 						if($scope.is_admin)
 						{
 								$scope.$apply(function(){$scope.slide_menu = true;});
 								$('.slider1').on('afterChange', function(event, slick, currentSlide){
-								  console.log(currentSlide);
+								  $scope.slide_image[$scope.data.active_slide] = $scope.get_image();
+								  
 								  $scope.$apply(function(){$scope.data.active_slide = currentSlide;});
 								  OTSession.session.signal( 
 									{  type: 'presentationControl',
@@ -648,6 +651,13 @@
 										  console.log("signal sent.");
 										}
 									});
+
+									$timeout(function(){
+										if(typeof $scope.slide_image[currentSlide] != "undefined")
+										{
+										  $scope.draw_image($scope.slide_image[currentSlide]);
+										}
+									}, 500)
 								});
 						}
 						else

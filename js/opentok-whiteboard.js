@@ -28,12 +28,9 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
 
             '<div class="OT_panel">' +
 
-            '<input type="button" ng-class="{OT_color: true, OT_selected: c[\'background-color\'] === color}" ' +
+            /*'<input type="button" ng-class="{OT_color: true, OT_selected: c[\'background-color\'] === color}" ' +
             'ng-repeat="c in colors" ng-style="c" ng-click="changeColor(c)">' +
             '</input>' +
-
-            '<input type="button" ng-click="erase()" ng-class="{OT_erase: true, OT_selected: erasing}"' +
-            ' value="Eraser"></input>' +
 
             '<input type="button" ng-click="capture()" class="OT_capture" value="{{captureText}}"></input>' +
 
@@ -41,7 +38,12 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
 
             '<input type="button" ng-click="redo()" class="OT_capture" value="Redo"></input>' +
 
-            '<input type="button" ng-click="clear()" class="OT_clear" value="Clear"></input>',
+            '<input type="button" ng-click="clear()" class="OT_clear" value="Clear"></input>'*/
+
+
+            '<input type="text" ng-model="color"><input type="text" ng-model="lineWidth">'+
+            '<input type="button" ng-click="erase()" ng-class="{OT_erase: true, OT_selected: erasing}"' +
+            ' value="Eraser"></input>',
 
         link: function (scope, element, attrs) {
             var canvas = element.context.querySelector("canvas"),
@@ -92,7 +94,7 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                 redoStack = [];
                 count = 0;
             };
-
+            scope.erasing = false;
             scope.changeColor = function (color) {
                 scope.color = color['background-color'];
                 scope.erasing = false;
@@ -110,7 +112,17 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
             };
 
             scope.erase = function () {
-                scope.erasing = true;
+                scope.erasing = !scope.erasing;
+            };
+
+            scope.get_image = function(){
+                return drawHistory;
+            };
+
+            scope.draw_image = function(updates){
+                console.log(updates);
+                drawUpdates(updates);
+                scope.$emit('otWhiteboardUpdate');
             };
 
             scope.capture = function () {

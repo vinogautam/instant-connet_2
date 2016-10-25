@@ -31,6 +31,7 @@ class IC_front{
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js" type="text/javascript" charset="utf-8"></script>
 		<script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+		<script type="text/javascript" src="//wurfl.io/wurfl.js"></script>
 		<style>
 		<?php if($option == 1){?>
 		.chat_icon{width:70px; height:70px; border-radius:50%; background:#5C93C1; text-align:center; position:fixed; top:30px; left:30px; cursor:pointer;}
@@ -85,6 +86,9 @@ class IC_front{
 				</p>
 				<?php }?>
 				<input type="hidden" name="action" value="join_chat">
+				<input type="hidden" id="is_mobile" name="meeting[is_mobile]" value="join_chat">
+				<input type="hidden" id="complete_device_name" name="meeting[complete_device_name]" value="join_chat">
+				<input type="hidden" id="form_factor" name="meeting[form_factor]" value="join_chat">
 				<input type="hidden" name="meeting[status]" value="1">
 				<div class="submit_btn">
 					<input type="submit" id="instant_connect_formsubmit" name="Submit" value="Join Live Chat">
@@ -134,7 +138,11 @@ class IC_front{
 			
 			var count = 0,textchatref,scope;
 			jQuery(document).ready(function(){
-				
+					
+					$("#is_mobile").val(WURFL.is_mobile);
+					$("#complete_device_name").val(WURFL.complete_device_name);
+					$("#form_factor").val(WURFL.form_factor);
+
 					<?php if(isset($wuser) && $wuser->status==2){?>
 					jQuery.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=check_meeing&participants=<?php echo $is_waiting;?>&meeting_id=<?= $wuser->meeting_id?>', function(res){
 								if(!res) return;

@@ -129,6 +129,47 @@
 
 				<?php if(isset($_GET['admin'])){?>
 				
+				$scope.all_chat = [];
+				//$scope.alldata2 = [];
+				var statusRef_all = [];
+
+				$scope.$watch('joined_user', function(){
+					angular.forEach($scope.joined_user, function(v11,k){
+						if(statusRef_all[v11.id] === undefined)
+						{
+							statusRef_all[v11.id] = new Firebase('https://vinogautam.firebaseio.com/opentok/'+v11.id+'/<?= $sessionId?>');
+							$scope.all_chat[v11.id] = [];
+							//$scope.alldata2[v11.id] = {};
+							statusRef_all[v11.id].on('child_added', function(snapshot) {
+								//angular.forEach(snapshot.val(), function(v,k){
+									v = snapshot.val();
+									console.log(v);
+									if(typeof v.msg != "undefined")
+									{
+										hn = v.email ? v.email : v.name;
+										v.hash = CryptoJS.MD5(hn).toString();
+										if(!$scope.$$phase) {
+											$scope.$apply(function(){
+												$scope.all_chat[v11.id].push(v);
+												$scope.visible = true;
+											});
+										}
+										else
+										{
+											$scope.all_chat[v11.id].push(v);
+											$scope.visible = true;
+										}
+									}
+								//});
+							});
+						}
+						
+					});
+				});
+				 
+				
+
+
 				var intervals = [];
 				var interval_diff = [];
 				
@@ -344,6 +385,9 @@
 					//});
 				});
 				
+
+
+
 				$(document).on("change", "#convert_ppt", function(e) {
 					handleFileSelect(e, true);
 				});
@@ -515,9 +559,18 @@
 								});
 				};
 				
-				$scope.add = function(){
-					statusRef.push($scope.data2);
-					$scope.data2.msg = '';
+				$scope.add = function(id){
+					if(id == undefined)
+					{
+						statusRef.push($scope.data2);
+						$scope.data2.msg = '';
+					}
+					else
+					{
+						statusRef_all.push($scope.alldata2[id]);
+						$scope.alldata2[id].msg = '';
+					}
+					
 				};
 				
 				$scope.video_noti = function(st, tm){

@@ -280,12 +280,34 @@ class IC_front{
 						}, 300000);
 
 
-						textchatref = new Firebase('https://vinogautam.firebaseio.com/opentok/'+res.sessionId);
-							$scope.data.name = res.name;
-							$scope.data.email = res.email;
-							$scope.meeting = res;
+						textchatref = new Firebase('https://vinogautam.firebaseio.com/opentok/'+res.pid+'/'+res.sessionId);
+						$scope.data.name = res.name;
+						$scope.data.email = res.email;
+						$scope.meeting = res;
 
-							OTSession.init('<?= API_KEY;?>', $scope.meeting.sessionId, $scope.meeting.token, function (err) {
+						textchatref.on('child_added', function(snapshot) {
+									//angular.forEach(snapshot.val(), function(v,k){
+										v = snapshot.val();
+										console.log(v);
+										if(typeof v.msg != "undefined")
+										{
+											hn = v.email ? v.email : v.name;
+											v.hash = CryptoJS.MD5(hn).toString();
+											if(!$scope.$$phase) {
+											$scope.$apply(function(){
+												$scope.chat.push(v);
+											});
+											}
+											else
+											{
+												$scope.chat.push(v);
+											}
+										}
+										
+									//});
+								});
+
+						OTSession.init('<?= API_KEY;?>', $scope.meeting.sessionId, $scope.meeting.token, function (err) {
 								if (!err) {
 									console.log(OTSession.session);
 
@@ -337,26 +359,7 @@ class IC_front{
 								}
 							});
 							
-								textchatref.on('child_added', function(snapshot) {
-									//angular.forEach(snapshot.val(), function(v,k){
-										v = snapshot.val();
-										if(v.noti === undefined)
-										{
-											hn = v.email ? v.email : v.name;
-											v.hash = CryptoJS.MD5(hn).toString();
-											if(!$scope.$$phase) {
-											$scope.$apply(function(){
-												$scope.chat.push(v);
-											});
-											}
-											else
-											{
-												$scope.chat.push(v);
-											}
-										}
-										
-									//});
-								});
+								
 					};
 					
 					$scope.add = function(){

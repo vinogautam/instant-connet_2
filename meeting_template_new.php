@@ -468,7 +468,7 @@ Instant Connect UI
               
               <iframe ng-show="video" <?php if(!isset($_GET['admin'])){?>style="pointer-events:none;"<?php }?> id="youtube-player" width="640" height="360" src="//www.youtube.com/embed/geTgZcHrXTc?enablejsapi=1&version=3&playerapiid=ytplayer" frameborder="0" allowfullscreen="true" allowscriptaccess="always"></iframe>
               
-              
+              {{all_chat}}
             </div>
           </div>
         </div>
@@ -794,5 +794,29 @@ Instant Connect UI
 <script src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/md5-min.js'></script>
 
 <?php include 'action.php';?>
+
+<?php if(isset($_GET['admin'])){?>
+<div class="individual_chat" style="position: absolute;right: 0;bottom: 0;z-index: 9999;">
+  {{all_chart}}
+  <div ng-repeat="part in joined_user" ng-show="part.status == '2'">
+    <div id="messagesDiv" style="height:250px;overflow:auto;">
+      <p ng-repeat="c in all_chat[part.id]" on-finish-render ng-class="{align_right: c.email != data2.email}" ng-if="c.msg">
+        <img ng-if="c.email == data2.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
+        <span ng-bind-html="urlify(c.msg) | to_trusted"></span>
+        <img ng-if="c.email != data2.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
+        <hr>
+      </p>
+    </div>
+    <p ng-show="noti">{{noti.name}} is typing...</p>
+    <form>
+      <input size="43" type="hidden" ng-model="data2.name" placeholder="Name">
+      <input size="43" type="hidden" ng-model="data2.email" placeholder="Email">
+      <textarea rows="2" cols="33" ng-model="data2.msg" placeholder="Message" ng-enter="add();"></textarea>
+      <button ng-click="add();">Post</button>
+    </form>
+  </div>
+</div>
+<?php }?>
+
 </body>
 </html>

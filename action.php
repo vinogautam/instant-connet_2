@@ -130,7 +130,7 @@
 				<?php if(isset($_GET['admin'])){?>
 				
 				$scope.all_chat = [];
-				//$scope.alldata2 = [];
+				$scope.alldata2 = [];
 				var statusRef_all = [];
 
 				$scope.$watch('joined_user', function(){
@@ -139,7 +139,7 @@
 						{
 							statusRef_all[v11.id] = new Firebase('https://vinogautam.firebaseio.com/opentok/'+v11.id+'/<?= $sessionId?>');
 							$scope.all_chat[v11.id] = [];
-							//$scope.alldata2[v11.id] = {};
+							$scope.alldata2[v11.id] = {'chat':1, 'msg':''};
 							statusRef_all[v11.id].on('child_added', function(snapshot) {
 								//angular.forEach(snapshot.val(), function(v,k){
 									v = snapshot.val();
@@ -567,7 +567,7 @@
 					}
 					else
 					{
-						statusRef_all.push($scope.alldata2[id]);
+						statusRef_all[[id]].push({name: "admin", msg: $scope.alldata2[id].msg});
 						$scope.alldata2[id].msg = '';
 					}
 					

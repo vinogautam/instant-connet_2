@@ -797,22 +797,25 @@ Instant Connect UI
 
 <?php if(isset($_GET['admin'])){?>
 <div class="individual_chat" style="position: absolute;right: 0;bottom: 0;z-index: 9999;">
-  {{all_chart}}
-  <div ng-repeat="part in joined_user" ng-show="part.status == '2'">
-    <div id="messagesDiv" style="height:250px;overflow:auto;">
-      <p ng-repeat="c in all_chat[part.id]" on-finish-render ng-class="{align_right: c.email != data2.email}" ng-if="c.msg">
-        <img ng-if="c.email == data2.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
+  <div ng-repeat="part in joined_user" ng-show="part.status == '2'" style="border:1px solid #790303;background: #fff;float: left;margin-right: 20px;">
+    <div style="background: #790303;">
+      <h4 style="margin: 0px; padding: 5px; color:#fff;">{{part.name}} 
+        <i class="fa fa-minus pull-right" ng-click="$parent.alldata2[part.id].chat = !alldata2[part.id].chat;"></i>  
+      </h4>
+    </div>
+    <div ng-show="$parent.alldata2[part.id].chat" id="messagesDiv" style="height:250px;overflow:auto;">
+      <p ng-repeat="c in all_chat[part.id]" on-finish-render ng-class="{align_right: c.name == 'admin'}" ng-if="c.msg">
+        <img ng-if="c.name != 'admin'" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
         <span ng-bind-html="urlify(c.msg) | to_trusted"></span>
-        <img ng-if="c.email != data2.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
+        <img ng-if="c.name == 'admin'" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
         <hr>
       </p>
     </div>
-    <p ng-show="noti">{{noti.name}} is typing...</p>
-    <form>
+    <form ng-show="$parent.alldata2[part.id].chat">
       <input size="43" type="hidden" ng-model="data2.name" placeholder="Name">
       <input size="43" type="hidden" ng-model="data2.email" placeholder="Email">
-      <textarea rows="2" cols="33" ng-model="data2.msg" placeholder="Message" ng-enter="add();"></textarea>
-      <button ng-click="add();">Post</button>
+      <textarea class="form-control" rows="2" cols="33" ng-model="alldata2[part.id].msg" placeholder="Message" ng-enter="add(part.id);"></textarea>
+      <button ng-click="add(part.id);">Post</button>
     </form>
   </div>
 </div>

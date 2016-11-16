@@ -29,8 +29,18 @@ class IC_ajax{
 		add_action( 'wp_ajax_nopriv_send_ic_gift', array( &$this, 'send_ic_gift') );
 		add_action( 'wp_ajax_send_add_chat_points', array( &$this, 'add_chat_points') );
 		add_action( 'wp_ajax_nopriv_send_add_chat_points', array( &$this, 'add_chat_points') );
+		add_action( 'wp_ajax_heartbeat', array( &$this, 'heartbeat'), 100);
     }
 	
+    function heartbeat()
+    {
+    	global $current_user;
+		update_user_meta($current_user->ID, 'user_logintime', date("Y-m-d H:i:s"));
+		echo "string";
+		die(0);
+		exit;
+    }
+
 	function add_chat_points()
     {
     	global $wpdb, $ntm_mail, $endorsements;
@@ -441,6 +451,14 @@ class IC_ajax{
 	{
 		$general = get_option("general");
 		$arr = array(1 => 'Online', 2 => 'Offline', 3 => 'Meeting', 4 => 'Away');
+		
+
+		$lst_login_time = get_user_meta($general['agent'], 'user_logintime', true);
+		if(strtotime("now") - strtotime($lst_login_time) > 60)
+		{
+			update_user_meta($general['agent'], 'user_current_status', 2);
+		}
+
 		$user_current_status = get_user_meta($general['agent'], 'user_current_status', true);
 		echo $arr[$user_current_status];
 		die(0);

@@ -26,6 +26,13 @@ class IC_front{
 		
 					$user_info = get_userdata($general['agent']);
 					$arr = array(1 => 'Online', 2 => 'Offline', 3 => 'Meeting', 4 => 'Away');
+					
+					$lst_login_time = get_user_meta($general['agent'], 'user_logintime', true);
+					if(strtotime("now") - strtotime($lst_login_time) > 60)
+					{
+						update_user_meta($general['agent'], 'user_current_status', 2);
+					}
+
 					$user_current_status = get_user_meta($general['agent'], 'user_current_status', true);
 		?>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
@@ -79,10 +86,14 @@ class IC_front{
 					<label>Name</label>
 					<input type="text" name="meeting[name]" id="nameInput">
 				</p>
-				<?php if($user_current_status != 1){?>
 				<p>
 					<label>Email</label>
 					<input type="text" name="meeting[email]" id="emailInput">
+				</p>
+				<?php if($user_current_status != 1){?>
+				<p>
+					<label>Question</label>
+					<input type="text" name="meeting[question]" id="questionInput">
 				</p>
 				<?php }?>
 				<input type="hidden" name="action" value="join_chat">

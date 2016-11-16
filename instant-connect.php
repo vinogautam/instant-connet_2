@@ -39,6 +39,7 @@
 		add_action( 'init', 'codex_custom_init' );
 		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_date_picker' ));
 		add_filter( 'page_template', array( &$this, 'wpa3396_page_template' ));
+		add_action('wp_login', array( &$this, 'after_login' ), 10, 2);
 
 		$ntmadmin = new IC_admin();
 		new IC_Metabox();
@@ -46,6 +47,12 @@
 		new IC_front();
 	}
 	
+	function after_login($user_login, $user)
+	{
+		update_user_meta($current_user->ID, 'user_current_status', $_GET['status']);
+		update_user_meta($current_user->ID, 'user_logintime', date("Y-m-d H:i:s"));
+	}
+
 	function wpa3396_page_template( $page_template )
 	{
 		if ( is_page( 'meeting' ) ) {

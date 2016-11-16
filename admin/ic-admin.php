@@ -17,6 +17,9 @@ class IC_admin{
 		//print_r($bbb);
 		$status = get_user_meta($current_user->ID, 'user_current_status', true);
 		$arr = array(1 => 'Online', 2 => 'Offline', 3 => 'Meeting', 4 => 'Away');
+
+		update_user_meta($current_user->ID, 'user_current_status', 1);
+		update_user_meta($current_user->ID, 'user_logintime', date("Y-m-d H:i:s"));
 		?>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 		<style>
@@ -214,6 +217,11 @@ class IC_admin{
 									});
 								});
 								
+								setInterval(function(){
+									$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=update_agent_status&status='+jQuery("#user_current_status").val()).then(function(res){
+									});
+								}, 30000);
+
 								$scope.delete_file = function(e, id)
 								{
 									$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=delete_presentation_file&id='+id).then(function(res){

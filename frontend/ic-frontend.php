@@ -81,19 +81,25 @@ class IC_front{
 		</div>
 		<div class="instant_connect_form hide_when_start" >
 			<form  id="instant_connect_form" onSubmit="return false;">
+				<div style="display: inline-block; overflow: hidden; border-radius: 50%; border: 5px solid rgb(204, 204, 204); width: 50px; height: 50px;border-radius: 50%;">
+					<?php echo get_avatar( $user_info->user_email, 50 ); ?>
+				</div>
+				<?php if($user_current_status == 1){?>
+				<p style="font-size: 14px;"><?= $user_info->username; ?>(Agent) is available to take your questions please put your name and email.</p>
+				<?php }else{?>
+				<p style="font-size: 14px;"><?= $user_info->username; ?>(Agent) is offline put ur question with name and email.</p>
+				<?php }?>
+
 				<?php if($is_waiting == 0){?>
 				<p>
-					<label>Name</label>
-					<input type="text" name="meeting[name]" id="nameInput">
+					<input placeholder="Name" type="text" name="meeting[name]" id="nameInput">
 				</p>
 				<p>
-					<label>Email</label>
-					<input type="text" name="meeting[email]" id="emailInput">
+					<input placeholder="Email" type="text" name="meeting[email]" id="emailInput">
 				</p>
 				<?php if($user_current_status != 1){?>
 				<p>
-					<label>Question</label>
-					<input type="text" name="meeting[question]" id="questionInput">
+					<textarea placeholder="Question" name="meeting[question]" id="questionInput"></textarea>
 				</p>
 				<?php }?>
 				<input type="hidden" name="action" value="join_chat">

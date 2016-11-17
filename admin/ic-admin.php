@@ -99,10 +99,11 @@ class IC_admin{
 					<hr>
 					<div class="lobby_tab">
 						<span ng-class="{active:tab == 1}" ng-click="tab = 1;">Online Users</span>
+						<span ng-class="{active:tab == 2}" ng-click="tab = 2;">Offline Users</span>
 					</div>
 					<div ng-if="tab == 1" class="">
 						<ul>
-							<li ng-repeat="part in participants" ng-click="selected(part.id)" ng-class="{selected:check_selected(part.id)}" ng-init="part.diff = part.diff === undefined ? 0 : part.diff; autotimer(part);">
+							<li ng-repeat="part in participants" ng-if="part.status == '1'" ng-click="selected(part.id)" ng-class="{selected:check_selected(part.id)}" ng-init="part.diff = part.diff === undefined ? 0 : part.diff; autotimer(part);">
 								<span class="fa fa-circle"></span>
 								<img ng-src="{{get_avatar(part)}}">
 								#{{part.id}} {{part.name}} 
@@ -112,6 +113,25 @@ class IC_admin{
 							<input id="submit" class="button button-primary" ng-click="create_meeting(0)" type="submit" value="Join Chat" name="submit">
 							<input id="submit" class="button button-primary" ng-click="create_meeting(1)" type="submit" value="Join Meeting" name="submit">
 						</p>
+					</div>
+					<div ng-if="tab == 2" class="">
+						<div ng-show="schedule">
+							<p>Name : {{schedule['name']}}</p>
+							<p>Email : {{schedule['email']}}</p>
+							<p>Appointment on : <input type="text"></p>
+							<p>
+								<button ng-click="$parent.schedule = false;">Back</button>
+								<input class="button button-primary" ng-click="schedule_appointment(1)" type="submit" value="Confirm Appointment" name="submit">
+							</p>
+						</div>
+						<ul ng-hide="schedule">
+							<li ng-repeat="part in participants" ng-show="part.status == '0'">
+								<span class="fa fa-circle"></span>
+								<img ng-src="{{get_avatar(part)}}">
+								#{{part.id}} {{part.name}} 
+								<button ng-click="$parent.$parent.schedule = part">Schedule Appointment</button>
+							</li>
+						</ul>
 					</div>
 				</form>
 			</div>

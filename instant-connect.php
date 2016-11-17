@@ -91,6 +91,7 @@
 			   meeting_id int(11),
 			   name tinytext NOT NULL,
 			   email tinytext NOT NULL,
+			   question text NOT NULL,
 			   meeting_date datetime NOT NULL,
 			   status int(1),
 			   video int(1),

@@ -149,7 +149,7 @@ class IC_ajax{
 						array("id" => $_POST['pid'])
 			);
 		$joined_user = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (status = 3 or status = 2) and meeting_id=".$_POST['mid']);
-		$participants = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where status = 1");
+		$participants = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (status = 0 or status = 1)");
 		
 		echo json_encode(array('joined_user' => $joined_user, 'participants' => $participants));
 		
@@ -176,7 +176,7 @@ class IC_ajax{
 		}
 
 		$joined_user = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (status = 3 or status = 2) and meeting_id=".$_POST['mid']);
-		$participants = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where status = 1");
+		$participants = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (status = 0 or status = 1)");
 		
 		echo json_encode(array('joined_user' => $joined_user, 'participants' => $participants));
 		
@@ -359,7 +359,7 @@ class IC_ajax{
 						array("id" => $id)
 			);
 		}
-		else
+		elseif($ree->status != 0)
 		{
 			$wpdb->update($wpdb->prefix . "meeting_participants", 
 						array('status' => 4),
@@ -370,13 +370,13 @@ class IC_ajax{
 		if(isset($_GET['meetingroom']))
 		{
 			$joined_user = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (status = 3 or status = 2) and meeting_id=".$_GET['meetingroom']);
-			$participants = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where status = 1");
+			$participants = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (status = 0 or status = 1)");
 			
 			echo json_encode(array('joined_user' => $joined_user, 'participants' => $participants));
 		}
 		else
 		{
-			$results = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where status = 1");
+			$results = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (status = 0 or status = 1)");
 		
 			echo json_encode($results);
 		}
@@ -469,7 +469,7 @@ class IC_ajax{
 	{
 		global $wpdb;
 		
-		$results = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where status = 1");
+		$results = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (status = 0 or status = 1)");
 		
 		echo json_encode($results);
 		die(0);

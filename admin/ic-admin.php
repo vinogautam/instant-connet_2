@@ -18,6 +18,9 @@ class IC_admin{
 		$status = get_user_meta($current_user->ID, 'user_current_status', true);
 		$arr = array(1 => 'Online', 2 => 'Offline', 3 => 'Meeting', 4 => 'Away');
 
+		$mode = get_user_meta($current_user->ID, 'agent_communication_mode', true);
+		$modearr = array(1 => 'Question', 2 => 'Chat', 3 => 'IC');
+
 		update_user_meta($current_user->ID, 'user_current_status', 1);
 		update_user_meta($current_user->ID, 'user_logintime', date("Y-m-d H:i:s"));
 		?>
@@ -95,6 +98,12 @@ class IC_admin{
 							<option value="<?php _e($st);?>"><?php _e($lb);?></option>
 							<?php }?>
 						</select>
+						<br>Communication mode<br>
+						<select name="user_current_status" id="user_mode_status">
+							<?php foreach($modearr as $st=>$lb){ $sel = $st == $mode ? 'selected' : ''; ?>
+							<option value="<?php _e($st);?>"><?php _e($lb);?></option>
+							<?php }?>
+						</select>
 					<div>
 					<hr>
 					<div class="lobby_tab">
@@ -145,6 +154,7 @@ class IC_admin{
 					    app.controller("ICCtrl", function($scope, $http, $timeout, $interval) {
 								var myDataRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_user');
 								var statusRef = new Firebase('https://vinogautam.firebaseio.com/pusher/status_change');
+								var modeRef = new Firebase('https://vinogautam.firebaseio.com/pusher/mode_change');
 								var meetingRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_meeting');
 								var online_status = new Firebase('https://vinogautam.firebaseio.com/pusher/online_status');
 								var refresh_user_list = new Firebase('https://vinogautam.firebaseio.com/pusher/refresh_user_list');
@@ -202,6 +212,10 @@ class IC_admin{
 								statusRef.once('value', function(snapshot) {
 									status_count = parseInt(snapshot.val().count);
 								});
+
+								modeRef.once('value', function(snapshot) {
+									mode_count = parseInt(snapshot.val().count);
+								});
 								
 								$scope.settings_submit = function(){
 									$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=save_settings', $scope.bbb).then(function(res){
@@ -237,6 +251,13 @@ class IC_admin{
 									});
 								});
 								
+								jQuery("#user_chat_status").change(function()
+								{
+									$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=update_agent_mode&chatmode&status='+jQuery(this).val()).then(function(res){
+										modeRef.update({ count:mode_count++});
+									});
+								});
+
 								setInterval(function(){
 									$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=update_agent_status&status='+jQuery("#user_current_status").val()).then(function(res){
 									});

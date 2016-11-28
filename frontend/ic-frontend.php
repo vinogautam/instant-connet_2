@@ -24,16 +24,18 @@ class IC_front{
 		}
 		
 		
-					$user_info = get_userdata($general['agent']);
-					$arr = array(1 => 'Online', 2 => 'Offline', 3 => 'Meeting', 4 => 'Away');
-					
-					$lst_login_time = get_user_meta($general['agent'], 'user_logintime', true);
-					if(strtotime("now") - strtotime($lst_login_time) > 60)
-					{
-						update_user_meta($general['agent'], 'user_current_status', 2);
-					}
+		$user_info = get_userdata($general['agent']);
+		$arr = array(1 => 'Online', 2 => 'Offline', 3 => 'Meeting', 4 => 'Away');
+		
+		$lst_login_time = get_user_meta($general['agent'], 'user_logintime', true);
+		if(strtotime("now") - strtotime($lst_login_time) > 60)
+		{
+			update_user_meta($general['agent'], 'user_current_status', 2);
+			update_user_meta($general['agent'], 'agent_communication_mode', 1);
+		}
 
-					$user_current_status = get_user_meta($general['agent'], 'user_current_status', true);
+		$user_current_status = get_user_meta($general['agent'], 'user_current_status', true);
+		$com_mode = get_user_meta($general['agent'], 'agent_communication_mode', true);
 		?>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js" type="text/javascript" charset="utf-8"></script>
@@ -81,28 +83,26 @@ class IC_front{
 		</div>
 		<div class="instant_connect_form hide_when_start" >
 			<form  id="instant_connect_form" onSubmit="return false;">
-				<div style="display: inline-block; overflow: hidden; border-radius: 50%; border: 5px solid rgb(204, 204, 204); width: 50px; height: 50px;border-radius: 50%;">
-					<?php echo get_avatar( $user_info->user_email, 50 ); ?>
-				</div>
-				<?php if($user_current_status == 1){?>
-				<p style="font-size: 14px;"><?= $user_info->username; ?>(Agent) is available to take your questions please put your name and email.</p>
-				<?php }else{?>
-				<p style="font-size: 14px;"><?= $user_info->username; ?>(Agent) is offline put ur question with name and email.</p>
-				<?php }?>
-
 				<?php if($is_waiting == 0){?>
-				<p>
-					<input placeholder="Name" type="text" name="meeting[name]" id="nameInput">
-				</p>
-				<p>
-					<input placeholder="Email" type="text" name="meeting[email]" id="emailInput">
-				</p>
-				<?php if($user_current_status != 1){?>
-				<p>
-					<textarea placeholder="Question" name="meeting[question]" id="questionInput"></textarea>
-				</p>
-				<?php }?>
+				<div id="question_mode" <?= $com_mode == 1 ? 'style="display:none;"' : '';?>>
+					<div style="display: inline-block; overflow: hidden; border-radius: 50%; border: 5px solid rgb(204, 204, 204); width: 50px; height: 50px;border-radius: 50%;">
+						<?php echo get_avatar( $user_info->user_email, 50 ); ?>
+					</div>
+					<p style="font-size: 14px;"><?= $user_info->username; ?>(Agent) is available to take your questions please put your name and email.</p>
+					<p>
+						<textarea placeholder="Question" name="meeting[question]" id="questionInput"></textarea>
+					</p>
+				</div>
+				<div id="chatnicmode" <?= $com_mode != 1 ? 'style="display:none;"' : '';?>>
+					<p>
+						<input placeholder="Name" type="text" name="meeting[name]" id="nameInput">
+					</p>
+					<p>
+						<input placeholder="Email" type="text" name="meeting[email]" id="emailInput">
+					</p>
+				</div>
 				<input type="hidden" name="action" value="join_chat">
+				<input type="hidden" name="mode" value="<?= $com_mode;?>">
 				<input type="hidden" id="is_mobile" name="meeting[is_mobile]" value="join_chat">
 				<input type="hidden" id="complete_device_name" name="meeting[complete_device_name]" value="join_chat">
 				<input type="hidden" id="form_factor" name="meeting[form_factor]" value="join_chat">
@@ -122,8 +122,9 @@ class IC_front{
 			</form>
 			
 		</div>
+		<?php if($is_waiting){?>
 		<div ng-app="demo" ng-controller="ActionController" class="text_chat_container" style="display:none;position: fixed; top: 0; bottom:0;right:0;width: 300px; background: rgb(255, 255, 255) none repeat scroll 0% 0%;border:1px solid #000;">
-						<iframe ng-src="{{'<?= str_replace("http://financialinsiders.ca/", "https://financialinsiders.ca/", site_url()); ?>/meeting/?id='+meeting.mid+'&only_video'}}"></iframe>
+						<iframe ng-if="meeting" ng-src="{{'<?= str_replace("http://financialinsiders.ca/", "https://financialinsiders.ca/", site_url()); ?>/meeting/?id='+meeting.mid+'&only_video'}}"></iframe>
 						<div style="position:absolute;bottom:0;">
 							<div id="messagesDiv" style="height:250px;overflow:auto;">
 								<p ng-repeat="c in chat track by $index" on-finish-render ng-class="{align_right: c.email != data.email}" ng-if="c.msg">
@@ -150,11 +151,12 @@ class IC_front{
 		<script src="//static.opentok.com/v2.6/js/opentok.js" type="text/javascript" charset="utf-8"></script>
 		<script src="<?= IC_PLUGIN_URL; ?>js/opentok-layout.js" type="text/javascript" charset="utf-8"></script>
         <script src="<?= IC_PLUGIN_URL; ?>js/opentok-angular.js" type="text/javascript" charset="utf-8"></script>
+        <?php }?>
 		<script>
 			
 			
 			var count = 0,textchatref,scope;
-			jQuery(document).ready(function(){
+			jQuery(document).ready(function($){
 					
 					$("#is_mobile").val(WURFL.is_mobile);
 					$("#complete_device_name").val(WURFL.complete_device_name);
@@ -255,6 +257,7 @@ class IC_front{
 					<?php }?>
 			});
 			
+			<?php if($is_waiting){?>
 			angular.module('demo', ['opentok'])
 			.directive('ngEnter', function() {
 			return function(scope, element, attrs) {
@@ -389,7 +392,10 @@ class IC_front{
 
 					
 			}]);
+
+			<?php }?>
 		</script>
 		<?php
+
 	}
 }

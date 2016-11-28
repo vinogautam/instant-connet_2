@@ -409,7 +409,11 @@ class IC_ajax{
 	function update_agent_status() {
 
 			global $current_user;
-			update_user_meta($current_user->ID, 'user_current_status', $_GET['status']);
+			if(isset($_GET['chatmode']))
+				update_user_meta($current_user->ID, 'user_current_status', $_GET['status']);
+			else
+				update_user_meta($current_user->ID, 'agent_communication_mode', $_GET['status']);
+
 			update_user_meta($current_user->ID, 'user_logintime', date("Y-m-d H:i:s"));
 			
 			echo 'done';
@@ -461,6 +465,23 @@ class IC_ajax{
 
 		$user_current_status = get_user_meta($general['agent'], 'user_current_status', true);
 		echo $arr[$user_current_status];
+		die(0);
+		exit;
+	}
+
+	function agent_mode()
+	{
+		$general = get_option("general");
+		
+
+		$lst_login_time = get_user_meta($general['agent'], 'user_logintime', true);
+		if(strtotime("now") - strtotime($lst_login_time) > 60)
+		{
+			update_user_meta($general['agent'], 'agent_communication_mode', 1);
+		}
+
+		$user_current_status = get_user_meta($general['agent'], 'agent_communication_mode', true);
+		echo $user_current_status;
 		die(0);
 		exit;
 	}

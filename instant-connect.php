@@ -12,7 +12,7 @@
  define('IC_PLUGIN_DIR',$dir['dirname']);
 
  define("API_KEY", "45722162");
- define("API_SECRET", "19ZM2pjq6U4jVb283GZkCPNukjeyb2YZ2u");
+ define("API_SECRET", "1e621b5e8067b02ec96fc6d4b030d2a779601ade");
  
  include 'includes.php';
  include 'pusher/pusher.php';

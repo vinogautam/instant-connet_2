@@ -513,6 +513,9 @@ Let me know if you have any questions,", ET_DOMAIN);
 	
 	function mandrip_mail($to, $subject , $message, $headers, $arr=array())
 	{
+		
+		return NTM_mail_template::send_mail($to, $subject , $message, '', '', $arr);
+
 		$option = get_option('mandrill');
 		
 		$mail = new PHPMailer;

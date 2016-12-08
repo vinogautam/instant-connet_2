@@ -409,7 +409,7 @@ class IC_ajax{
 	function update_agent_status() {
 
 			global $current_user;
-			if(isset($_GET['chatmode']))
+			if(!isset($_GET['chatmode']))
 				update_user_meta($current_user->ID, 'user_current_status', $_GET['status']);
 			else
 				update_user_meta($current_user->ID, 'agent_communication_mode', $_GET['status']);

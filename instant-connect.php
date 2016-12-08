@@ -99,6 +99,7 @@
 			   lead int(11),
 			   endorser int(11),
 			   gift_status int(1),
+			   mode int(1),
 			   is_mobile int(1),
 			   complete_device_name tinytext NOT NULL,
 			   form_factor tinytext NOT NULL,

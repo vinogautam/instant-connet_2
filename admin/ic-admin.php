@@ -21,7 +21,6 @@ class IC_admin{
 		$mode = get_user_meta($current_user->ID, 'agent_communication_mode', true);
 		$modearr = array(1 => 'Question', 2 => 'Chat', 3 => 'IC');
 
-		update_user_meta($current_user->ID, 'user_current_status', 1);
 		update_user_meta($current_user->ID, 'user_logintime', date("Y-m-d H:i:s"));
 		?>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
@@ -50,6 +49,66 @@ class IC_admin{
 		.settings_tab{position:absolute; transition:all 350ms ease 0s; right:400px; position:fixed; background:#fff; top:0; bottom:0;  z-index: 100000; border:2px solid #ccc;opacity:0;width:0; display:none;}
 		.settings_tab.settings{right:0;opacity:1;width:300px;}
 		#loading_progress{display:none;}
+		.chat_container{
+		    bottom: 0;
+		    position: fixed;
+		    right: 0;
+		    z-index: 10000;
+		}
+		.chat_container .chat_box{
+			float: right;
+			width: 250px;
+			height: 350px;
+		    background: #d9d9d9;
+		    margin-right: 30px;
+		    position: relative;
+		}
+		.chat_container .chat_box .chat_header{
+		    background: #272634 none repeat scroll 0 0;
+		    color: #fff;
+		    padding: 5px 10px;
+		    height: 20px;
+		}
+		.chat_container .chat_box .chat_header b{vertical-align: top;}
+		.chat_container .chat_box .chat_header a{
+		    cursor: pointer;
+		    float: right;
+		    padding: 0 5px;
+		    vertical-align: top;
+		}
+		.chat_container .chat_box .chat_conversation_box {
+		    height: 250px;
+		    overflow: auto;
+		    margin: 10px 0;
+		}
+		.chat_container .chat_box .chat_input{
+		    bottom: 0;
+		    padding: 5px;
+		    position: absolute;
+		    width: 100%;
+		}
+		.chat_container .chat_box .chat_input input{
+		    padding: 10px 0;
+		    width: 100%;
+		}
+		.chat_container .chat_box .chat_conversation_box .own_msg,.chat_container .chat_box .chat_conversation_box .opponent_msg{margin-top: 15px;}
+		.chat_container .chat_box .chat_conversation_box .own_msg div div{    background: #fff;
+		    display: inline-block;
+		    margin: 0 10px;padding: 0 5px;
+		    width: 75%;}
+		.chat_container .chat_box .chat_conversation_box .own_msg div img{border-radius: 50%;
+		    float: right;
+		    margin-right: 10px;}
+		.chat_container .chat_box .chat_conversation_box .opponent_msg div div{    background: #fff;
+		    display: inline-block;
+		    margin: 0 10px;padding: 0 5px;
+		    width: 75%;
+		float: right;}
+		.chat_container .chat_box .chat_conversation_box .opponent_msg div img{border-radius: 50%;margin-left: 10px;float: left;}
+		.chat_container .chat_box .chat_conversation_box .opponent_msg+.opponent_msg{margin:0;}
+		.chat_container .chat_box .chat_conversation_box .own_msg+.own_msg{margin:0;}
+		.chat_container .chat_box .chat_conversation_box .opponent_msg+.opponent_msg img{visibility: hidden;}
+		.chat_container .chat_box .chat_conversation_box .own_msg+.own_msg img{visibility: hidden;}
 		</style>
 		<div class="chat_icon">
 			<i class="fa fa-comments"></i>
@@ -95,13 +154,13 @@ class IC_admin{
 						<?php echo get_avatar( $current_user->user_email, 50 ).'<br>'; echo $current_user->user_login; ?><br>
 						<select name="user_current_status" id="user_current_status">
 							<?php foreach($arr as $st=>$lb){ $sel = $st == $status ? 'selected' : ''; ?>
-							<option value="<?php _e($st);?>"><?php _e($lb);?></option>
+							<option <?php _e($sel);?> value="<?php _e($st);?>"><?php _e($lb);?></option>
 							<?php }?>
 						</select>
 						<br>Communication mode<br>
 						<select name="user_current_status" id="user_mode_status">
 							<?php foreach($modearr as $st=>$lb){ $sel = $st == $mode ? 'selected' : ''; ?>
-							<option value="<?php _e($st);?>"><?php _e($lb);?></option>
+							<option <?php _e($sel);?> value="<?php _e($st);?>"><?php _e($lb);?></option>
 							<?php }?>
 						</select>
 					<div>
@@ -112,7 +171,7 @@ class IC_admin{
 					</div>
 					<div ng-if="tab == 1" class="">
 						<ul>
-							<li ng-repeat="part in participants" ng-if="part.status == '1'" ng-click="selected(part.id)" ng-class="{selected:check_selected(part.id)}" ng-init="part.diff = part.diff === undefined ? 0 : part.diff; autotimer(part);">
+							<li ng-repeat="part in participants" ng-if="part.mode == 3 && part.status == '1'" ng-click="selected(part.id)" ng-class="{selected:check_selected(part.id)}" ng-init="part.diff = part.diff === undefined ? 0 : part.diff; autotimer(part);">
 								<span class="fa fa-circle"></span>
 								<img ng-src="{{get_avatar(part)}}">
 								#{{part.id}} {{part.name}} 
@@ -144,6 +203,38 @@ class IC_admin{
 					</div>
 				</form>
 			</div>
+
+
+			
+			<!-- ng-show="$index < 2 || $index == current_chat.length-1" -->
+			<div ng-cloak class="chat_container">
+			      <div class="chat_box" ng-repeat="part in participants" ng-if="part.mode != 3 && part.status == '1'" >
+			        <div class="chat_header">
+			          <img style="float: left;" class="img-circle" width="20" ng-src="{{getAvatarbyId(part.id)}}" alt="">
+			          <b ng-if="part.mode == 2">{{part.name}}({{part.email}})</b>
+			          <a ng-click="remove_chat(chat)"><i class="fa fa-close"></i></a>
+			          <a ng-click="new_video_chat(chat)"><i class="fa fa-video-camera"></i></a>
+			        </div>
+			        <div id="chat_box_{{chat}}" class="chat_conversation_box">
+			        	<b ng-if="part.mode == 1">"{{part.question}}"</b>
+			          
+			          <div ng-repeat="msg in all_chat_data[chat]" on-finish-render="{{chat}}" ng-class="{own_msg: msg.id == <?= $loggedInUser['id']; ?>, opponent_msg: msg.id != <?= $loggedInUser['id']; ?>}">
+			            <div class="clearfix" ng-if="msg.msg && msg.id == <?= $loggedInUser['id']; ?>">
+			              <div><p>{{msg.msg}}<p></div>
+			              <img ng-src="http://identicon.org/?t=<?= $loggedInUser['email']; ?>&s=20">
+			            </div>
+			            <div class="clearfix" ng-if="msg.msg && msg.id != <?= $loggedInUser['id']; ?>">
+			              <img ng-src="{{getAvatarbyId(msg.id)}}">
+			              <div><p>{{msg.msg}}</p></div>
+			            </div>
+			          </div>
+			        </div>
+			        <div class="chat_input">
+			          <input type="text" ng-model="multi_chat[chat]" ng-enter="add(chat);">
+			        </div>
+			      </div>
+			</div>
+
 		</div>
 		<script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0-rc.1/angular.min.js'></script>
 			<script src='https://cdn.firebase.com/js/client/2.2.4/firebase.js'></script>
@@ -159,6 +250,12 @@ class IC_admin{
 								var online_status = new Firebase('https://vinogautam.firebaseio.com/pusher/online_status');
 								var refresh_user_list = new Firebase('https://vinogautam.firebaseio.com/pusher/refresh_user_list');
 
+								$scope.filter = {mode:[1,2], status:'1'};
+
+								$scope.getAvatarbyId = function(id){
+							          return "http://identicon.org/?t="+id+"&s=20";
+								};
+
 								var refresh_user_list_status = 0;
 								refresh_user_list.on('value', function(snapshot) {
 									refresh_user_list_status++;
@@ -172,7 +269,7 @@ class IC_admin{
 								});
 
 								var status_count = 0;
-								
+								var mode_count = 0; 
 								$scope.tab = 1;
 								
 								$scope.participants = [];
@@ -251,9 +348,9 @@ class IC_admin{
 									});
 								});
 								
-								jQuery("#user_chat_status").change(function()
+								jQuery("#user_mode_status").change(function()
 								{
-									$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=update_agent_mode&chatmode&status='+jQuery(this).val()).then(function(res){
+									$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=update_agent_status&chatmode&status='+jQuery(this).val()).then(function(res){
 										modeRef.update({ count:mode_count++});
 									});
 								});

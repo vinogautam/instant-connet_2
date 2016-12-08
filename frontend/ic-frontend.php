@@ -84,7 +84,7 @@ class IC_front{
 		<div class="instant_connect_form hide_when_start" >
 			<form  id="instant_connect_form" onSubmit="return false;">
 				<?php if($is_waiting == 0){?>
-				<div id="question_mode" <?= $com_mode == 1 ? 'style="display:none;"' : '';?>>
+				<div id="question_mode" <?= $com_mode != 1 ? 'style="display:none;"' : '';?>>
 					<div style="display: inline-block; overflow: hidden; border-radius: 50%; border: 5px solid rgb(204, 204, 204); width: 50px; height: 50px;border-radius: 50%;">
 						<?php echo get_avatar( $user_info->user_email, 50 ); ?>
 					</div>
@@ -93,7 +93,7 @@ class IC_front{
 						<textarea placeholder="Question" name="meeting[question]" id="questionInput"></textarea>
 					</p>
 				</div>
-				<div id="chatnicmode" <?= $com_mode != 1 ? 'style="display:none;"' : '';?>>
+				<div id="chatnicmode" <?= $com_mode == 1 ? 'style="display:none;"' : '';?>>
 					<p>
 						<input placeholder="Name" type="text" name="meeting[name]" id="nameInput">
 					</p>
@@ -102,7 +102,7 @@ class IC_front{
 					</p>
 				</div>
 				<input type="hidden" name="action" value="join_chat">
-				<input type="hidden" name="mode" value="<?= $com_mode;?>">
+				<input type="hidden" name="meeting[mode]" value="<?= $com_mode;?>">
 				<input type="hidden" id="is_mobile" name="meeting[is_mobile]" value="join_chat">
 				<input type="hidden" id="complete_device_name" name="meeting[complete_device_name]" value="join_chat">
 				<input type="hidden" id="form_factor" name="meeting[form_factor]" value="join_chat">

@@ -91,7 +91,10 @@ class IC_admin{
 		    padding: 10px 0;
 		    width: 100%;
 		}
+		.chat_container .chat_box .chat_conversation_box .own_msg,.chat_container .chat_box .chat_conversation_box p{margin: 0;}
 		.chat_container .chat_box .chat_conversation_box .own_msg,.chat_container .chat_box .chat_conversation_box .opponent_msg{margin-top: 15px;}
+		.chat_container .chat_box .chat_conversation_box .own_msg p{text-align: right;}
+		.chat_container .chat_box .chat_conversation_box .opponent_msg p{text-align: left;}
 		.chat_container .chat_box .chat_conversation_box .own_msg div div{    background: #fff;
 		    display: inline-block;
 		    margin: 0 10px;padding: 0 5px;
@@ -208,29 +211,28 @@ class IC_admin{
 			
 			<!-- ng-show="$index < 2 || $index == current_chat.length-1" -->
 			<div ng-cloak class="chat_container">
-			      <div class="chat_box" ng-repeat="part in participants" ng-if="part.mode != 3 && part.status == '1'" >
+			      <div class="chat_box" ng-repeat="part in participants" ng-if="part.mode != 3 && part.status == '1'" ng-init="part.diff = part.diff === undefined ? 0 : part.diff; autotimer(part); new_chat(part.id);">
 			        <div class="chat_header">
 			          <img style="float: left;" class="img-circle" width="20" ng-src="{{getAvatarbyId(part.id)}}" alt="">
 			          <b ng-if="part.mode == 2">{{part.name}}({{part.email}})</b>
-			          <a ng-click="remove_chat(chat)"><i class="fa fa-close"></i></a>
-			          <a ng-click="new_video_chat(chat)"><i class="fa fa-video-camera"></i></a>
+			          <a ng-click="remove_chat(part.id)"><i class="fa fa-close"></i></a>
+			          <a ng-click="new_video_chat(part.id)"><i class="fa fa-video-camera"></i></a>
 			        </div>
-			        <div id="chat_box_{{chat}}" class="chat_conversation_box">
+			        <div id="chat_box_{{part.id}}" class="chat_conversation_box">
 			        	<b ng-if="part.mode == 1">"{{part.question}}"</b>
-			          
-			          <div ng-repeat="msg in all_chat_data[chat]" on-finish-render="{{chat}}" ng-class="{own_msg: msg.id == <?= $loggedInUser['id']; ?>, opponent_msg: msg.id != <?= $loggedInUser['id']; ?>}">
-			            <div class="clearfix" ng-if="msg.msg && msg.id == <?= $loggedInUser['id']; ?>">
-			              <div><p>{{msg.msg}}<p></div>
-			              <img ng-src="http://identicon.org/?t=<?= $loggedInUser['email']; ?>&s=20">
+			          <div ng-repeat="msg in all_chat_data[part.id]" on-finish-render="{{part.id}}" ng-class="{own_msg: msg.id == 'agent', opponent_msg: msg.id != 'agent'}">
+			            <div class="clearfix" ng-if="msg.msg && msg.id == 'agent'">
+			              <div><p>{{msg.msg}}</p></div>
+			              <img ng-src="http://identicon.org/?t=agent&s=20">
 			            </div>
-			            <div class="clearfix" ng-if="msg.msg && msg.id != <?= $loggedInUser['id']; ?>">
+			            <div class="clearfix" ng-if="msg.msg && msg.id != 'agent'">
 			              <img ng-src="{{getAvatarbyId(msg.id)}}">
 			              <div><p>{{msg.msg}}</p></div>
 			            </div>
 			          </div>
 			        </div>
 			        <div class="chat_input">
-			          <input type="text" ng-model="multi_chat[chat]" ng-enter="add(chat);">
+			          <input type="text" ng-model="multi_chat[part.id]" ng-enter="add(part.id);">
 			        </div>
 			      </div>
 			</div>
@@ -242,6 +244,33 @@ class IC_admin{
 			<script src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/md5-min.js'></script>
 			  <script>
 				    var app = angular.module("instant_connect", []);
+
+				    app.directive('ngEnter', function() {
+						        return function(scope, element, attrs) {
+						            element.bind("keydown keypress", function(event) {
+						                if(event.which === 13) {
+						                        scope.$apply(function(){
+						                                scope.$eval(attrs.ngEnter);
+						                        });
+						                        
+						                        event.preventDefault();
+						                }
+						            });
+						        };
+						    })
+						    .directive('onFinishRender', function ($timeout) {
+						        return {
+						            restrict: 'A',
+						            link: function (scope, element, attr) {
+						                if (scope.$last === true) {
+						                    $timeout(function () {
+						                      //scope.$emit(attr.onFinishRender);
+						                      jQuery("#chat_box_"+attr.onFinishRender).scrollTop(jQuery("#chat_box_"+attr.onFinishRender)[0].scrollHeight);
+						                    });
+						                }
+						            }
+						        }
+						});
 					    app.controller("ICCtrl", function($scope, $http, $timeout, $interval) {
 								var myDataRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_user');
 								var statusRef = new Firebase('https://vinogautam.firebaseio.com/pusher/status_change');
@@ -250,7 +279,37 @@ class IC_admin{
 								var online_status = new Firebase('https://vinogautam.firebaseio.com/pusher/online_status');
 								var refresh_user_list = new Firebase('https://vinogautam.firebaseio.com/pusher/refresh_user_list');
 
-								$scope.filter = {mode:[1,2], status:'1'};
+								/*Question mode and chat mode upates start here*/
+
+								var all_chat_listeners = [];
+						        $scope.all_chat_data = [];
+						        $scope.multi_chat = {};
+						        $scope.new_chat = function(id)
+						        {
+						          if(all_chat_listeners[id] === undefined)
+						          {
+						            $scope.all_chat_data[id] = [];
+						            all_chat_listeners[id] = new Firebase('https://vinogautam.firebaseio.com/pusher/individual_chat/'+id+'/');
+						            
+						            all_chat_listeners[id].on('child_added', function(snapshot) {
+						                if(!$scope.$$phase) {
+						                  $scope.$apply(function(){
+						                    $scope.all_chat_data[id].push(snapshot.val());
+						                  });
+						                }
+						                else
+						                {
+						                  $scope.all_chat_data[id].push(snapshot.val());
+						                }
+						            });
+						          }
+								};
+
+								$scope.add = function(id){
+						            all_chat_listeners[id].push({id: 'agent', msg: $scope.multi_chat[id]});
+						            $scope.multi_chat[id] = '';
+								};
+								/*Question mode and chat mode upates end here*/
 
 								$scope.getAvatarbyId = function(id){
 							          return "http://identicon.org/?t="+id+"&s=20";

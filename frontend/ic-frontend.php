@@ -7,6 +7,26 @@ class IC_front{
 	
 	function instant_connect_chat_icon()
 	{
+		$general = get_option('general');
+
+		$lst_login_time = get_user_meta($general['agent'], 'user_logintime', true);
+		if(strtotime("now") - strtotime($lst_login_time) > 60)
+		{
+			update_user_meta($general['agent'], 'user_current_status', 2);
+			update_user_meta($general['agent'], 'agent_communication_mode', 1);
+		}
+
+		$com_mode = get_user_meta($general['agent'], 'agent_communication_mode', true);
+
+		$arr = array(1 => 'question_mode', 2 => 'chat_mode', 3 => 'ic');
+
+		$fn = 'instant_connect_chat_icon_'.$arr[$com_mode];
+
+		$this->$fn();
+	}
+
+	function instant_connect_chat_icon_question_mode()
+	{
 		global $wpdb;
 		$option = get_option('chat_position');
 		$general = get_option('general');
@@ -26,13 +46,138 @@ class IC_front{
 		
 		$user_info = get_userdata($general['agent']);
 		$arr = array(1 => 'Online', 2 => 'Offline', 3 => 'Meeting', 4 => 'Away');
+
+		$user_current_status = get_user_meta($general['agent'], 'user_current_status', true);
+		$com_mode = get_user_meta($general['agent'], 'agent_communication_mode', true);
+		?>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+		<script type="text/javascript" src="//wurfl.io/wurfl.js"></script>
+		<style>
+		.instant_connect_form{transition:all 350ms ease 0s; right:100px; position:fixed; background:#DBDBDB; bottom:120px; width:300px; padding:20px;}
+		.instant_connect_form.join_chat{right:40px; }
+		.instant_connect_form label, .instant_connect_form input{display:block; width:100%;}
+		.submit_btn{position:relative;}
+		.submit_btn img{display:none; position:absolute; top:13px;}
+		.instant_connect_form.submitted{opacity:0.7; cursor_pointer:none;}
+		.instant_connect_form.submitted .submit_btn img{display:inline-block}
+		</style>
+		<div ng-app="demo" ng-controller="ActionController" class="instant_connect_form hide_when_start" >
+			<form  id="instant_connect_form" onSubmit="return false;">
+				<div id="question_mode" <?= $com_mode != 1 ? 'style="display:none;"' : '';?>>
+					<div style="display: inline-block; overflow: hidden; border-radius: 50%; border: 5px solid rgb(204, 204, 204); width: 50px; height: 50px;border-radius: 50%;">
+						<?php echo get_avatar( $user_info->user_email, 50 ); ?>
+					</div>
+					<p style="font-size: 14px;"><?= $user_info->username; ?>(Agent) is available to take your questions please put your name and email.</p>
+					<p>
+						<textarea placeholder="Question" name="meeting[question]" id="questionInput"></textarea>
+					</p>
+				</div>
+				<div ng-if="chat.length" id="messagesDiv" style="height:250px;overflow:auto;">
+					<p ng-repeat="c in chat track by $index" on-finish-render ng-class="{align_right: c.email != data.email}" ng-if="c.msg">
+						<img ng-if="c.email == data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
+						{{c.msg}}
+						<img ng-if="c.email != data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
+						<hr>
+					</p>
+				</div>
+				<input type="hidden" name="action" value="join_chat">
+				<input type="hidden" name="meeting[mode]" value="<?= $com_mode;?>">
+				<input type="hidden" id="is_mobile" name="meeting[is_mobile]" value="join_chat">
+				<input type="hidden" id="complete_device_name" name="meeting[complete_device_name]" value="join_chat">
+				<input type="hidden" id="form_factor" name="meeting[form_factor]" value="join_chat">
+				<input type="hidden" name="meeting[status]" value="1">
+				<div class="submit_btn">
+					<input type="submit" id="instant_connect_formsubmit" name="Submit" value="Join Live Chat">
+					<img src="<?= IC_PLUGIN_URL; ?>294.gif">
+				</div>
+			</form>
+			
+		</div>
+
+		<script type="text/javascript">
+			angular.module('demo', []).controller('ActionController', ['$scope', '$timeout', '$http', function($scope, $timeout, $http) {
+					
+					$scope.chat = [];
+					$scope.data = {name:"", email:"", msg:""};
+					$scope.meeting = {};
+					$scope.start_chating = function(res){
+						console.log("start cghat");
+
+						setTimeout(function(){
+							$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=add_chat_points&id='+res.pid).then(function(res){
+
+							});
+						}, 300000);
+
+
+						textchatref = new Firebase('https://vinogautam.firebaseio.com/opentok/'+res.pid+'/'+res.sessionId);
+						$scope.data.name = res.name;
+						$scope.data.email = res.email;
+						$scope.meeting = res;
+
+						textchatref.on('child_added', function(snapshot) {
+									//angular.forEach(snapshot.val(), function(v,k){
+										v = snapshot.val();
+										console.log(v);
+										if(typeof v.msg != "undefined")
+										{
+											hn = v.email ? v.email : v.name;
+											v.hash = CryptoJS.MD5(hn).toString();
+											if(!$scope.$$phase) {
+											$scope.$apply(function(){
+												$scope.chat.push(v);
+											});
+											}
+											else
+											{
+												$scope.chat.push(v);
+											}
+										}
+										
+									//});
+								});
+					};
+					
+					$scope.add = function(){
+						console.log($scope.data);
+						textchatref.push($scope.data);
+						$scope.data.msg = '';
+					};
+					
+			}]);
+		</script>
+
+	<?php 
+	}
+
+	function instant_connect_chat_icon_chat_mode()
+	{
+
+	}
+
+	function instant_connect_chat_icon_ic()
+	{
+		global $wpdb;
+		$option = get_option('chat_position');
+		$general = get_option('general');
 		
-		$lst_login_time = get_user_meta($general['agent'], 'user_logintime', true);
-		if(strtotime("now") - strtotime($lst_login_time) > 60)
+		$is_waiting = isset($_COOKIE['instant_connect_waiting_id']) ? $_COOKIE['instant_connect_waiting_id'] : 0;
+		
+		if($is_waiting)
 		{
-			update_user_meta($general['agent'], 'user_current_status', 2);
-			update_user_meta($general['agent'], 'agent_communication_mode', 1);
+			$wuser = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where (status = 1 or status = 2) and id = ".$is_waiting);
+			if(!count($wuser))
+			{
+				$is_waiting = 0;
+				setcookie("instant_connect_waiting_id", "", time()-3600, "/");
+			}
 		}
+		
+		
+		$user_info = get_userdata($general['agent']);
+		$arr = array(1 => 'Online', 2 => 'Offline', 3 => 'Meeting', 4 => 'Away');
 
 		$user_current_status = get_user_meta($general['agent'], 'user_current_status', true);
 		$com_mode = get_user_meta($general['agent'], 'agent_communication_mode', true);

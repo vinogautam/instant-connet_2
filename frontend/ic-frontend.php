@@ -70,9 +70,7 @@ class IC_front{
 						<?php echo get_avatar( $user_info->user_email, 50 ); ?>
 					</div>
 					<p style="font-size: 14px;"><?= $user_info->username; ?>(Agent) is available to take your questions please put your name and email.</p>
-					<p>
-						<textarea placeholder="Question" name="meeting[question]" id="questionInput"></textarea>
-					</p>
+					
 				</div>
 				<div ng-if="chat.length" id="messagesDiv" style="height:250px;overflow:auto;">
 					<p ng-repeat="c in chat track by $index" on-finish-render ng-class="{align_right: c.email != data.email}" ng-if="c.msg">
@@ -82,14 +80,11 @@ class IC_front{
 						<hr>
 					</p>
 				</div>
-				<input type="hidden" name="action" value="join_chat">
-				<input type="hidden" name="meeting[mode]" value="<?= $com_mode;?>">
-				<input type="hidden" id="is_mobile" name="meeting[is_mobile]" value="join_chat">
-				<input type="hidden" id="complete_device_name" name="meeting[complete_device_name]" value="join_chat">
-				<input type="hidden" id="form_factor" name="meeting[form_factor]" value="join_chat">
-				<input type="hidden" name="meeting[status]" value="1">
+				<p>
+					<textarea placeholder="Question" ng-model="data.msg"></textarea>
+				</p>
 				<div class="submit_btn">
-					<input type="submit" id="instant_connect_formsubmit" name="Submit" value="Join Live Chat">
+					<input type="submit" ng-click="add();" name="Submit" value="Submit">
 					<img src="<?= IC_PLUGIN_URL; ?>294.gif">
 				</div>
 			</form>
@@ -112,38 +107,46 @@ class IC_front{
 						}, 300000);
 
 
-						textchatref = new Firebase('https://vinogautam.firebaseio.com/opentok/'+res.pid+'/'+res.sessionId);
+						textchatref = new Firebase('https://vinogautam.firebaseio.com/pusher/individual_chat/'+res.pid+'/');
 						$scope.data.name = res.name;
 						$scope.data.email = res.email;
 						$scope.meeting = res;
 
 						textchatref.on('child_added', function(snapshot) {
-									//angular.forEach(snapshot.val(), function(v,k){
-										v = snapshot.val();
-										console.log(v);
-										if(typeof v.msg != "undefined")
-										{
-											hn = v.email ? v.email : v.name;
-											v.hash = CryptoJS.MD5(hn).toString();
-											if(!$scope.$$phase) {
-											$scope.$apply(function(){
-												$scope.chat.push(v);
-											});
-											}
-											else
-											{
-												$scope.chat.push(v);
-											}
-										}
-										
-									//});
+							v = snapshot.val();
+							console.log(v);
+							if(typeof v.msg != "undefined")
+							{
+								hn = v.email ? v.email : v.name;
+								v.hash = CryptoJS.MD5(hn).toString();
+								if(!$scope.$$phase) {
+								$scope.$apply(function(){
+									$scope.chat.push(v);
 								});
+								}
+								else
+								{
+									$scope.chat.push(v);
+								}
+							}
+						});
 					};
 					
 					$scope.add = function(){
-						console.log($scope.data);
-						textchatref.push($scope.data);
-						$scope.data.msg = '';
+						if($scope.chat.length)
+						{
+							textchatref.push($scope.data);
+							$scope.data.msg = '';
+						}
+						else
+						{
+							data = {action:'join_chat', meeting: {mode:1, is_mobile: WURFL.is_mobile, question: $scope.data.msg, complete_device_name: WURFL.complete_device_name, form_factor:WURFL.form_factor, status: 1}};
+							headers = {headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}};
+							$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php', data, headers, function(res){
+								textchatref.push($scope.data);
+								$scope.data.msg = '';
+							});
+						}
 					};
 					
 			}]);

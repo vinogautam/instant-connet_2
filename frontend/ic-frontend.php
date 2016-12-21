@@ -54,6 +54,8 @@ class IC_front{
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js" type="text/javascript" charset="utf-8"></script>
 		<script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
 		<script type="text/javascript" src="//wurfl.io/wurfl.js"></script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/core.js'></script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/md5-min.js'></script>
 		<style>
 		.instant_connect_form{transition:all 350ms ease 0s; right:100px; position:fixed; background:#DBDBDB; bottom:120px; width:300px; padding:20px;}
 		.instant_connect_form.join_chat{right:40px; }
@@ -80,38 +82,46 @@ class IC_front{
 						<hr>
 					</p>
 				</div>
-				<p>
-					<textarea placeholder="Question" ng-model="data.msg"></textarea>
-				</p>
-				<div class="submit_btn">
+				
+				<div ng-hide="getinput || chat.length == 1" class="submit_btn">
+					<p>
+						<textarea placeholder="Question" ng-model="data.msg"></textarea>
+					</p>
 					<input type="submit" ng-click="add();" name="Submit" value="Submit">
 					<img src="<?= IC_PLUGIN_URL; ?>294.gif">
 				</div>
+				<div ng-show="getinput" class="submit_btn">
+					<p>
+						<input placeholder="Name" ng-model="data.name">
+					</p>
+					<p>
+						<input placeholder="Email" ng-model="data.email">
+					</p>
+					<input type="submit" ng-click="update_user();" name="Submit" value="Submit">
+					<img src="<?= IC_PLUGIN_URL; ?>294.gif">
+				</div>
+
 			</form>
 			
 		</div>
 
 		<script type="text/javascript">
+			var textchatref;
+
 			angular.module('demo', []).controller('ActionController', ['$scope', '$timeout', '$http', function($scope, $timeout, $http) {
 					
 					$scope.chat = [];
 					$scope.data = {name:"", email:"", msg:""};
 					$scope.meeting = {};
+
+					$scope.getinput = false;
+
 					$scope.start_chating = function(res){
-						console.log("start cghat");
-
-						setTimeout(function(){
-							$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=add_chat_points&id='+res.pid).then(function(res){
-
-							});
-						}, 300000);
 
 
-						textchatref = new Firebase('https://vinogautam.firebaseio.com/pusher/individual_chat/'+res.pid+'/');
-						$scope.data.name = res.name;
-						$scope.data.email = res.email;
-						$scope.meeting = res;
-
+						textchatref = new Firebase('https://vinogautam.firebaseio.com/pusher/individual_chat/'+res+'/');
+						textchatref.push($scope.data);
+						$scope.data.msg = '';
 						textchatref.on('child_added', function(snapshot) {
 							v = snapshot.val();
 							console.log(v);
@@ -132,6 +142,8 @@ class IC_front{
 						});
 					};
 					
+					$scope.participant = 0;
+
 					$scope.add = function(){
 						if($scope.chat.length)
 						{
@@ -141,14 +153,32 @@ class IC_front{
 						else
 						{
 							data = {action:'join_chat', meeting: {mode:1, is_mobile: WURFL.is_mobile, question: $scope.data.msg, complete_device_name: WURFL.complete_device_name, form_factor:WURFL.form_factor, status: 1}};
-							headers = {headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}};
-							$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php', data, headers, function(res){
-								textchatref.push($scope.data);
-								$scope.data.msg = '';
-							});
+							jQuery.post('<?php echo site_url();?>/wp-admin/admin-ajax.php', data, function(res){
+									$scope.start_chating(res);
+									$scope.participant = res;
+									$timeout(function(){
+										if($scope.chat.length == 1)
+										$scope.getinput = true;
+									}, 600);
+
+									var online_status = new Firebase('https://vinogautam.firebaseio.com/pusher/online_status');
+									cccnt = 1;
+									setInterval(function(){
+										online_status.update({ count:res+"-"+cccnt++});
+									}, 5000);
+									var myDataRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_user');
+									myDataRef.update({ count:res});
+								}
+							);
 						}
 					};
 					
+					$scope.update_user = function(){
+						jQuery.post('<?php echo site_url();?>/wp-admin/admin-ajax.php', {action:'update_participant_data', id: $scope.participant, data: {name: $scope.data.name, email: $scope.data.email}}, function(res){
+							$scope.getinput = false;
+
+						});
+					};
 			}]);
 		</script>
 

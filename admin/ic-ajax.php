@@ -30,8 +30,20 @@ class IC_ajax{
 		add_action( 'wp_ajax_send_add_chat_points', array( &$this, 'add_chat_points') );
 		add_action( 'wp_ajax_nopriv_send_add_chat_points', array( &$this, 'add_chat_points') );
 		add_action( 'wp_ajax_heartbeat', array( &$this, 'heartbeat'), 100);
+		add_action( 'wp_ajax_update_participant_data', array( &$this, 'update_participant_data') );
+		add_action( 'wp_ajax_nopriv_update_participant_data', array( &$this, 'update_participant_data') );
     }
 	
+    function update_participant_data()
+    {
+    	global $wpdb;
+
+    	print_r($wpdb->update($wpdb->prefix . "meeting_participants", $_POST['data']), array('id' => $_POST['id']));
+
+		die(0);
+		exit;
+    }
+
     function heartbeat()
     {
     	global $current_user;

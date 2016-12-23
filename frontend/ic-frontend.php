@@ -143,7 +143,7 @@ class IC_front{
 					};
 					
 					$scope.participant = 0;
-
+					$scope.video_container = false;
 					$scope.add = function(){
 						if($scope.chat.length)
 						{
@@ -168,6 +168,32 @@ class IC_front{
 									}, 5000);
 									var myDataRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_user');
 									myDataRef.update({ count:res});
+
+
+									var meetingRef = new Firebase('https://vinogautam.firebaseio.com/pusher/new_meeting');
+									var meetingstatus = 0;
+									meetingRef.on('value', function(snapshot) {
+										mid = snapshot.val().id;
+										if(typeof mid != "number")
+											mid = mid.split("-")[0];
+										
+										meetingstatus++;
+										if(meetingstatus != 1)
+										{
+											jQuery.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=check_meeing&participants='+res+'&meeting_id='+mid, function(res1){
+												if(!res1) return;
+												res1 = JSON.parse(res1);
+												console.log(res1);
+												if(res1.status == 2)
+												{	
+													scope.$apply(function(){
+														scope.video_container = true;
+													});
+												}
+											});
+										}
+										
+									});
 								}
 							);
 						}

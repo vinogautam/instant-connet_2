@@ -216,7 +216,7 @@ class IC_admin{
 			          <img style="float: left;" class="img-circle" width="20" ng-src="{{getAvatarbyId(part.id)}}" alt="">
 			          <b ng-if="part.mode == 2">{{part.name}}({{part.email}})</b>
 			          <a ng-click="remove_chat(part.id)"><i class="fa fa-close"></i></a>
-			          <a ng-click="new_video_chat(part.id)"><i class="fa fa-video-camera"></i></a>
+			          <a ng-click="create_meeting_from_qc(part.id)"><i class="fa fa-video-camera"></i></a>
 			        </div>
 			        <div id="chat_box_{{part.id}}" class="chat_conversation_box">
 			        	<b ng-if="part.mode == 1">"{{part.question}}"</b>
@@ -449,6 +449,25 @@ class IC_admin{
 									});
 								};
 								
+								$scope.create_meeting_from_qc = function(id)
+								{
+									$interval.cancel(id);
+
+									$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=create_new_meeting&st=2', 
+									{data: [id]}).then(function(res){
+										
+										meetingRef.update({ id:res['data']['id']});
+										$scope.selected_participants = [];
+										$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=waiting_participants').then(function(res){
+											$scope.participants = res['data'];
+										});
+
+										refresh_user_list.update({ st:"new_meeting_created"+res['data']['id']});
+
+										window.open("<?= str_replace("http://financialinsiders.ca", "https://financialinsiders.ca", site_url()); ?>/meeting/?id="+res['data']['id']+"&admin", '_blank');
+									});
+								};
+
 								var intervals = [];
 								var interval_diff = [];
 								

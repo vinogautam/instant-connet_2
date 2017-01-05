@@ -28,53 +28,171 @@ global $wpdb;
 		<script type="text/javascript" src="//wurfl.io/wurfl.js"></script>
 		<script src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/core.js'></script>
 		<script src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/md5-min.js'></script>
-		<style>
-		.instant_connect_form{transition:all 350ms ease 0s; right:100px; position:fixed; background:#DBDBDB; bottom:120px; width:300px; padding:20px;}
-		.instant_connect_form.join_chat{right:40px; }
-		.instant_connect_form label, .instant_connect_form input{display:block; width:100%;}
-		.submit_btn{position:relative;}
-		.submit_btn img{display:none; position:absolute; top:13px;}
-		.instant_connect_form.submitted{opacity:0.7; cursor_pointer:none;}
-		.instant_connect_form.submitted .submit_btn img{display:inline-block}
+		</div>
+		<style class="qc_style">
+		.agent-details1{width:400px; height:250px; background:#fff; position:fixed; bottom:70px; right:20px; border-radius:10px; box-shadow: 0px 0px 6px 0px rgba(0,0,0,0.50); display:none;}
+		.cus-pho1{width:100px; height:100px; margin:auto; position: absolute; top: -7px; left:-24px;}
+		.agent-chat{background:rgb(121,3,3); color:#fff; margin-top:0; border-radius:0 10px 0 0; padding-left:100px; height:84px;}
+		.agent-chat h4{ font-size:16px; font-weight:600; margin:0; padding-top:17px; padding-bottom: 10px;text-align: left;color: #fff;}
+		.agent-chat p{  padding: 0 0 10px; text-align:left; font-size:11px; color:#fff; margin-top:4px;line-height: 15px;} 
+		.cus-pho1 img { border-radius:50% !important;width:100%; height:100%; display:block;  border:5px solid #f7f7f7;}
+		.form-control1{width:100%; text-align:left; border-top:1px solid #790303; position:absolute; bottom:0; background:#fff; border-radius: 0 0 10px 10px; height:91px;}
+		.form-control1 textarea{border:none;  padding:10px 32px 4px; margin-top:7px; height:60px; resize:none;font-size: 1.4rem; width:290px; background: transparent none repeat scroll 0 0; }
+		.go{ background:none; border:none; width:50px;padding:8px 0; position:absolute; right:0; bottom:40px; color:#790303; font-size:16px;}
+		.go1{ background:none; border:none; width:20px;padding:8px 0; position:absolute; left:7px; bottom:10px; color:#ccc; font-size:16px;}
+		.chat-icon{ position:fixed; bottom:5px; right:5px; background:#790303; border-radius:50% !important; width:50px; height:50px; cursor:pointer;
+		 border:2px solid #fff;}
+		.chat-icon i{padding:10px 11px; opacity:0; pointer-events:none; transition:all ease 0.5s; z-index:0;position: absolute;left: 0;top: -2px;}
+		.chat-icon.showclose .close,.chat-icon.showchat .chat{ opacity:1; pointer-events:auto; z-index:1;}
+		.fa-comments,.fa-times{color:#fff; font-size:30px;}
+		.fa-times{ padding:10px 13px !important;}
+		.form-control2{ margin-right:10px; width:270px; text-align:center; border:1px solid #ccc; padding:10px; float:right; background:#f1f1f1}
+		.wiat-box{float:left; width:180px;}
+		.wiat-box input{border:1px solid #ccc; padding:8px 2px; margin-bottom:0px; width:180px; border-radius:2px;}
+		.form-control2 p{font-size:12px; color:#888;}
+		.submit{ float:none; width:30px; height:69px; border-radius:0 2px 2px 0; background:#790303; border:none; color:#fff;}
+		textarea:focus{ outline:none; }
+		.connecting{ position:absolute; bottom:60px; right:10px;}
+		.connecting span{font-size:14px; font-weight:600; color:#790303;}
+		.bowerd{ position:absolute; right:5px; bottom:4px; color:#888; font-size:11px; text-decoration:none;} 
+		.bowerd img{ width:10px;}
+		.hide{ display:none !important;}
+
+		.agent-details2{width:360px; height:100%; background:#fff; position:fixed; right:0px; box-shadow: 0px 0px 6px 0px rgba(0,0,0,0.50);top: 0;z-index: 10;}
+		.cus-pho2{width:80px; height:80px; position: absolute; top:8px; left:5px;}
+		.agent-chat1{ color:#444; margin-top:10px; padding-bottom: 10px; padding-left:100px; border-bottom: 1px solid #790303;}
+		.agent-chat1 h4{ padding-bottom: 12px; font-size:16px; font-weight:600; margin:0; padding-top:17px;text-align: left;}
+		.agent-chat1 p{  padding: 0 0 0px; text-align:left; font-size:12px; color:#aaa; text-shadow:0 0px 0.5px; margin-top:4px;line-height: 15px;} 
+		.cus-pho2 img { border-radius:50% !important;width:100%; height:100%; display:block;  border:2px solid #f7f7f7;}
+		.close-chat{ color: #790303; font-size: 16px; position: absolute; right: 25px; top: 30px;}
+		textarea:focus{ outline:none;}
+		.messages{ text-align:right}
+		.messages .del{ font-size:10px; color:#888; margin-top:10px; display: inline-block; margin-right:20px; font-weight:600;}
+		.messages p { margin:0;}
+		.messages p span{ text-align:right; max-width: 100%;
+		    padding: 1.0rem 1.25rem;
+		    white-space: pre-wrap;
+		    border-radius: 5px !important;
+		    word-break: break-word;
+			margin:3px;
+			font-size: 1.4rem;
+		}
+		.msg-bar.msg-last{ background: #a60000 none repeat scroll 0 0;
+		    border-bottom-left-radius: 20px !important;
+		    border-top-left-radius: 20px !important;
+		    margin-bottom: 0;
+		    margin-right: 10px; display:inline-block; color:#fff;}
+		p:first-of-type .msg-bar.msg-last {
+		    border-top-right-radius: 20px !important;}
+		p:last-of-type .msg-bar.msg-last {
+		    border-bottom-right-radius: 20px !important;
+		}
+		.chat-mathed{ position:relative;}
+		.messages1{ text-align:left;}
+		.messages1 .chat-persion{font-size:10px; color:#888; font-weight:600; margin-top:10px; margin-left:20px; display: inline-block;}
+		.messages1 p{ margin:0;}
+		.messages1 p span{ text-align:left; max-width: 100%;
+		    padding: 1.0rem 1.25rem;
+		    white-space: pre-wrap;
+		    border-radius: 5px;
+		    word-break: break-word;
+			margin:3px; font-size: 1.4rem;}
+			.msg-bar-resive.msg-last-resive{ background:  #f8f8f8 none repeat scroll 0 0;
+		    border-bottom-right-radius: 20px;
+		    border-top-right-radius: 20px;
+		    margin-bottom: 0;
+		    margin-right: 10px; display:inline-block;}
+		p:first-of-type .msg-bar-resive.msg-last-resive {
+		    border-top-left-radius: 20px;}
+		p:last-of-type .msg-bar-resive.msg-last-resive {
+		    border-bottom-left-radius: 20px;
+		}
+		.messages1 p img{ width:40px; height:40px; border-radius:50%; float:left; margin:10px;}
+		.chat-mothed{ height:400px; overflow:auto;}
+
+		.wiat-box{ width:100%;position: relative;}
+		.wiat-box input{border:1px solid #ccc; padding:8px 5px; margin-bottom:0px; width:165px; border-radius:2px;height: 35px;font-size: 14px;}
+		.form-control2 p{font-size:12px; color:#888;  margin-top: 0;}
+		.submit{ float:none; width:36px; height:34px; border-radius:0 2px 2px 0; background:#790303; border:none; color:#fff;}
+		.form-control2{ margin-right:20px; float:right; padding: 10px 20px; border:1px solid #ccc; margin-top:7px;}
+		.submit .fa-angle-right{ font-weight:600; font-size:16px;}
 		</style>
-		<div ng-app="demo" ng-controller="ActionController" class="instant_connect_form hide_when_start" >
-			<form  id="instant_connect_form" onSubmit="return false;">
-				<div id="question_mode" <?= $com_mode != 1 ? 'style="display:none;"' : '';?>>
-					<div style="display: inline-block; overflow: hidden; border-radius: 50%; border: 5px solid rgb(204, 204, 204); width: 50px; height: 50px;border-radius: 50%;">
-						<?php echo get_avatar( $user_info->user_email, 50 ); ?>
-					</div>
-					<p style="font-size: 14px;"><?= $user_info->username; ?>(Agent) is available to take your questions please put your name and email.</p>
-					
+		<div ng-app="demo" ng-controller="ActionController" >
+			<div ng-hide="chat.length" class="agent-details1">
+				<div class="cus-pho1">
+					<?php echo get_avatar( $user_info->user_email, 100 ); ?>
 				</div>
-				<div ng-if="chat.length" id="messagesDiv" style="height:250px;overflow:auto;">
+				<div class="agent-chat">
+					<h4>Agent Name</h4>
+					<p>Text placeholder </p>
+				</div>
+				<div class="connecting"><span>Conneting...</span></div>
+				<div class="form-control1">
+					<form>
+						<textarea ng-model="data.msg" id="msg" placeholder="Type a message here" rows="3"></textarea>
+						<button class="go1"><i class="fa fa-paperclip" aria-hidden="true"></i></button>
+						<button ng-click="add();" class="go hide"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+						<a href="#" class="bowerd">We're <img src="<?= IC_PLUGIN_URL; ?>img/bower.png"> by Agent</a>
+					</form>
+				</div>
+			</div>
+			<div ng-show="chat.length" class="agent-details2">
+				<div class="cus-pho2">
+					<?php echo get_avatar( $user_info->user_email, 100 ); ?>
+				</div>
+				<div class="agent-chat1">
+					<h4>Agent Name</h4>
+					<p>Text placeholder </p>
+				</div>
+				<div class="close-chat">
+					<i class="fa fa-times close" aria-hidden="true"></i>
+				</div>
+				<div class="chat-mothed" id="messagesDiv">
+					<div class="messages">
+						<p ng-repeat="c in chat track by $index" on-finish-render><span class="msg-bar msg-last">{{c.msg}}</span></p>
+						<span class="del">Delivered 11:29 PM</span>
+					</div>
+
+					<!-- 
 					<p ng-repeat="c in chat track by $index" on-finish-render ng-class="{align_right: c.email != data.email}" ng-if="c.msg">
 						<img ng-if="c.email == data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
 						{{c.msg}}
 						<img ng-if="c.email != data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
 						<hr>
 					</p>
+					<div class="messages1">
+						<span class="chat-persion">Agent Name 12.00 PM</span>
+						<p><span class="msg-bar-resive msg-last-resive">hi how r u</span></p>
+						<p><span class="msg-bar-resive msg-last-resive"> is therezxzxv</span></p>
+						<p><span class="msg-bar-resive msg-last-resive"> is there</span></p>
+					</div>
+					<div class="messages1">
+						<span class="chat-persion">Agent Name 12.00 PM</span>
+						<p><img src="img/cus-pho.jpg"><span class="msg-bar-resive msg-last-resive" style=" float:left; width:240px;">Hey! Would you like to talk to sales, support, or anyone?</span></p>
+					</div> -->
+					<div class="form-control2" ng-show="getinput">
+						<p>Get notify when agent is online </p>
+						<div class="wiat-box">
+							<input type="text" ng-model="data.name" placeholder="Enter your email">
+						
+							<button ng-click="update_user();"  class="submit"><i class="fa fa-angle-right" aria-hidden="true"></i></button>
+						</div>
+					</div>
 				</div>
 				
-				<div ng-hide="getinput || chat.length == 1" class="submit_btn">
-					<p>
-						<textarea placeholder="Question" ng-model="data.msg"></textarea>
-					</p>
-					<input type="submit" ng-click="add();" name="Submit" value="Submit">
-					<img src="<?= IC_PLUGIN_URL; ?>294.gif">
+				<div class="form-control1">
+					<form>
+						<textarea ng-model="data.msg" class="msg" placeholder="Type a message here" rows="2"></textarea>
+						<button class="go1"><i class="fa fa-paperclip" aria-hidden="true"></i></button>
+						<button ng-click="add();"  class="go hide"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+						<a href="#" class="bowerd">We're <img src="<?= IC_PLUGIN_URL; ?>img/bower.png"> by Agent</a>
+					</form>
 				</div>
-				<div ng-show="getinput" class="submit_btn">
-					<p>
-						<input placeholder="Name" ng-model="data.name">
-					</p>
-					<p>
-						<input placeholder="Email" ng-model="data.email">
-					</p>
-					<input type="submit" ng-click="update_user();" name="Submit" value="Submit">
-					<img src="<?= IC_PLUGIN_URL; ?>294.gif">
-				</div>
-
-			</form>
-			
+			</div>
+		</div>
+		<div class="chat-icon showchat">
+			<i class="fa fa-comments chat" aria-hidden="true"></i>
+			<i class="fa fa-times close" aria-hidden="true"></i>
 		</div>
 
 		<script type="text/javascript">
@@ -82,6 +200,21 @@ global $wpdb;
 
 			angular.module('demo', []).controller('ActionController', ['$scope', '$timeout', '$http', function($scope, $timeout, $http) {
 					
+					$(".chat-icon").click(function(){
+					    $(".agent-details1").toggle(300);
+						$(this).toggleClass("showchat").toggleClass("showclose");
+					});
+					$( "#msg" ).keyup(function() {
+					 	if($(this).val())
+					 	{
+							$(".go").removeClass("hide");
+						}
+					 	else
+					 	{
+							$(".go").addClass("hide");
+						}
+					});
+
 					$scope.chat = [];
 					$scope.data = {name:"", email:"", msg:""};
 					$scope.meeting = {};
@@ -90,7 +223,7 @@ global $wpdb;
 
 					$scope.start_chating = function(res){
 
-
+						console.log(res);
 						textchatref = new Firebase('https://vinogautam.firebaseio.com/pusher/individual_chat/'+res+'/');
 						textchatref.push($scope.data);
 						$scope.data.msg = '';
@@ -131,7 +264,7 @@ global $wpdb;
 									$timeout(function(){
 										if($scope.chat.length == 1)
 										$scope.getinput = true;
-									}, 600);
+									}, 60000);
 
 									var online_status = new Firebase('https://vinogautam.firebaseio.com/pusher/online_status');
 									cccnt = 1;

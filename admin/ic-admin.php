@@ -306,7 +306,7 @@ class IC_admin{
 								};
 
 								$scope.add = function(id){
-						            all_chat_listeners[id].push({id: 'agent', msg: $scope.multi_chat[id]});
+						            all_chat_listeners[id].push({id: 'agent', msg: $scope.multi_chat[id], time:new Date().getTime(), name: '<?= $current_user->user_login; ?>'});
 						            $scope.multi_chat[id] = '';
 								};
 								/*Question mode and chat mode upates end here*/

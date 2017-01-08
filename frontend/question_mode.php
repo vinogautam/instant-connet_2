@@ -58,7 +58,7 @@ global $wpdb;
 		.bowerd img{ width:10px;}
 		.hide{ display:none !important;}
 
-		.agent-details2{width:360px; height:100%; background:#fff; position:fixed; right:0px; box-shadow: 0px 0px 6px 0px rgba(0,0,0,0.50);top: 0;z-index: 10;}
+		.agent-details2{width:360px; height:100%; background:#fff; position:fixed; right:0px; box-shadow: 0px 0px 6px 0px rgba(0,0,0,0.50);top: 0;z-index: 1000000;}
 		.cus-pho2{width:80px; height:80px; position: absolute; top:8px; left:5px;}
 		.agent-chat1{ color:#444; margin-top:10px; padding-bottom: 10px; padding-left:100px; border-bottom: 1px solid #790303;}
 		.agent-chat1 h4{ padding-bottom: 12px; font-size:16px; font-weight:600; margin:0; padding-top:17px;text-align: left;}
@@ -98,14 +98,14 @@ global $wpdb;
 		    word-break: break-word;
 			margin:3px; font-size: 1.4rem;}
 			.msg-bar-resive.msg-last-resive{ background:  #f8f8f8 none repeat scroll 0 0;
-		    border-bottom-right-radius: 20px;
-		    border-top-right-radius: 20px;
+		    border-bottom-right-radius: 20px !important;
+		    border-top-right-radius: 20px !important;
 		    margin-bottom: 0;
 		    margin-right: 10px; display:inline-block;}
 		p:first-of-type .msg-bar-resive.msg-last-resive {
-		    border-top-left-radius: 20px;}
+		    border-top-left-radius: 20px !important;}
 		p:last-of-type .msg-bar-resive.msg-last-resive {
-		    border-bottom-left-radius: 20px;
+		    border-bottom-left-radius: 20px !important;
 		}
 		.messages1 p img{ width:40px; height:40px; border-radius:50%; float:left; margin:10px;}
 		.chat-mothed{ height:400px; overflow:auto;}
@@ -148,11 +148,17 @@ global $wpdb;
 					<i class="fa fa-times close" aria-hidden="true"></i>
 				</div>
 				<div class="chat-mothed" id="messagesDiv">
-					<div class="messages">
-						<p ng-repeat="c in chat track by $index" on-finish-render><span class="msg-bar msg-last">{{c.msg}}</span></p>
-						<span class="del">Delivered 11:29 PM</span>
+					<div ng-repeat="ch in chat2 track by $index" on-finish-render>
+						<div class="messages" ng-if="$index%2 == 0">
+						<p ng-repeat="c in ch.msg track by $index" ><span class="msg-bar msg-last">{{c.msg}}</span></p>
+						<span class="del">Delivered {{ch.time | date:'h:mm a'}}</span>
+						</div>
+						<div class="messages1" ng-if="$index%2 != 0">
+							<span class="chat-persion">Agent Name {{ch.time | date:'h:mm a'}}</span>
+							<p ng-repeat="c in ch.msg track by $index"><span class="msg-bar-resive msg-last-resive">{{c.msg}}</span></p>
+						</div>
 					</div>
-
+					
 					<!-- 
 					<p ng-repeat="c in chat track by $index" on-finish-render ng-class="{align_right: c.email != data.email}" ng-if="c.msg">
 						<img ng-if="c.email == data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
@@ -184,7 +190,7 @@ global $wpdb;
 					<form>
 						<textarea ng-model="data.msg" class="msg" placeholder="Type a message here" rows="2"></textarea>
 						<button class="go1"><i class="fa fa-paperclip" aria-hidden="true"></i></button>
-						<button ng-click="add();"  class="go hide"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+						<button ng-click="add();"  class="go"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
 						<a href="#" class="bowerd">We're <img src="<?= IC_PLUGIN_URL; ?>img/bower.png"> by Agent</a>
 					</form>
 				</div>
@@ -216,16 +222,41 @@ global $wpdb;
 					});
 
 					$scope.chat = [];
+					$scope.chat2 = [];
 					$scope.data = {name:"", email:"", msg:""};
 					$scope.meeting = {};
 
 					$scope.getinput = false;
 
-					$scope.start_chating = function(res){
+					$scope.insert_chat_byid = function(msg){
+
+						var a = {id: "", time: "", msg:[]};
+						if($scope.chat2.length == 0)
+						{
+							$scope.chat2.push({id: msg.id, time: msg.time, msg:[msg]});
+						}
+						else if($scope.chat2[$scope.chat2.length-1].id == msg.id)
+						{
+							$scope.chat2[$scope.chat2.length-1].id = msg.id;
+							$scope.chat2[$scope.chat2.length-1].time = msg.time;
+							$scope.chat2[$scope.chat2.length-1].msg.push(msg);
+						}
+						else
+						{
+							$scope.chat2.push({id: msg.id, time: msg.time, msg:[msg]});
+						}
+					};
+
+					$scope.start_chating = function(res, bl){
 
 						console.log(res);
 						textchatref = new Firebase('https://vinogautam.firebaseio.com/pusher/individual_chat/'+res+'/');
+						
+						$scope.data.time = new Date().getTime();
+
+						if(bl === undefined)
 						textchatref.push($scope.data);
+
 						$scope.data.msg = '';
 						textchatref.on('child_added', function(snapshot) {
 							v = snapshot.val();
@@ -237,21 +268,33 @@ global $wpdb;
 								if(!$scope.$$phase) {
 								$scope.$apply(function(){
 									$scope.chat.push(v);
+									$scope.insert_chat_byid(v);
 								});
 								}
 								else
 								{
 									$scope.chat.push(v);
+									$scope.insert_chat_byid(v);
 								}
 							}
 						});
 					};
 					
+					<?php if($is_waiting){?>
+						$scope.start_chating(<?= $is_waiting?>, 1);
+						$scope.data.id = <?= $is_waiting?>;
+						var online_status = new Firebase('https://vinogautam.firebaseio.com/pusher/online_status');
+									cccnt = 1;
+									setInterval(function(){
+										online_status.update({ count:<?= $is_waiting?>+"-"+cccnt++});
+									}, 5000);
+					<?php }?>
 					$scope.participant = 0;
 					$scope.video_container = false;
 					$scope.add = function(){
 						if($scope.chat.length)
 						{
+							$scope.data.time = new Date().getTime();
 							textchatref.push($scope.data);
 							$scope.data.msg = '';
 						}
@@ -259,13 +302,14 @@ global $wpdb;
 						{
 							data = {action:'join_chat', meeting: {mode:1, is_mobile: WURFL.is_mobile, question: $scope.data.msg, complete_device_name: WURFL.complete_device_name, form_factor:WURFL.form_factor, status: 1}};
 							jQuery.post('<?php echo site_url();?>/wp-admin/admin-ajax.php', data, function(res){
+									$scope.data.id = res;
 									$scope.start_chating(res);
 									$scope.participant = res;
 									$timeout(function(){
 										if($scope.chat.length == 1)
 										$scope.getinput = true;
 									}, 60000);
-
+									
 									var online_status = new Firebase('https://vinogautam.firebaseio.com/pusher/online_status');
 									cccnt = 1;
 									setInterval(function(){
@@ -310,5 +354,6 @@ global $wpdb;
 
 						});
 					};
+
 			}]);
 		</script>

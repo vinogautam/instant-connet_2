@@ -129,14 +129,14 @@ global $wpdb;
 				<div class="connecting"><span>Conneting...</span></div>
 				<div class="form-control1">
 					<form>
-						<textarea ng-model="data.msg" id="msg" placeholder="Type a message here" rows="3"></textarea>
+						<textarea ng-enter="add();" ng-model="data.msg" id="msg" placeholder="Type a message here" rows="3"></textarea>
 						<button class="go1"><i class="fa fa-paperclip" aria-hidden="true"></i></button>
 						<button ng-click="add();" class="go hide"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
 						<a href="#" class="bowerd">We're <img src="<?= IC_PLUGIN_URL; ?>img/bower.png"> by Agent</a>
 					</form>
 				</div>
 			</div>
-			<div ng-show="chat.length" class="agent-details2">
+			<div ng-show="chat.length && showchat" class="agent-details2">
 				<div class="cus-pho2">
 					<?php echo get_avatar( $user_info->user_email, 100 ); ?>
 				</div>
@@ -145,7 +145,7 @@ global $wpdb;
 					<p>Text placeholder </p>
 				</div>
 				<div class="close-chat">
-					<i class="fa fa-times close" aria-hidden="true"></i>
+					<i ng-click="showchat = false;" class="fa fa-times close" aria-hidden="true"></i>
 				</div>
 				<div class="chat-mothed" id="messagesDiv">
 					<div ng-repeat="ch in chat2 track by $index" on-finish-render>
@@ -158,24 +158,6 @@ global $wpdb;
 							<p ng-repeat="c in ch.msg track by $index"><span class="msg-bar-resive msg-last-resive">{{c.msg}}</span></p>
 						</div>
 					</div>
-					
-					<!-- 
-					<p ng-repeat="c in chat track by $index" on-finish-render ng-class="{align_right: c.email != data.email}" ng-if="c.msg">
-						<img ng-if="c.email == data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
-						{{c.msg}}
-						<img ng-if="c.email != data.email" ng-src="http://www.gravatar.com/avatar/{{c.hash}}/?s=30"> 
-						<hr>
-					</p>
-					<div class="messages1">
-						<span class="chat-persion">Agent Name 12.00 PM</span>
-						<p><span class="msg-bar-resive msg-last-resive">hi how r u</span></p>
-						<p><span class="msg-bar-resive msg-last-resive"> is therezxzxv</span></p>
-						<p><span class="msg-bar-resive msg-last-resive"> is there</span></p>
-					</div>
-					<div class="messages1">
-						<span class="chat-persion">Agent Name 12.00 PM</span>
-						<p><img src="img/cus-pho.jpg"><span class="msg-bar-resive msg-last-resive" style=" float:left; width:240px;">Hey! Would you like to talk to sales, support, or anyone?</span></p>
-					</div> -->
 					<div class="form-control2" ng-show="getinput">
 						<p>Get notify when agent is online </p>
 						<div class="wiat-box">
@@ -188,23 +170,51 @@ global $wpdb;
 				
 				<div class="form-control1">
 					<form>
-						<textarea ng-model="data.msg" class="msg" placeholder="Type a message here" rows="2"></textarea>
+						<textarea ng-enter="add();" ng-model="data.msg" class="msg" placeholder="Type a message here" rows="2"></textarea>
 						<button class="go1"><i class="fa fa-paperclip" aria-hidden="true"></i></button>
 						<button ng-click="add();"  class="go"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
 						<a href="#" class="bowerd">We're <img src="<?= IC_PLUGIN_URL; ?>img/bower.png"> by Agent</a>
 					</form>
 				</div>
 			</div>
+			<div class="chat-icon showchat" ng-click="showchat=true;">
+				<i class="fa fa-comments chat" aria-hidden="true"></i>
+				<i class="fa fa-times close" aria-hidden="true"></i>
+			</div>
 		</div>
-		<div class="chat-icon showchat">
-			<i class="fa fa-comments chat" aria-hidden="true"></i>
-			<i class="fa fa-times close" aria-hidden="true"></i>
-		</div>
+		
 
 		<script type="text/javascript">
 			var textchatref;
 
-			angular.module('demo', []).controller('ActionController', ['$scope', '$timeout', '$http', function($scope, $timeout, $http) {
+			angular.module('demo', [])
+			.directive('ngEnter', function() {
+						        return function(scope, element, attrs) {
+						            element.bind("keydown keypress", function(event) {
+						                if(event.which === 13) {
+						                        scope.$apply(function(){
+						                                scope.$eval(attrs.ngEnter);
+						                        });
+						                        
+						                        event.preventDefault();
+						                }
+						            });
+						        };
+						    })
+			.directive('onFinishRender', function ($timeout) {
+						        return {
+						            restrict: 'A',
+						            link: function (scope, element, attr) {
+						                if (scope.$last === true) {
+						                    $timeout(function () {
+						                      //scope.$emit(attr.onFinishRender);
+						                      jQuery("#messagesDiv").scrollTop(jQuery("#messagesDiv")[0].scrollHeight);
+						                    }, 500);
+						                }
+						            }
+						        }
+						})
+			.controller('ActionController', ['$scope', '$timeout', '$http', function($scope, $timeout, $http) {
 					
 					$(".chat-icon").click(function(){
 					    $(".agent-details1").toggle(300);
@@ -221,6 +231,7 @@ global $wpdb;
 						}
 					});
 
+					$scope.showchat = true;
 					$scope.chat = [];
 					$scope.chat2 = [];
 					$scope.data = {name:"", email:"", msg:""};

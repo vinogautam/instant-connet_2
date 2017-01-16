@@ -44,7 +44,7 @@ global $wpdb;
 		.chat-icon i{padding: 10px 11px; opacity:0; pointer-events:none; transition:all ease 0.5s; z-index:0;position:absolute;left: 0;top: -2px;}
 		.chat-icon.showclose .close,.chat-icon.showchat .chat{ opacity:1; pointer-events:auto; z-index:1;}
 		.fa-comments,.fa-times{color:#fff; font-size:30px;}
-		.fa-times{ padding:10px 13px !important;}
+		.fa-times{padding:10px 13px !important;}
 		.form-control2{ margin-right:10px; width:270px; text-align:center; border:1px solid #ccc; padding:10px; float:right; background:#f1f1f1}
 		.wiat-box{float:left; width:180px;}
 		.wiat-box input{border:1px solid #ccc; padding:8px 2px; margin-bottom:0px; width:180px; border-radius:2px;}

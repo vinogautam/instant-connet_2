@@ -170,7 +170,7 @@ class IC_admin{
 					<hr>
 					<div class="lobby_tab">
 						<span ng-class="{active:tab == 1}" ng-click="tab = 1;">Online Users</span>
-						<span ng-class="{active:tab == 2}" ng-click="tab = 2;">Offline Users</span>
+						<span ng-class="{active:tab == 2}" ng-click="tab = 2;">Conversation</span>
 					</div>
 					<div ng-if="tab == 1" class="">
 						<ul>
@@ -186,6 +186,15 @@ class IC_admin{
 						</p>
 					</div>
 					<div ng-if="tab == 2" class="">
+						<ul>
+							<li ng-repeat="part in participants" ng-if="part.mode != 3 && part.status == '1'" ng-click="new_chat(part.id)" ng-init="part.diff = part.diff === undefined ? 0 : part.diff; autotimer(part);">
+								<span class="fa fa-circle"></span>
+								<img ng-src="{{get_avatar(part)}}">
+								#{{part.id}} {{part.name}} {{part.msg}}
+							</li>
+						</ul>
+					</div>
+					<!--<div ng-if="tab == 2" class="">
 						<div ng-show="schedule">
 							<p>Name : {{schedule['name']}}</p>
 							<p>Email : {{schedule['email']}}</p>
@@ -203,7 +212,7 @@ class IC_admin{
 								<button ng-click="$parent.$parent.schedule = part">Schedule Appointment</button>
 							</li>
 						</ul>
-					</div>
+					</div>-->
 				</form>
 			</div>
 
@@ -211,16 +220,16 @@ class IC_admin{
 			
 			<!-- ng-show="$index < 2 || $index == current_chat.length-1" -->
 			<div ng-cloak class="chat_container">
-			      <div class="chat_box" ng-repeat="part in participants" ng-if="part.mode != 3 && part.status == '1'" ng-init="part.diff = part.diff === undefined ? 0 : part.diff; autotimer(part); new_chat(part.id);">
+			      <div class="chat_box" ng-repeat="cc in current_chat" >
 			        <div class="chat_header">
-			          <img style="float: left;" class="img-circle" width="20" ng-src="{{getAvatarbyId(part.id)}}" alt="">
+			          <img style="float: left;" class="img-circle" width="20" ng-src="{{getAvatarbyId(cc)}}" alt="">
 			          <b ng-if="part.mode == 2">{{part.name}}({{part.email}})</b>
-			          <a ng-click="remove_chat(part.id)"><i class="fa fa-close"></i></a>
-			          <a ng-click="create_meeting_from_qc(part.id)"><i class="fa fa-video-camera"></i></a>
+			          <a ng-click="remove_chat(cc)"><i class="fa fa-close"></i></a>
+			          <a ng-click="create_meeting_from_qc(cc)"><i class="fa fa-video-camera"></i></a>
 			        </div>
-			        <div id="chat_box_{{part.id}}" class="chat_conversation_box">
+			        <div id="chat_box_{{cc}}" class="chat_conversation_box">
 			        	<b ng-if="part.mode == 1">"{{part.question}}"</b>
-			          <div ng-repeat="msg in all_chat_data[part.id]" on-finish-render="{{part.id}}" ng-class="{own_msg: msg.id == 'agent', opponent_msg: msg.id != 'agent'}">
+			          <div ng-repeat="msg in all_chat_data[cc]" on-finish-render="{{cc}}" ng-class="{own_msg: msg.id == 'agent', opponent_msg: msg.id != 'agent'}">
 			            <div class="clearfix" ng-if="msg.msg && msg.id == 'agent'">
 			              <div><p>{{msg.msg}}</p></div>
 			              <img ng-src="http://identicon.org/?t=agent&s=20">
@@ -280,12 +289,16 @@ class IC_admin{
 								var refresh_user_list = new Firebase('https://vinogautam.firebaseio.com/pusher/refresh_user_list');
 
 								/*Question mode and chat mode upates start here*/
-
+								$scope.current_chat = [];
 								var all_chat_listeners = [];
 						        $scope.all_chat_data = [];
 						        $scope.multi_chat = {};
 						        $scope.new_chat = function(id)
 						        {
+						          if($scope.current_chat.indexOf(id) != -1) return;
+
+									$scope.current_chat.push(id);
+
 						          if(all_chat_listeners[id] === undefined)
 						          {
 						            $scope.all_chat_data[id] = [];

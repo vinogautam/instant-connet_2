@@ -112,6 +112,7 @@ class IC_admin{
 		.chat_container .chat_box .chat_conversation_box .own_msg+.own_msg{margin:0;}
 		.chat_container .chat_box .chat_conversation_box .opponent_msg+.opponent_msg img{visibility: hidden;}
 		.chat_container .chat_box .chat_conversation_box .own_msg+.own_msg img{visibility: hidden;}
+		.chat_container .chat_box.boxminimize{height: 30px;}
 		</style>
 		<div class="chat_icon">
 			<i class="fa fa-comments"></i>
@@ -220,14 +221,16 @@ class IC_admin{
 			
 			<!-- ng-show="$index < 2 || $index == current_chat.length-1" -->
 			<div ng-cloak class="chat_container">
-			      <div class="chat_box" ng-repeat="cc in current_chat" >
+			      <div class="chat_box" ng-repeat="cc in current_chat" ng-init="$parent.minmax[cc]=false;" ng-class="{boxminimize:minmax[cc]==true}">
 			        <div class="chat_header">
 			          <img style="float: left;" class="img-circle" width="20" ng-src="{{getAvatarbyId(cc)}}" alt="">
 			          <b ng-if="part.mode == 2">{{part.name}}({{part.email}})</b>
+			          <a ng-show="minmax[cc]==true" ng-click="$parent.minmax[cc]=false;"><i class="fa fa-plus"></i></a>
+			          <a ng-show="minmax[cc]==false" ng-click="$parent.minmax[cc]=true;"><i class="fa fa-minus"></i></a>
 			          <a ng-click="remove_chat(cc)"><i class="fa fa-close"></i></a>
 			          <a ng-click="create_meeting_from_qc(cc)"><i class="fa fa-video-camera"></i></a>
 			        </div>
-			        <div id="chat_box_{{cc}}" class="chat_conversation_box">
+			        <div ng-show="minmax[cc]==false" id="chat_box_{{cc}}" class="chat_conversation_box">
 			        	<b ng-if="part.mode == 1">"{{part.question}}"</b>
 			          <div ng-repeat="msg in all_chat_data[cc]" on-finish-render="{{cc}}" ng-class="{own_msg: msg.id == 'agent', opponent_msg: msg.id != 'agent'}">
 			            <div class="clearfix" ng-if="msg.msg && msg.id == 'agent'">
@@ -240,7 +243,7 @@ class IC_admin{
 			            </div>
 			          </div>
 			        </div>
-			        <div class="chat_input">
+			        <div ng-show="minmax[cc]==false" class="chat_input">
 			          <input type="text" ng-model="multi_chat[part.id]" ng-enter="add(part.id);">
 			        </div>
 			      </div>
@@ -289,6 +292,7 @@ class IC_admin{
 								var refresh_user_list = new Firebase('https://vinogautam.firebaseio.com/pusher/refresh_user_list');
 
 								/*Question mode and chat mode upates start here*/
+								$scope.minmax = {};
 								$scope.current_chat = [];
 								var all_chat_listeners = [];
 						        $scope.all_chat_data = [];

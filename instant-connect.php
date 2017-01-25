@@ -40,6 +40,9 @@
 		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_date_picker' ));
 		add_filter( 'page_template', array( &$this, 'wpa3396_page_template' ));
 		add_action('wp_login', array( &$this, 'after_login' ), 10, 2);
+		
+		add_action( 'add_meta_boxes', array( &$this, 'ic_meta_boxes' ));
+		add_action( 'save_post', array( &$this, 'ic_save_meta_box' ));
 
 		$ntmadmin = new IC_admin();
 		new IC_Metabox();
@@ -47,6 +50,28 @@
 		new IC_front();
 	}
 	
+	function ic_meta_boxes() {
+	    add_meta_box( 'ic_meta_boxes', __( 'Chat Box Settings', 'textdomain' ), array( &$this, 'ic_meta_boxes_callback'), 'page' );
+	}
+
+	function ic_meta_boxes_callback( $post ) {
+	    
+	    $autopopup = get_post_meta($post->ID, 'autopopup', $_POST['autopopup']);
+	    $chtmessage = get_post_meta($post->ID, 'chtmessage', $_POST['chtmessage']);
+	    ?>
+	    <p>Auto popup on/off <input <?= $autopopup[0] ? 'checked' : ''?> value="1" type="checkbox" name="autopopup"></p>
+	    <div>
+	    	<h4>Custom chat message</h4>
+	    	<textarea name="chtmessage" cols="80" rows="5"><?= $chtmessage[0]?></textarea>
+	    </div>
+	    <?php
+	}
+
+	function ic_save_meta_box( $post_id ) {
+	    update_post_meta($post_id, 'autopopup', $_POST['autopopup']);
+	    update_post_meta($post_id, 'chtmessage', $_POST['chtmessage']);
+	}
+
 	function after_login($user_login, $user)
 	{
 		update_user_meta($current_user->ID, 'user_current_status', $_GET['status']);

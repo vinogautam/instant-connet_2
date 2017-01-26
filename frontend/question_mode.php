@@ -117,6 +117,10 @@ global $wpdb;
 		.form-control2{ margin-right:20px; float:right; padding: 10px 20px; border:1px solid #ccc; margin-top:7px;}
 		.submit .fa-angle-right{ font-weight:600; font-size:16px;}
 		</style>
+		<?php
+		if(get_the_ID())
+		$instant_connect_settings = get_post_meta(get_the_ID(), 'instant_connect_settings', true);
+		?>
 		<div ng-app="demo" ng-controller="ActionController" >
 			<div ng-hide="chat.length" class="agent-details1">
 				<div class="cus-pho1">
@@ -126,6 +130,11 @@ global $wpdb;
 					<h4>Agent Name</h4>
 					<p>Text placeholder </p>
 				</div>
+				
+				<?php if(isset($instant_connect_settings) && isset($instant_connect_settings['message'])){?>
+				<p><?= $instant_connect_settings['message']?></p>
+				<?php }?>
+
 				<div class="connecting"><span>Conneting...</span></div>
 				<div class="form-control1">
 					<form>
@@ -186,6 +195,11 @@ global $wpdb;
 
 		<script type="text/javascript">
 			var textchatref;
+			<?php if(isset($instant_connect_settings) && isset($instant_connect_settings['timeout'])){?>
+			var angtimeout = <?= $instant_connect_settings['timeout']?>;
+			<?php }else{?>
+			var angtimeout = 60;
+			<?php }?>
 
 			angular.module('demo', [])
 			.directive('ngEnter', function() {
@@ -319,7 +333,7 @@ global $wpdb;
 									$timeout(function(){
 										if($scope.chat.length == 1)
 										$scope.getinput = true;
-									}, 60000);
+									}, angtimeout*1000);
 									
 									var online_status = new Firebase('https://vinogautam.firebaseio.com/pusher/online_status');
 									cccnt = 1;

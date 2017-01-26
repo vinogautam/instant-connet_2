@@ -51,25 +51,44 @@
 	}
 	
 	function ic_meta_boxes() {
-	    add_meta_box( 'ic_meta_boxes', __( 'Chat Box Settings', 'textdomain' ), array( &$this, 'ic_meta_boxes_callback'), 'page' );
+	    add_meta_box( 'ic_meta_boxes', __( 'Instant Connect Settings', 'textdomain' ), array( &$this, 'ic_meta_boxes_callback'), 'page' );
 	}
 
 	function ic_meta_boxes_callback( $post ) {
 	    
-	    $autopopup = get_post_meta($post->ID, 'autopopup', $_POST['autopopup']);
-	    $chtmessage = get_post_meta($post->ID, 'chtmessage', $_POST['chtmessage']);
+	    $instant_connect_settings = get_post_meta($post->ID, 'instant_connect_settings', true);
 	    ?>
-	    <p>Auto popup on/off <input <?= $autopopup[0] ? 'checked' : ''?> value="1" type="checkbox" name="autopopup"></p>
+	    <p><label>Auto popup on/off</label> <input <?= isset($instant_connect_settings['autopopup']) ? 'checked' : ''?> value="1" type="checkbox" name="instant_connect_settings[autopopup]"></p>
+
+	    <p>
+	    	<label>Email input timeout delay(in seconds)</label>
+	    	<select name="instant_connect_settings[timeout]">
+	    		<option <?= (isset($instant_connect_settings['timeout']) && $instant_connect_settings['timeout'] == 10) ? 'selected' : ''?> value="10">10</option>
+	    		<option <?= (isset($instant_connect_settings['timeout']) && $instant_connect_settings['timeout'] == 20) ? 'selected' : ''?> value="20">20</option>
+	    		<option <?= (isset($instant_connect_settings['timeout']) && $instant_connect_settings['timeout'] == 30) ? 'selected' : ''?> value="30">30</option>
+	    		<option <?= (isset($instant_connect_settings['timeout']) && $instant_connect_settings['timeout'] == 40) ? 'selected' : ''?> value="40">40</option>
+	    		<option <?= (isset($instant_connect_settings['timeout']) && $instant_connect_settings['timeout'] == 50) ? 'selected' : ''?> value="50">50</option>
+	    		<option <?= (isset($instant_connect_settings['timeout']) && $instant_connect_settings['timeout'] == 60) ? 'selected' : ''?> value="60">60</option>
+	    	</select>
+	    </p>
+	    <p><label>Get name with email</label> <input <?= isset($instant_connect_settings['getname']) ? 'checked' : ''?> value="1" type="checkbox" name="instant_connect_settings[getname]"></p>
 	    <div>
 	    	<h4>Custom chat message</h4>
-	    	<textarea name="chtmessage" cols="80" rows="5"><?= $chtmessage[0]?></textarea>
+	    	<textarea name="instant_connect_settings[message]" cols="60" rows="3"><?= isset($instant_connect_settings['message']) ? $instant_connect_settings['message'] : '';?></textarea>
+	    </div>
+	    <div>
+	    	<h4>Chat welcome message(If Online)</h4>
+	    	<textarea name="instant_connect_settings[onmessage]" cols="60" rows="3"><?= isset($instant_connect_settings['onmessage']) ? $instant_connect_settings['onmessage'] : '';?></textarea>
+	    </div>
+	    <div>
+	    	<h4>Chat welcome message(If Offline)</h4>
+	    	<textarea name="instant_connect_settings[offmessage]" cols="60" rows="3"><?= isset($instant_connect_settings['offmessage']) ? $instant_connect_settings['offmessage'] : '';?></textarea>
 	    </div>
 	    <?php
 	}
 
 	function ic_save_meta_box( $post_id ) {
-	    update_post_meta($post_id, 'autopopup', $_POST['autopopup']);
-	    update_post_meta($post_id, 'chtmessage', $_POST['chtmessage']);
+	    update_post_meta($post_id, 'instant_connect_settings', $_POST['instant_connect_settings']);
 	}
 
 	function after_login($user_login, $user)

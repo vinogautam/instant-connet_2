@@ -230,6 +230,29 @@ global $wpdb;
 						})
 			.controller('ActionController', ['$scope', '$timeout', '$http', function($scope, $timeout, $http) {
 					
+					<?php if(isset($instant_connect_settings) && isset($instant_connect_settings['autopopup'])){?>
+						$(".chat-icon").hide();
+					$(window).scroll(function() {
+					   if($(window).scrollTop() + $(window).height() == $(document).height()) {
+					       if(!$(".chat-icon").hasClass("chattriggered"))
+					       {
+					       		$(".chat-icon").show();
+					       		$(".chat-icon").addClass("chattriggered");
+					       		$(".chat-icon").trigger("click");
+					       }
+					   }
+					});
+
+					setTimeout(function(){
+						if(!$(".chat-icon").hasClass("chattriggered"))
+					       {
+					       		$(".chat-icon").show();
+					       		$(".chat-icon").addClass("chattriggered");
+					       		$(".chat-icon").trigger("click");
+					       }
+					}, 30000);
+					<?php }?>
+
 					$(".chat-icon").click(function(){
 					    $(".agent-details1").toggle(300);
 						$(this).toggleClass("showchat").toggleClass("showclose");
@@ -280,7 +303,14 @@ global $wpdb;
 						$scope.data.time = new Date().getTime();
 
 						if(bl === undefined)
-						textchatref.push($scope.data);
+						{
+							textchatref.push($scope.data);
+							<?php if(isset($instant_connect_settings)){?>
+							$timeout(function(){
+								textchatref.push({id:'admin', msg:'<?= $user_current_status == 1 ? $instant_connect_settings['onmessage'] : $instant_connect_settings['offmessage'] ;?>'});
+							}, 5000);
+							<?php }?>
+						}
 
 						$scope.data.msg = '';
 						textchatref.on('child_added', function(snapshot) {

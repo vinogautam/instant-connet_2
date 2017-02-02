@@ -100,7 +100,8 @@
 	function wpa3396_page_template( $page_template )
 	{
 		if ( is_page( 'meeting' ) ) {
-			$page_template = dirname( __FILE__ ) . '/meeting_template_new.php';
+			$version = isset($_GET['version']) ? $_GET['version'] : 2;
+			$page_template = dirname( __FILE__ ) . '/meeting_template_v'.$version.'.php';
 		}
 		return $page_template;
 	}

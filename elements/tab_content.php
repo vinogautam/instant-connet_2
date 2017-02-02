@@ -1,5 +1,10 @@
 <!-- WHITEBOARD WINDOW -->
 <div ng-if="tab.type == 'whiteboard'" class="col-xs-12 no-pad meeting-pane">
+ 
+ <div class="col-sm-12 no-pad">
+    <ot-whiteboard  width="700" height="420"></ot-whiteboard>
+ </div>
+
  <div class="pane-footer col-xs-12">
    
    <div class="col-sm-10 col-lg-12 col-md-10 col-xs-12 whiteboard-tools no-pad">

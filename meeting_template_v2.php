@@ -55,6 +55,13 @@ Instant Connect UI
   <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
   <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
   <![endif]-->
+  <link rel="stylesheet" href="<?= plugin_dir_url(__FILE__); ?>css/opentok-whiteboard.css" type="text/css" media="screen" charset="utf-8">
+  <style type="text/css">
+    .meet-icon li{background: url(<?= plugin_dir_url(__FILE__); ?>dist/v2/img/meet-icons.jpg);}
+    ot-whiteboard {display: block;width: 100%;height:400px;position: absolute;left: 0;right: 0;z-index:11;}
+  </style>
+
+
 </head>
 
 <body class="hold-transition skin-red sidebar-collapse sidebar-mini instant-connect <?= isset($_GET['admin']) ? 'admin_view' : 'client_view'; ?>" ng-controller="MyCtrl">
@@ -374,10 +381,14 @@ Instant Connect UI
 
       <div class="tab-pane active" ng-if="current_tab == -1" >
         <div class="col-xs-12 no-pad meeting-pane">
-           <a ng-click="add_tab('whiteboard', 'WhiteBoard');">WhiteBoard</a>
-           <a href="#" data-toggle="modal" data-target="#presentationsModal">Presentation</a>
-           <a ng-click="add_tab('screenshare', 'Screen Share');">Screen Share</a>
-           <a href="#" data-toggle="modal" data-target="#youtubeModal">Youtube</a>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+              <ul class="meet-icon">
+                <li class="presen-img"><a href="#" data-toggle="modal" data-target="#presentationsModal"></a></li>
+                <li class="screen-share"><a ng-click="add_tab('screenshare', 'Screen Share');" href="#"></a></li>
+                <li class="whith-board"><a ng-click="add_tab('whiteboard', 'WhiteBoard');" href="#"></a></li>
+                <li class="youtube"><a href="#" data-toggle="modal" data-target="#youtubeModal"></a></li>
+              </ul>
+            </div>
         </div>
       </div>
       <div class="tab-pane" ng-repeat="tab in tabs track by $index" ng-if="current_tab != -1 && current_tab == $index" ng-class="{active:current_tab == $index}">

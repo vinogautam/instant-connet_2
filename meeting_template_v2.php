@@ -6,13 +6,22 @@ if(isset($_GET['only_video']))
   exit;
 }
 
-$meeting_id = $_GET['id'];
+if(isset($_GET['dev']))
+{
+  $ot = opentok_token();
+  $sessionId = $ot['sessionId']; 
+  $token = $ot['token'];
+}
+else
+{
+  $meeting_id = $_GET['id'];
 
-global $wpdb; $results = $meeting = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting where id=".$meeting_id);
-$sessionId = $meeting->session_id; 
-$token = $meeting->token;
-if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GET['finonce'], 'finonce'))) {
-  die("Invalid meeting url");
+  global $wpdb; $results = $meeting = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting where id=".$meeting_id);
+  $sessionId = $meeting->session_id; 
+  $token = $meeting->token;
+  if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GET['finonce'], 'finonce'))) {
+    die("Invalid meeting url");
+  }
 }
 ?>
 <!DOCTYPE html>
@@ -354,7 +363,7 @@ Instant Connect UI
     <div class="meeting-panel row">
         
         <div class="col-xs-12 panel-header no-pad">
-        <div ng-click="current_tab = -1" class="home-label">Start</div>
+        <div ng-click="set_tab(-1);" class="home-label">Start</div>
         <ul>
             <li ng-repeat="tab in tabs track by $index" ng-class="{active:current_tab == $index}"><a ng-click="set_tab($index);">{{tab.name}} <span ng-click="$event.stopPropagation();remove_tab($index);" class="close-window">&times;</span></a></li>
         </ul>

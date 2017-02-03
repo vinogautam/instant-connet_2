@@ -58,7 +58,31 @@ Instant Connect UI
   <link rel="stylesheet" href="<?= plugin_dir_url(__FILE__); ?>css/opentok-whiteboard.css" type="text/css" media="screen" charset="utf-8">
   <style type="text/css">
     .meet-icon li{background: url(<?= plugin_dir_url(__FILE__); ?>dist/v2/img/meet-icons.jpg);}
+    
+
+    /*Need to add this styes in less*/
     ot-whiteboard {display: block;width: 100%;height:400px;position: absolute;left: 0;right: 0;z-index:11;}
+    .meet-icon{ padding: 0; text-align: center; margin-top: 12%; }
+    .meet-icon li, .meet-icon li a{ list-style-type: none;  width:142px; height: 142px;  margin:12px;
+      background-repeat: no-repeat; display: inline-block;}
+    .meet-icon .presen-img{ background-position: -32px -33px;  }
+    .meet-icon .presen-img:hover{ background-position: -32px -180px;  }
+    .meet-icon .screen-share{background-position: -185px -33px;}
+    .meet-icon .screen-share:hover{background-position: -185px -180px;}
+    .meet-icon .whith-board{background-position: -339px -33px; border-bottom:1px solid #ededed;}
+    .meet-icon .whith-board:hover{background-position: -339px -180px;}
+    .meet-icon .youtube{background-position: -491px -33px; border-top:1px solid #ededed;}
+    .meet-icon .youtube:hover{background-position: -491px -180px;}
+
+    .pane-footer{z-index:9999;}
+    .absolute_center{position:absolute;left:0;right:0;top:0;bottom:0;margin:auto;}
+    .img_whm100{width:auto;height:auto;max-width:100%;max-height:100%;}
+    .wh100{width:100%;height:100%;}
+    .w100{width:100%;}
+    .h100{height:100%;}
+    .instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li.active img{outline:2px solid #790303}
+    .instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li.active p span{background:#790303;color:#fff;padding:1px 20px 4px;border-radius:20px}
+    /*End here*/
   </style>
 
 

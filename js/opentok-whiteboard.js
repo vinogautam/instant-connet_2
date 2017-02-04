@@ -21,7 +21,7 @@ if (typeof paper === 'undefined' && typeof require !== 'undefined') {
 }
 
 var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
-.directive('otWhiteboard', ['OTSession', '$window', function (OTSession, $window) {
+.directive('otWhiteboard', ['OTSession', '$window', '$rootScope', function (OTSession, $window, $rootScope) {
     return {
         restrict: 'E',
         template: '<canvas hidpi="off"></canvas>',
@@ -228,6 +228,8 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                         });
                         break;
                 }
+                
+                $rootScope.$broadcast('Whiteboard_changed', scope.get_image());
             };
 
             var drawUpdates = function (updates) {

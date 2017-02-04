@@ -415,7 +415,7 @@ Instant Connect UI
             </div>
         </div>
       </div>
-      <div class="tab-pane" ng-repeat="tab in tabs track by $index" ng-if="current_tab != -1 && current_tab == $index" ng-class="{active:current_tab == $index}">
+      <div class="tab-pane" ng-repeat="tab in tabs track by $index" ng-if="current_tab != -1 && current_tab == $index" ng-class="{active:current_tab == $index}" ng-init="tab.index = $index">
          <?php include 'elements/tab_content.php';?>
       </div>
 
@@ -549,7 +549,7 @@ Instant Connect UI
 <script src="<?= plugin_dir_url(__FILE__); ?>js/opentok-layout.js" type="text/javascript" charset="utf-8"></script>
 <script src="<?= plugin_dir_url(__FILE__); ?>js/opentok-angular.js" type="text/javascript" charset="utf-8"></script>
 <script src="<?= plugin_dir_url(__FILE__); ?>js/opentok-whiteboard.js" type="text/javascript" charset="utf-8"></script>
-<script src="https://www.youtube.com/iframe_api"></script>
+
 <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/core.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/md5-min.js'></script>

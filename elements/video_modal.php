@@ -30,8 +30,8 @@
               <table class="table table-hover">
                 
                 <tr ng-repeat="p in youtube_list | filter:vsearch | startFrom:currentPage*5 | limitTo:5  track by $index ">
-                  <td ng-click="change_video(p.url)" data-dismiss="modal"><img ng-src="{{'https://img.youtube.com/vi/'+getvideobyID(p.url)+'/hqdefault.jpg'}}" width="60" /></td>
-                  <td ng-click="change_video(p.url)" data-dismiss="modal">{{p.name}}</td>
+                  <td ng-click="add_tab('youtube', p.name, p)" data-dismiss="modal"><img ng-src="{{'https://img.youtube.com/vi/'+getvideobyID(p.url)+'/hqdefault.jpg'}}" width="60" /></td>
+                  <td ng-click="add_tab('youtube', p.name, p)" data-dismiss="modal">{{p.name}}</td>
                 
                   <td>
                     <a ng-click="deletevideo($event, $index)" class="btn btn-app modal-app-btn" data-toggle="tooltip" data-placement="bottom" data-animation="delay 2" title="Remove"><i class="fa fa-trash"></i></a>

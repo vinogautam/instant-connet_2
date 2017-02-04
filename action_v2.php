@@ -23,11 +23,11 @@ function onPlayerStateChange(event) {
 		break;
 	  case 1:
 		console.log('video playing from '+player.getCurrentTime());
-		scope.video_noti('start', player.getCurrentTime());
+		//scope.video_noti('start', player.getCurrentTime());
 		break;
 	  case 2:
 		console.log('video paused at '+player.getCurrentTime());
-		scope.video_noti('pause', player.getCurrentTime());
+		//scope.video_noti('pause', player.getCurrentTime());
 	}
 }
 function setCookie(cname, cvalue, exdays) {
@@ -80,12 +80,16 @@ if (scope.$last === true) {
 }
 })
 .filter('to_trusted', ['$sce', function($sce){
-return function(text) {
-return $sce.trustAsHtml(text);
-};
+	return function(text) {
+		return $sce.trustAsHtml(text);
+	};
 }])
-
-.controller('MyCtrl', ['$scope', 'OTSession', 'apiKey', 'sessionId', 'token', '$timeout', '$http', '$interval', '$filter', function($scope, OTSession, apiKey, sessionId, token, $timeout, $http, $interval, $filter) {
+.filter('trustAsResourceUrl', ['$sce', function($sce) {
+    return function(val) {
+        return $sce.trustAsResourceUrl(val);
+    };
+}])
+.controller('MyCtrl', ['$scope', 'OTSession', 'apiKey', 'sessionId', 'token', '$timeout', '$http', '$interval', '$filter', '$rootScope', function($scope, OTSession, apiKey, sessionId, token, $timeout, $http, $interval, $filter, $rootScope) {
 
 	$scope.tabs = [];
 	$scope.current_tab = -1;
@@ -146,6 +150,11 @@ return $sce.trustAsHtml(text);
 		        });
 	        }
 	        
+	        if($("#youtube-player").length)
+	        {
+	        	$("#youtube-player").height($(".meeting-pane").height()-40);
+	        }
+
 		}, 100);
 	};
 
@@ -159,6 +168,15 @@ return $sce.trustAsHtml(text);
 	{
 		return parseInt(id);
 	};
+
+	$rootScope.$on('Whiteboard_changed', function(event, data){
+		if($scope.tabs[$scope.current_tab].type == 'presentation')
+        {    
+        	$scope.$apply(function(){
+        		$scope.tabs[$scope.current_tab].slide_image[$scope.tabs[$scope.current_tab].currentpresentationindex] = data;
+        	});
+        }
+	})
 
 	$scope.remove_tab = function(id)
 	{
@@ -201,13 +219,33 @@ return $sce.trustAsHtml(text);
 
 		if($scope.newvideo)
 		{
-			$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=addnew_video', $scope.newvideo).then(function(){
-				$scope.youtube_list.push($scope.newvideo);
+			console.log($scope.newvideo);
+
+			$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=addnew_video', $scope.newvideo).then(function(res){
+				$scope.youtube_list = res['data'];
 				$scope.newvideo = {};
 			});
 
 			$scope.reset();
 		}
+	};
+
+	$scope.numberOfPages=function(arr, search){
+        return Math.ceil($filter('filter')($scope[arr], $scope[search]).length/5);                
+    };
+
+    $scope.numberOfPagesArray=function(arr, search){
+        return new Array($scope.numberOfPages(arr, search));                
+    };
+
+	$scope.getvideobyID = function(url)
+	{
+		if(url.split("/embed/").length == 2)
+            return url.split("/embed/")[1];
+        else if(url.split("?v=").length == 2)
+            return url.split("?v=")[1];
+        else
+            return;
 	};
 
 	$(document).on("change", "#convert_ppt", function(e) {

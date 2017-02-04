@@ -22,6 +22,7 @@ class IC_ajax{
 		add_action( 'wp_ajax_new_user_to_meeting', array( &$this, 'new_user_to_meeting'));
 		add_action( 'wp_ajax_usercontrol', array( &$this, 'usercontrol'));
 		add_action( 'wp_ajax_addnew_video', array( &$this, 'addnew_video'));
+		add_action( 'wp_ajax_nopriv_addnew_video', array( &$this, 'addnew_video'));
 		add_action( 'wp_ajax_delete_video', array( &$this, 'delete_video'));
 		add_action( 'wp_ajax_delete_presentation', array( &$this, 'delete_presentation'));
 		add_action( 'wp_ajax_nopriv_delete_presentation', array( &$this, 'delete_presentation'));
@@ -148,6 +149,7 @@ class IC_ajax{
 			$option[] = $_POST;
 			update_option('youtube_videos', $option);
 		}
+		echo json_encode(get_option('youtube_videos'));
     	die(0);
 		exit;
     }

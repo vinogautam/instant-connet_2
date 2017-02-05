@@ -229,24 +229,24 @@ class IC_ajax{
 	{
 		$data = $_POST['data'];
 		$file = explode("?", $data)[1];
-		file_put_contents(IC_PLUGIN_DIR."zip_files/$file.zip", file_get_contents($data));
-
+		file_put_contents(IC_PLUGIN_DIR."/zip_files/$file.zip", file_get_contents($data));
+		//echo IC_PLUGIN_DIR."zip_files/$file.zip"; exit;
 		$zip = new ZipArchive;
-		$res = $zip->open(IC_PLUGIN_DIR."zip_files/$file.zip");
+		$res = $zip->open(IC_PLUGIN_DIR."/zip_files/$file.zip");
 		if ($res === TRUE) {
-		  $zip->extractTo(IC_PLUGIN_DIR."extract/$file/");
+		  $zip->extractTo(IC_PLUGIN_DIR."/extract/$file/");
 		  $zip->close();
 			$files = array();
 			$i = 0;
-			if (is_dir(IC_PLUGIN_DIR."extract/$file/")){
-					  if ($dh = opendir(IC_PLUGIN_DIR."extract/$file/")){
+			if (is_dir(IC_PLUGIN_DIR."/extract/$file/")){
+					  if ($dh = opendir(IC_PLUGIN_DIR."/extract/$file/")){
 						while (($filee = readdir($dh)) !== false){
 						  if(str_replace(".", "", $filee))
 						  {
 						  	$files[] = $filee;
 							//resize_image(IC_PLUGIN_DIR."/extract/$file/".$filee, 1600, 1200);
 							$w = 1600; $h = 1200;
-							list($width, $height) = getimagesize(IC_PLUGIN_DIR."extract/$file/".$filee);
+							list($width, $height) = getimagesize(IC_PLUGIN_DIR."/extract/$file/".$filee);
 						    $r = $width / $height;
 						    if ($crop) {
 						        if ($width > $height) {
@@ -265,11 +265,11 @@ class IC_ajax{
 						            $newwidth = $w;
 						        }
 						    }
-						    $src = imagecreatefromjpeg(IC_PLUGIN_DIR."extract/$file/".$filee);
+						    $src = imagecreatefromjpeg(IC_PLUGIN_DIR."/extract/$file/".$filee);
 						    $dst = imagecreatetruecolor($newwidth, $newheight);
 						    imagecopyresampled($dst, $src, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 
-						    imagejpeg($dst,IC_PLUGIN_DIR."extract/$file/".$filee);
+						    imagejpeg($dst,IC_PLUGIN_DIR."/extract/$file/".$filee);
 						  }
 						  $i++;
 						}

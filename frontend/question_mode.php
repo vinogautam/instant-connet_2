@@ -305,7 +305,7 @@ global $wpdb;
 						if(bl === undefined)
 						{
 							textchatref.push($scope.data);
-							<?php if(isset($instant_connect_settings)){?>
+							<?php if(isset($instant_connect_settings) && isset($instant_connect_settings['onmessage'])){?>
 							$timeout(function(){
 								textchatref.push({id:'admin', msg:'<?= $user_current_status == 1 ? $instant_connect_settings['onmessage'] : $instant_connect_settings['offmessage'] ;?>'});
 							}, 5000);

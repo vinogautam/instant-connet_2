@@ -115,8 +115,8 @@ if (scope.$last === true) {
 		              content: '#toolbar-options',
 		              position: 'top',
 		              adjustment: 28,
-		              event: 'hover',
-		             
+		              event: 'click',
+		             hideOnClick: true,	
 		              style: 'dark'
 
 		        });

@@ -230,8 +230,6 @@ if (scope.$last === true) {
 
 		if($scope.newvideo)
 		{
-			console.log($scope.newvideo);
-
 			$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=addnew_video', $scope.newvideo).then(function(res){
 				$scope.youtube_list = res['data'];
 				$scope.newvideo = {};
@@ -357,12 +355,10 @@ if (scope.$last === true) {
 				$(".upload-preload .progress-bar").width("50%");
 
 				$http.post("<?php echo site_url();?>/wp-admin/admin-ajax.php?action=save_ppt&name="+filename, {data:request.getResponseHeader('FileUrl')}).then(function(data){
-					console.log(data);
 					if(data['data'] != 'error')
 					{	
 						new_data = data['data'];
 						new_data.name = filename;
-						console.log(new_data);
 						$scope.presentation_files.push(new_data);
 						$scope.add_tab('presentation', new_data.name, new_data);
 

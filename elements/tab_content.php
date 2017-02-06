@@ -58,7 +58,7 @@
       <img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/'+tab.data.files[tab.currentpresentationindex]}}" class="img-responsive absolute_center img_whm100">
     </div>
 
-    <div ng-hide="hidethumbs" class="col-xs-2 presentation-thumbs no-pad">
+    <div ng-hide="tab.hidethumbs" class="col-xs-2 presentation-thumbs no-pad">
 
         <ul>
           <li ng-repeat="img in tab.data.files" ng-class="{active:tab.currentpresentationindex==''+$index+''}" ng-click="tab.currentpresentationindex=''+$index+'';clear();draw_image(reset_value());"><img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/'+img}}" class="img-responsive"><p><span>Page {{$index+1}}</span></p></li>

@@ -227,6 +227,7 @@ class IC_ajax{
 
 	function save_ppt()
 	{
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		$data = $_POST['data'];
 		$file = explode("?", $data)[1];
 		file_put_contents(IC_PLUGIN_DIR."/zip_files/$file.zip", file_get_contents($data));

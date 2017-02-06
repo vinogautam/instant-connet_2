@@ -248,6 +248,22 @@ if (scope.$last === true) {
             return;
 	};
 
+	$scope.deletevideo = function(e, ind){
+		e.stopPropagation();
+		$scope.youtube_list.splice(ind,1);
+		$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=delete_video&ind='+ind).then(function(){
+
+		});
+	};
+
+	$scope.deletepresentation = function(e, ind){
+		e.stopPropagation();
+		$scope.presentation_files.splice(ind,1);
+		$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=delete_presentation&ind='+ind).then(function(){
+
+		});
+	};
+
 	$(document).on("change", "#convert_ppt", function(e) {
 		handleFileSelect(e, true);
 	});
@@ -295,15 +311,15 @@ if (scope.$last === true) {
 				$(".upload-preload .upload_percentage").text("50%");
 				$(".upload-preload .progress-bar").width("50%");
 
-				$.post("<?php echo site_url();?>/wp-admin/admin-ajax.php?action=save_ppt&name="+filename, {data:request.getResponseHeader('FileUrl')}, function(data){
-					if(data != 'error')
+				$http.post("<?php echo site_url();?>/wp-admin/admin-ajax.php?action=save_ppt&name="+filename, {data:request.getResponseHeader('FileUrl')}).then(function(data){
+					console.log(data);
+					if(data['data'] != 'error')
 					{	
-						new_data = JSON.parse(data);
+						new_data = data['data'];
 						new_data.name = filename;
-						$scope.$apply(function(){
-							$scope.presentation_files.push(new_data);
-							$scope.selected_file(new_data.folder, new_data.files);
-						});
+						console.log(new_data);
+						$scope.presentation_files.push(new_data);
+						$scope.add_tab('presentation', new_data.name, new_data);
 
 						$(".upload-preload .upload_percentage").text("100%");
 						$(".upload-preload .progress-bar").width("100%");

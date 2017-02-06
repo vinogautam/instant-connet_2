@@ -52,8 +52,8 @@
 <!-- END WHITEBOARD WINDOW -->
 
 <!-- PRESENTATION WINDOW -->
-<div ng-if="tab.type == 'presentation'" class="col-xs-12 no-pad meeting-pane presentation-room thumbs-active" ng-init="tab.currentpresentationindex=tab.currentpresentationindex===undefined ? '0' : tab.currentpresentationindex;tab.hidethumbs= tab.hidethumbs===undefined ? false : tab.hidethumbs;tab.slide_image = tab.slide_image === undefined ? {} : tab.slide_image;">
-    <div ng-class="{'col-xs-12':tab.hidethumbs, 'col-xs-10': !tab.hidethumbs}" class="col-xs-10 presentation-room no-pad h100">
+<div ng-if="tab.type == 'presentation'" class="col-xs-12 no-pad meeting-pane presentation-room thumbs-active" ng-init="tab.currentpresentationindex=tab.currentpresentationindex===undefined ? '0' : tab.currentpresentationindex;tab.hidethumbs= tab.hidethumbs===undefined ? false : tab.hidethumbs;tab.slide_image = tab.slide_image === undefined ? {} : tab.slide_image;clear();trigger_draw_image();">
+    <div ng-class="{'col-xs-12':tab.hidethumbs, 'col-xs-10': !tab.hidethumbs}" class="col-xs-10 presentation-room presentation-room-inner no-pad h100">
       <ot-whiteboard  width="700" height="420"></ot-whiteboard>
       <img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/'+tab.data.files[tab.currentpresentationindex]}}" class="img-responsive absolute_center img_whm100">
     </div>
@@ -61,7 +61,7 @@
     <div ng-hide="hidethumbs" class="col-xs-2 presentation-thumbs no-pad">
 
         <ul>
-          <li ng-repeat="img in tab.data.files" ng-class="{active:tab.currentpresentationindex==''+$index+''}" ng-click="tab.currentpresentationindex=''+$index+''"><img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/'+img}}" class="img-responsive"><p><span>Page {{$index+1}}</span></p></li>
+          <li ng-repeat="img in tab.data.files" ng-class="{active:tab.currentpresentationindex==''+$index+''}" ng-click="tab.currentpresentationindex=''+$index+'';clear();draw_image(reset_value());"><img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/'+img}}" class="img-responsive"><p><span>Page {{$index+1}}</span></p></li>
            </ul> 
     </div>
   <div class="pane-footer col-xs-12">
@@ -71,13 +71,13 @@
      </div>
 
      <div class="col-sm-4 no-pad pagination">
-     <div ng-hide="parseInt(tab.currentpresentationindex)==0" class="per" ng-click="tab.currentpresentationindex=''+(parseInt(tab.currentpresentationindex)-1)+'';"><i class="fa fa-arrow-left" aria-hidden="true"></i> PREV</div>
+     <div ng-hide="parseInt(tab.currentpresentationindex)==0" class="per" ng-click="tab.currentpresentationindex=''+(parseInt(tab.currentpresentationindex)-1)+'';clear();draw_image(reset_value());"><i class="fa fa-arrow-left" aria-hidden="true"></i> PREV</div>
      <div class="page-number">
-      <select ng-model="tab.currentpresentationindex">
+      <select ng-change="clear();draw_image(reset_value());" ng-model="tab.currentpresentationindex">
         <option ng-repeat="img in tab.data.files" value="{{$index}}">Page {{$index+1}} of {{tab.data.files.length}}</option>
       </select>
      </div>
-     <div ng-hide="parseInt(tab.currentpresentationindex)==tab.data.files.length-1" class="next" ng-click="tab.currentpresentationindex=''+(parseInt(tab.currentpresentationindex)+1)+'';">NEXT <i class="fa fa-arrow-right" aria-hidden="true"></i></div>
+     <div ng-hide="parseInt(tab.currentpresentationindex)==tab.data.files.length-1" class="next" ng-click="tab.currentpresentationindex=''+(parseInt(tab.currentpresentationindex)+1)+'';clear();draw_image(reset_value());">NEXT <i class="fa fa-arrow-right" aria-hidden="true"></i></div>
      </div>
 
      <div class="col-sm-5 no-pad">

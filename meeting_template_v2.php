@@ -531,7 +531,10 @@ Instant Connect UI
 <?php include 'elements/presentation_modal.php';?>
 <!-- REQUIRED JS SCRIPTS -->
 
-
+<script type="text/javascript">
+  var extensionId = 'nedllccjjngfnljgploibnpkikgmmfkc';
+  var ffWhitelistVersion;
+</script>
 <!-- jQuery 2.2.3 -->
 <script src="<?= plugin_dir_url(__FILE__); ?>plugins/jQuery/jquery-2.2.3.min.js"></script>
 

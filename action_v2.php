@@ -155,6 +155,11 @@ if (scope.$last === true) {
 	        	$("#youtube-player").height($(".meeting-pane").height()-40);
 	        }
 
+	        if($(".presentation-room-inner").length)
+	        {
+	        	$(".presentation-room-inner").height($(".meeting-pane").height()-40);
+	        }
+
 		}, 100);
 	};
 
@@ -172,9 +177,15 @@ if (scope.$last === true) {
 	$rootScope.$on('Whiteboard_changed', function(event, data){
 		if($scope.tabs[$scope.current_tab].type == 'presentation')
         {    
-        	$scope.$apply(function(){
+        	if(!$scope.$$phase) {
+        		$scope.$apply(function(){
+	        		$scope.tabs[$scope.current_tab].slide_image[$scope.tabs[$scope.current_tab].currentpresentationindex] = data;
+	        	});
+        	}
+        	else
+        	{
         		$scope.tabs[$scope.current_tab].slide_image[$scope.tabs[$scope.current_tab].currentpresentationindex] = data;
-        	});
+        	}
         }
 	})
 
@@ -236,6 +247,40 @@ if (scope.$last === true) {
 
     $scope.numberOfPagesArray=function(arr, search){
         return new Array($scope.numberOfPages(arr, search));                
+    };
+
+    /*$scope.connected = false;
+	OTSession.init(apiKey, sessionId, token, function (err) {
+		if (!err) {
+			$scope.$apply(function () {
+				$scope.connected = true;
+			});
+		}
+	});
+	$scope.streams = OTSession.streams;
+	$scope.screenshare = OTSession.screenshare;
+
+	$scope.initiate_screen_sharing = function(){
+		OTSession.initiate_screenshring();
+	};*/
+
+	$scope.trigger_draw_image = function()
+	{
+		$timeout(function(){
+			$(".presentation-thumbs ul li:eq("+$scope.parseInt($scope.tabs[$scope.current_tab].currentpresentationindex)+")").trigger("click");
+		}, 500);
+	};
+
+    $scope.reset_value = function()
+    {
+    	if($scope.tabs[$scope.current_tab].slide_image[$scope.tabs[$scope.current_tab].currentpresentationindex] === undefined)
+        {    
+        	return [];
+        }
+        else
+        {
+        	return $scope.tabs[$scope.current_tab].slide_image[$scope.tabs[$scope.current_tab].currentpresentationindex];
+        }
     };
 
 	$scope.getvideobyID = function(url)

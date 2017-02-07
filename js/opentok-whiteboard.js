@@ -120,7 +120,6 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
             };
 
             scope.draw_image = function(updates){
-                console.log(updates);
                 drawUpdates(updates);
                 scope.$emit('otWhiteboardUpdate');
             };

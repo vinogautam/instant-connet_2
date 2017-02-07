@@ -61,7 +61,7 @@ Instant Connect UI
     
 
     /*Need to add this styes in less*/
-    ot-whiteboard {display: block;width: 100%;height:400px;position: absolute;left: 0;right: 0;z-index:11;}
+    ot-whiteboard {display: block;width: 100%;height:100%;position: absolute;left: 0;right: 0;z-index:11;}
     .meet-icon{ padding: 0; text-align: center; margin-top: 12%; }
     .meet-icon li, .meet-icon li a{ list-style-type: none;  width:142px; height: 142px;  margin:12px;
       background-repeat: no-repeat; display: inline-block;}
@@ -532,7 +532,7 @@ Instant Connect UI
 <!-- REQUIRED JS SCRIPTS -->
 
 <script type="text/javascript">
-  var extensionId = 'nedllccjjngfnljgploibnpkikgmmfkc';
+  var extensionId = 'pfobnffdhkcjnpmcgjmfdgbgcpaijbpd';
   var ffWhitelistVersion;
 </script>
 <!-- jQuery 2.2.3 -->

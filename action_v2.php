@@ -150,14 +150,9 @@ if (scope.$last === true) {
 		        });
 	        }
 	        
-	        if($("#youtube-player").length)
+	        if($(".tab-inner-div").length)
 	        {
-	        	$("#youtube-player").height($(".meeting-pane").height()-40);
-	        }
-
-	        if($(".presentation-room-inner").length)
-	        {
-	        	$(".presentation-room-inner").height($(".meeting-pane").height()-40);
+	        	$(".tab-inner-div").height($(".meeting-pane").height()-40);
 	        }
 
 		}, 100);
@@ -187,12 +182,25 @@ if (scope.$last === true) {
         		$scope.tabs[$scope.current_tab].slide_image[$scope.tabs[$scope.current_tab].currentpresentationindex] = data;
         	}
         }
+        else
+        {
+        	if(!$scope.$$phase) {
+        		$scope.$apply(function(){
+	        		$scope.tabs[$scope.current_tab].slide_image = data;
+	        	});
+        	}
+        	else
+        	{
+        		$scope.tabs[$scope.current_tab].slide_image = data;
+        	}
+        }
 	})
 
 	$scope.remove_tab = function(id)
 	{
 		$scope.tabs.splice(id,1);
 		$scope.current_tab = -1;
+		$scope.initiatescripts();
 	};
 
 	<?php 
@@ -247,7 +255,7 @@ if (scope.$last === true) {
         return new Array($scope.numberOfPages(arr, search));                
     };
 
-    /*$scope.connected = false;
+    $scope.connected = false;
 	OTSession.init(apiKey, sessionId, token, function (err) {
 		if (!err) {
 			$scope.$apply(function () {
@@ -260,13 +268,20 @@ if (scope.$last === true) {
 
 	$scope.initiate_screen_sharing = function(){
 		OTSession.initiate_screenshring();
-	};*/
+	};
 
 	$scope.trigger_draw_image = function()
 	{
 		$timeout(function(){
 			$(".presentation-thumbs ul li:eq("+$scope.parseInt($scope.tabs[$scope.current_tab].currentpresentationindex)+")").trigger("click");
 		}, 500);
+	};
+
+	$scope.trigger_draw_whiteboard_image = function()
+	{
+		$timeout(function(){
+			$(".clear_whiteboard").trigger("click");
+		}, 200);
 	};
 
     $scope.reset_value = function()

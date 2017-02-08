@@ -102,6 +102,49 @@ if (scope.$last === true) {
 		$scope.initiatescripts();
 	};
 
+	$scope.tab_type_length = function(type, id)
+	{
+		var len = 0;
+		angular.forEach($scope.tabs, function(v,k){
+			if(v.type == type)
+			{
+				if(id === undefined)
+				{
+					len++;
+				}
+				else if(v.data.id == id)
+				{
+					len++;
+				}
+			}
+		});
+		return len;
+	};
+
+	$scope.short_text = function(txt, len){
+
+        var tmp = document.createElement("DIV");
+        tmp.innerHTML = txt;
+        txt = tmp.textContent || tmp.innerText || "";
+
+        if(txt === undefined) return;
+
+        if(txt.length > len)
+        {
+            ind = txt.indexOf(" ", len);
+            if(ind == -1 || ind - len > 10)
+                return txt.substr(0, len+10)+'...';
+            else
+                return txt.substr(0, ind)+'...';
+        }
+        else
+            return txt;
+    };
+
+	$scope.randomid = function()
+	{
+		return new Date().getTime()+''+(Math.floor(Math.random()*90000) + 10000);
+	};
 
 	$scope.initiatescripts = function()
 	{
@@ -226,9 +269,8 @@ if (scope.$last === true) {
     	$scope.vsearch = {name:''};
     	$scope.psearch = {name:''};
     };
-			    
+		
 	$scope.addnew_video = function(){
-
 		if($scope.newvideo.url.split("/embed/").length == 2)
             $scope.newvideo.url = "https://www.youtube.com/embed/"+$scope.newvideo.url.split("/embed/")[1];
         else if($scope.newvideo.url.split("?v=").length == 2)
@@ -239,7 +281,8 @@ if (scope.$last === true) {
 		if($scope.newvideo)
 		{
 			$http.post('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=addnew_video', $scope.newvideo).then(function(res){
-				$scope.youtube_list = res['data'];
+				$scope.newvideo.id = $scope.randomid();
+				$scope.youtube_list.push($scope.newvideo);
 				$scope.newvideo = {};
 			});
 
@@ -374,6 +417,7 @@ if (scope.$last === true) {
 					{	
 						new_data = data['data'];
 						new_data.name = filename;
+						new_data.id = $scope.randomid();
 						$scope.presentation_files.push(new_data);
 						$scope.add_tab('presentation', new_data.name, new_data);
 

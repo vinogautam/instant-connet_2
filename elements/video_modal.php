@@ -26,16 +26,20 @@
               </div>
             </div>
             <!-- /.box-header -->
+            <div class="hide">
+              <span ng-repeat="p in youtube_list track by $index" ng-init="p.id = p.id === undefined ? randomid() : p.id;"></span>
+            </div>
             <div class="box-body table-responsive no-padding">
               <table class="table table-hover">
                 
                 <tr ng-repeat="p in youtube_list | filter:vsearch | startFrom:currentPage*5 | limitTo:5  track by $index ">
-                  <td ng-click="add_tab('youtube', p.name, p)" data-dismiss="modal"><img ng-src="{{'https://img.youtube.com/vi/'+getvideobyID(p.url)+'/hqdefault.jpg'}}" width="60" /></td>
-                  <td ng-click="add_tab('youtube', p.name, p)" data-dismiss="modal">{{p.name}}</td>
+                  <td><img ng-src="{{'https://img.youtube.com/vi/'+getvideobyID(p.url)+'/hqdefault.jpg'}}" width="60" /></td>
+                  <td>{{p.name}}</td>
                 
                   <td>
                     <a ng-click="deletevideo($event, $index)" class="btn btn-app modal-app-btn" data-toggle="tooltip" data-placement="bottom" data-animation="delay 2" title="Remove"><i class="fa fa-trash"></i></a>
-                    <a ng-click="add_tab('youtube', p.name, p)" class="btn btn-app modal-app-btn" data-toggle="tooltip" data-placement="bottom" title="Play Video" data-dismiss="modal"><i class="fa fa-youtube-play"></i></a>
+                    <a ng-hide="tab_type_length('youtube', p.id);" ng-click="add_tab('youtube', p.name, p)" class="btn btn-app modal-app-btn" data-toggle="tooltip" data-placement="bottom" title="Play Video" data-dismiss="modal"><i class="fa fa-youtube-play"></i></a>
+                    <a ng-show="tab_type_length('youtube', p.id);" class="btn btn-app modal-app-btn" data-toggle="tooltip" data-placement="bottom" title="Already added in tab" ><i class="fa fa-youtube-play"></i></a>
                   </td>
                 </tr>
                 

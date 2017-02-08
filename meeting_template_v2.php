@@ -82,6 +82,8 @@ Instant Connect UI
     .h100{height:100%;}
     .instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li.active img{outline:2px solid #790303}
     .instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li.active p span{background:#790303;color:#fff;padding:1px 20px 4px;border-radius:20px}
+    .tabnavigation{position: absolute;right: 0;}
+    .tabnavigation i{margin: 0 5px;}
     /*End here*/
   </style>
 
@@ -389,15 +391,18 @@ Instant Connect UI
 <!-- End Video and Group Chat -->
 
 <!--  MEETING ROOM WINDOWS -->
-<div class="col-xs-12 col-sm-9 meeting-panel-container">
-    
+<div class="col-xs-12 col-sm-9 meeting-panel-container" ng-init="tabindex=0">
     <div class="meeting-panel row">
         
         <div class="col-xs-12 panel-header no-pad">
         <div ng-click="set_tab(-1);" class="home-label">Start</div>
         <ul>
-            <li ng-repeat="tab in tabs track by $index" ng-class="{active:current_tab == $index}"><a ng-click="set_tab($index);">{{tab.name}} <span ng-click="$event.stopPropagation();remove_tab($index);" class="close-window">&times;</span></a></li>
+            <li ng-repeat="tab in tabs track by $index" ng-class="{active:current_tab == $index}" ng-show="$index >= tabindex && $index <= tabindex+4"><a ng-click="set_tab($index);">{{short_text(tab.name, 10)}} <span ng-click="$event.stopPropagation();remove_tab($index);" class="close-window">&times;</span></a></li>
         </ul>
+        <span ng-if="tabs.length > 4" class="tabnavigation">
+          <i ng-show="tabindex" ng-click="$parent.tabindex = $parent.tabindex-1" class="fa fa-arrow-left"></i>
+          <i ng-show="tabindex < tabs.length-5" ng-click="$parent.tabindex = $parent.tabindex+1" class="fa fa-arrow-right"></i>
+        </span>
         </div>
  
 
@@ -408,8 +413,14 @@ Instant Connect UI
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
               <ul class="meet-icon">
                 <li class="presen-img"><a href="#" data-toggle="modal" data-target="#presentationsModal"></a></li>
-                <li class="screen-share"><a ng-click="add_tab('screenshare', 'Screen Share');" href="#"></a></li>
-                <li class="whith-board"><a ng-click="add_tab('whiteboard', 'WhiteBoard');" href="#"></a></li>
+                <li class="screen-share">
+                  <a ng-hide="tab_type_length('screenshare');" ng-click="add_tab('screenshare', 'Screen Share');" href="#"></a>
+                  <a ng-show="tab_type_length('screenshare');" href="#"></a>
+                </li>
+                <li class="whith-board">
+                  <a ng-hide="tab_type_length('whiteboard');" ng-click="add_tab('whiteboard', 'WhiteBoard');" href="#"></a>
+                  <a ng-show="tab_type_length('whiteboard');" href="#"></a>
+                </li>
                 <li class="youtube"><a href="#" data-toggle="modal" data-target="#youtubeModal"></a></li>
               </ul>
             </div>

@@ -26,6 +26,9 @@
               </div>
             </div>
             <!-- /.box-header -->
+            <div class="hide">
+              <span ng-repeat="p in presentation_files track by $index" ng-init="p.id = p.id === undefined ? randomid() : p.id;"></span>
+            </div>
             <div class="box-body table-responsive no-padding">
               <table class="table table-hover">
                 
@@ -35,7 +38,8 @@
                 
                   <td>
                     <a ng-click="deletepresentation($event, $index)" class="btn btn-app modal-app-btn" data-toggle="tooltip" data-placement="bottom" data-animation="delay 2" title="Remove"><i class="fa fa-trash"></i></a>
-                    <a ng-click="add_tab('presentation', p.name, p)" class="btn btn-app modal-app-btn" data-toggle="tooltip" data-placement="bottom" title="Open" data-dismiss="modal"><i class="fa fa-angle-double-right"></i></a>
+                    <a ng-hide="tab_type_length('presentation', p.id);" ng-click="add_tab('presentation', p.name, p)" class="btn btn-app modal-app-btn" data-toggle="tooltip" data-placement="bottom" title="Open" data-dismiss="modal"><i class="fa fa-angle-double-right"></i></a>
+                    <a ng-show="tab_type_length('presentation', p.id);" class="btn btn-app modal-app-btn" data-toggle="tooltip" data-placement="bottom" title="Already added in tab" ><i class="fa fa-angle-double-right"></i></a>
                   </td>
                 </tr>
                 

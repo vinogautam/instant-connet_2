@@ -1,7 +1,6 @@
 <!-- WHITEBOARD WINDOW -->
 <div ng-if="tab.type == 'whiteboard'" class="col-xs-12 no-pad meeting-pane" ng-init="tab.slide_image = tab.slide_image === undefined ? [] : tab.slide_image;trigger_draw_whiteboard_image();">
-{{tab.slide_image}}
- <div class="hide clear_whiteboard" ng-click="clear();"></div>
+<div class="hide clear_whiteboard" ng-click="clear();"></div>
  <div class="hide draw_whiteboard" ng-click="draw_image(tab.slide_image);"></div>
  <div class="col-sm-12 no-pad wh100 tab-inner-div">
     <ot-whiteboard  width="700" height="420"></ot-whiteboard>

@@ -1,6 +1,6 @@
 <!-- WHITEBOARD WINDOW -->
 <div ng-if="tab.type == 'whiteboard'" class="col-xs-12 no-pad meeting-pane" ng-init="tab.slide_image = tab.slide_image === undefined ? [] : tab.slide_image;trigger_draw_whiteboard_image();">
-<div class="hide clear_whiteboard" ng-click="clear();"></div>
+  <div class="hide clear_whiteboard" ng-click="clear();"></div>
  <div class="hide draw_whiteboard" ng-click="draw_image(tab.slide_image);"></div>
  <div class="col-sm-12 no-pad wh100 tab-inner-div">
     <ot-whiteboard  width="700" height="420"></ot-whiteboard>
@@ -53,7 +53,8 @@
 <!-- END WHITEBOARD WINDOW -->
 
 <!-- PRESENTATION WINDOW -->
-<div ng-if="tab.type == 'presentation'" class="col-xs-12 no-pad meeting-pane presentation-room thumbs-active" ng-init="tab.currentpresentationindex=tab.currentpresentationindex===undefined ? '0' : tab.currentpresentationindex;tab.hidethumbs= tab.hidethumbs===undefined ? false : tab.hidethumbs;tab.slide_image = tab.slide_image === undefined ? {} : tab.slide_image;clear();trigger_draw_image();">
+<div ng-if="tab.type == 'presentation'" class="col-xs-12 no-pad meeting-pane presentation-room thumbs-active" ng-init="tab.currentpresentationindex=tab.currentpresentationindex===undefined ? '0' : tab.currentpresentationindex;tab.hidethumbs= tab.hidethumbs===undefined ? false : tab.hidethumbs;tab.slide_image = tab.slide_image === undefined ? {} : tab.slide_image;trigger_draw_image();">
+    <div class="hide clear_whiteboard" ng-click="clear();"></div>
     <div ng-class="{'col-xs-12':tab.hidethumbs, 'col-xs-10': !tab.hidethumbs}" class="col-xs-10 presentation-room presentation-room-inner tab-inner-div no-pad h100">
       <ot-whiteboard  width="700" height="420"></ot-whiteboard>
       <img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/'+tab.data.files[tab.currentpresentationindex]}}" class="img-responsive absolute_center img_whm100">

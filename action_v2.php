@@ -203,8 +203,23 @@ if (scope.$last === true) {
 
 	$scope.set_tab = function(id)
 	{
-		$scope.current_tab = id;
-		$scope.initiatescripts();
+		if($(".clear_whiteboard").length)
+		{
+			setTimeout(function(){
+				$(".clear_whiteboard").trigger("click");
+			});
+			$scope.dont_track = true;
+			$timeout(function(){
+				$scope.current_tab = id;
+				$scope.initiatescripts();
+				$scope.dont_track = false;
+			},500);
+		}
+		else
+		{
+			$scope.current_tab = id;
+			$scope.initiatescripts();
+		}
 	};
 
 	$scope.parseInt = function(id)
@@ -213,6 +228,11 @@ if (scope.$last === true) {
 	};
 
 	$rootScope.$on('Whiteboard_changed', function(event, data){
+
+		console.log($scope.tabs[$scope.current_tab], $scope.dont_track);
+
+		if($scope.tabs[$scope.current_tab] === undefined || $scope.dont_track)
+			return;
 		if($scope.tabs[$scope.current_tab].type == 'presentation')
         {    
         	if(!$scope.$$phase) {
@@ -239,11 +259,29 @@ if (scope.$last === true) {
         }
 	})
 
+	$scope.dont_track = false;
+
 	$scope.remove_tab = function(id)
 	{
-		$scope.tabs.splice(id,1);
-		$scope.current_tab = -1;
-		$scope.initiatescripts();
+		if($(".clear_whiteboard").length)
+		{
+			setTimeout(function(){
+				$(".clear_whiteboard").trigger("click");
+			});
+			$scope.dont_track = true;
+			$timeout(function(){
+				$scope.tabs.splice(id,1);
+				$scope.current_tab = -1;
+				$scope.initiatescripts();
+				$scope.dont_track = false;
+			}, 500);
+		}
+		else
+		{
+			$scope.tabs.splice(id,1);
+			$scope.current_tab = -1;
+			$scope.initiatescripts();
+		}
 	};
 
 	<?php 
@@ -322,9 +360,9 @@ if (scope.$last === true) {
 
 	$scope.trigger_draw_whiteboard_image = function()
 	{
-		$timeout(function(){
-			$(".clear_whiteboard").trigger("click");
-		}, 200);
+		setTimeout(function(){
+			$(".draw_whiteboard").trigger("click");
+		});
 	};
 
     $scope.reset_value = function()

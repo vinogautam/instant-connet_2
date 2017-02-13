@@ -365,6 +365,12 @@ if (scope.$last === true) {
 		});
 	};
 
+	$scope.thumb_position = function()
+	{
+		height = jQuery(".presentation-thumbs ul")[0].scrollHeight/$scope.tabs[$scope.current_tab].data.files.length;
+		jQuery(".presentation-thumbs ul").scrollTop(height*$scope.parseInt($scope.tabs[$scope.current_tab].currentpresentationindex));
+	};
+
     $scope.reset_value = function()
     {
     	if($scope.tabs[$scope.current_tab].slide_image[$scope.tabs[$scope.current_tab].currentpresentationindex] === undefined)

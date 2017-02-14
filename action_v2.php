@@ -203,16 +203,12 @@ if (scope.$last === true) {
 
 	$scope.set_tab = function(id)
 	{
-		if($(".clear_whiteboard").length)
+		if($scope.current_tab != -1 && ($scope.tabs[$scope.current_tab].type == 'presentation' || $scope.tabs[$scope.current_tab].type == 'whiteboard'))
 		{
-			setTimeout(function(){
-				$(".clear_whiteboard").trigger("click");
-			});
-			$scope.dont_track = true;
+			$scope.broadcast();
 			$timeout(function(){
 				$scope.current_tab = id;
 				$scope.initiatescripts();
-				$scope.dont_track = false;
 			},500);
 		}
 		else
@@ -222,17 +218,37 @@ if (scope.$last === true) {
 		}
 	};
 
+	$scope.remove_tab = function(id)
+	{
+		if($scope.current_tab != -1 && ($scope.tabs[$scope.current_tab].type == 'presentation' || $scope.tabs[$scope.current_tab].type == 'whiteboard'))
+		{
+			$scope.broadcast();
+
+			$timeout(function(){
+				$scope.tabs.splice(id,1);
+				$scope.current_tab = -1;
+				$scope.initiatescripts();
+			}, 500);
+		}
+		else
+		{
+			$scope.tabs.splice(id,1);
+			$scope.current_tab = -1;
+			$scope.initiatescripts();
+		}
+	};
+
 	$scope.parseInt = function(id)
 	{
 		return parseInt(id);
 	};
 
-	$rootScope.$on('Whiteboard_changed', function(event, data){
+	$scope.broadcast = function()
+	{
+		$rootScope.$broadcast('get_image_data', {ind:$scope.current_tab, tab:$scope.tabs[$scope.current_tab]});
+	};
 
-		console.log($scope.tabs[$scope.current_tab], $scope.dont_track);
-
-		if($scope.tabs[$scope.current_tab] === undefined || $scope.dont_track)
-			return;
+	$rootScope.$on('Presentation_changed', function(event, data){
 		if($scope.tabs[$scope.current_tab].type == 'presentation')
         {    
         	if(!$scope.$$phase) {
@@ -245,44 +261,24 @@ if (scope.$last === true) {
         		$scope.tabs[$scope.current_tab].slide_image[$scope.tabs[$scope.current_tab].currentpresentationindex] = data;
         	}
         }
-        else
+	});
+
+	$rootScope.$on('Whiteboard_changed', function(event, data){
+		if(data.tab.type == 'whiteboard')
         {
         	if(!$scope.$$phase) {
         		$scope.$apply(function(){
-	        		$scope.tabs[$scope.current_tab].slide_image = data;
+	        		$scope.tabs[data.ind].slide_image = data.image;
 	        	});
         	}
         	else
         	{
-        		$scope.tabs[$scope.current_tab].slide_image = data;
+        		$scope.tabs[data.ind].slide_image = data.image;
         	}
         }
-	})
+	});
 
-	$scope.dont_track = false;
-
-	$scope.remove_tab = function(id)
-	{
-		if($(".clear_whiteboard").length)
-		{
-			setTimeout(function(){
-				$(".clear_whiteboard").trigger("click");
-			});
-			$scope.dont_track = true;
-			$timeout(function(){
-				$scope.tabs.splice(id,1);
-				$scope.current_tab = -1;
-				$scope.initiatescripts();
-				$scope.dont_track = false;
-			}, 500);
-		}
-		else
-		{
-			$scope.tabs.splice(id,1);
-			$scope.current_tab = -1;
-			$scope.initiatescripts();
-		}
-	};
+	
 
 	<?php 
 	$option = get_option('ic_presentations');
@@ -360,9 +356,9 @@ if (scope.$last === true) {
 
 	$scope.trigger_draw_whiteboard_image = function()
 	{
-		setTimeout(function(){
+		$timeout(function(){
 			$(".draw_whiteboard").trigger("click");
-		});
+		}, 500);
 	};
 
 	$scope.thumb_position = function()

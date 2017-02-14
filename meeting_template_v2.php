@@ -418,8 +418,7 @@ Instant Connect UI
                   <a ng-show="tab_type_length('screenshare');" href="#"></a>
                 </li>
                 <li class="whith-board">
-                  <a ng-hide="tab_type_length('whiteboard');" ng-click="add_tab('whiteboard', 'WhiteBoard');" href="#"></a>
-                  <a ng-show="tab_type_length('whiteboard');" href="#"></a>
+                  <a ng-click="add_tab('whiteboard', 'WhiteBoard');" href="#"></a>
                 </li>
                 <li class="youtube"><a href="#" data-toggle="modal" data-target="#youtubeModal"></a></li>
               </ul>

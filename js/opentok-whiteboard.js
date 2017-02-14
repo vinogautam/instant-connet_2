@@ -227,9 +227,15 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                         });
                         break;
                 }
-                
-                $rootScope.$broadcast('Whiteboard_changed', scope.get_image());
+
+                $rootScope.$broadcast('Presentation_changed', scope.get_image());
             };
+
+            $rootScope.$on('get_image_data', function(event, data){
+                data['image'] = scope.get_image();
+                $rootScope.$broadcast('Whiteboard_changed', data);
+                scope.clear();
+            });
 
             var drawUpdates = function (updates) {
                 updates.forEach(function (update) {

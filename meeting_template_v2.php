@@ -12,6 +12,11 @@ if(isset($_GET['dev']))
   $sessionId = $ot['sessionId']; 
   $token = $ot['token'];
 }
+elseif(isset($_GET['user']))
+{
+  $sessionId = $_GET['sessionId']; 
+  $token = $_GET['token'];
+}
 else
 {
   $meeting_id = $_GET['id'];
@@ -84,6 +89,10 @@ Instant Connect UI
     .instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li.active p span{background:#790303;color:#fff;padding:1px 20px 4px;border-radius:20px}
     .tabnavigation{position: absolute;right: 0;}
     .tabnavigation i{margin: 0 5px;}
+    .control-sidebar-dark, .control-sidebar-dark + .control-sidebar-bg{ background: #fff; border-left:1px solid #ccc; position: fixed;}
+    .chat-mothed{overflow-y: auto;}
+    .msg-bar-resive.msg-last-resive{background: #ccc;}
+    .meeting_users:nth-child(even) .msg-bar-resive.msg-last-resive{background: #0085A6;color: #fff;}
     /*End here*/
   </style>
 
@@ -114,6 +123,7 @@ Instant Connect UI
       <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
           <!-- Messages: style can be found in dropdown.less-->
+          <li><a target="_blank" href="?user&sessionId=<?= $sessionId?>&token=<?= $token?>">Test user link</a></li>
           <li class="dropdown messages-menu">
             <!-- Menu toggle button -->
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -456,83 +466,17 @@ Instant Connect UI
 
 
 
-  <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark">
-    <!-- Create the tabs -->
-    <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
-      <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
-      <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
-    </ul>
-    <!-- Tab panes -->
-    <div class="tab-content">
-      <!-- Home tab content -->
-      <div class="tab-pane active" id="control-sidebar-home-tab">
-        <h3 class="control-sidebar-heading">Recent Activity</h3>
-        <ul class="control-sidebar-menu">
-          <li>
-            <a href="javascript::;">
-              <i class="menu-icon fa fa-birthday-cake bg-red"></i>
+  <!-- CHAT STARTS HERE PULL SNIPPET HERE-->
+  
+<?php include 'elements/chat_section.php';?>
 
-              <div class="menu-info">
-                <h4 class="control-sidebar-subheading">Langdon's Birthday</h4>
-
-                <p>Will be 23 on April 24th</p>
-              </div>
-            </a>
-          </li>
-        </ul>
-        <!-- /.control-sidebar-menu -->
-
-        <h3 class="control-sidebar-heading">Tasks Progress</h3>
-        <ul class="control-sidebar-menu">
-          <li>
-            <a href="javascript::;">
-              <h4 class="control-sidebar-subheading">
-                Custom Template Design
-                <span class="pull-right-container">
-                  <span class="label label-danger pull-right">70%</span>
-                </span>
-              </h4>
-
-              <div class="progress progress-xxs">
-                <div class="progress-bar progress-bar-danger" style="width: 70%"></div>
-              </div>
-            </a>
-          </li>
-        </ul>
-        <!-- /.control-sidebar-menu -->
-
-      </div>
-      <!-- /.tab-pane -->
-      <!-- Stats tab content -->
-      <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div>
-      <!-- /.tab-pane -->
-      <!-- Settings tab content -->
-      <div class="tab-pane" id="control-sidebar-settings-tab">
-        <form method="post">
-          <h3 class="control-sidebar-heading">General Settings</h3>
-
-          <div class="form-group">
-            <label class="control-sidebar-subheading">
-              Report panel usage
-              <input type="checkbox" class="pull-right" checked>
-            </label>
-
-            <p>
-              Some information about this general settings option
-            </p>
-          </div>
-          <!-- /.form-group -->
-        </form>
-      </div>
-      <!-- /.tab-pane -->
-    </div>
-  </aside>
   <!-- /.control-sidebar -->
   <!-- Add the sidebar's background. This div must be placed
        immediately after the control sidebar -->
+
   <div class="control-sidebar-bg"></div>
 </div>
+<!-- CHAT ENDS HERE PULL SNIPPET HERE- -->
 
 
 <!-- ./wrapper -->
@@ -564,8 +508,6 @@ Instant Connect UI
 <script src="<?= plugin_dir_url(__FILE__); ?>js/opentok-whiteboard.js" type="text/javascript" charset="utf-8"></script>
 
 <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/core.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/md5-min.js'></script>
 
 <?php include 'action_v2.php';?>
 <!-- Optionally, you can add Slimscroll and FastClick plugins.

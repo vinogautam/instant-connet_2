@@ -73,7 +73,7 @@ link: function (scope, element, attr) {
 if (scope.$last === true) {
     $timeout(function () {
         //scope.$emit(attr.onFinishRender);
-		jQuery("#messagesDiv").scrollTop(jQuery("#messagesDiv")[0].scrollHeight);
+		jQuery(".chat-mothed").scrollTop(jQuery(".chat-mothed")[0].scrollHeight);
     });
 }
 }
@@ -404,6 +404,64 @@ if (scope.$last === true) {
 
 		});
 	};
+
+	/*Chat section starts here*/
+	$scope.chat = [];
+
+	var statusRef = new Firebase('https://vinogautam.firebaseio.com/opentok/<?= $sessionId?>');
+	statusRef.on('child_added', function(snapshot) {
+		v = snapshot.val();
+		console.log(v);
+		if(typeof v.msg != "undefined")
+		{
+			hn = v.email ? v.email : v.name;
+			if(!$scope.$$phase) {
+				$scope.$apply(function(){
+					$scope.insert_chat_byid(v);
+					$scope.visible = true;
+				});
+			}
+			else
+			{
+				$scope.insert_chat_byid(v);
+				$scope.visible = true;
+			}
+		}
+	});
+
+	$scope.insert_chat_byid = function(msg){
+
+		var a = {id: "", time: "", msg:[]};
+		if($scope.chat.length == 0)
+		{
+			$scope.chat.push({id: msg.id, time: msg.time, msg:[msg]});
+		}
+		else if($scope.chat[$scope.chat.length-1].id == msg.id)
+		{
+			$scope.chat[$scope.chat.length-1].id = msg.id;
+			$scope.chat[$scope.chat.length-1].time = msg.time;
+			$scope.chat[$scope.chat.length-1].msg.push(msg);
+		}
+		else
+		{
+			$scope.chat.push({id: msg.id, time: msg.time, msg:[msg]});
+		}
+	};
+	$id = new Date().getTime()+''+Math.round(Math.random()*100000);
+	$scope.data2 = {id:$id, name: 'user'+$id, email: 'user'+$id+'@gmai.com', msg:''};
+
+	$(".chat-mothed").height($(window).height()-180);
+
+	$scope.add = function(){
+		if(!$scope.data2.msg)
+			return;
+		$scope.data2.time = new Date().getTime();
+		statusRef.push($scope.data2);
+		$scope.data2.msg = '';
+		
+	};
+	/*Chat end here*/
+
 
 	$(document).on("change", "#convert_ppt", function(e) {
 		handleFileSelect(e, true);

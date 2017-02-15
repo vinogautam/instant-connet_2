@@ -186,7 +186,7 @@ Instant Connect UI
           
           <!-- Control Sidebar Toggle Button -->
           <li>
-            <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+            <a href="#" data-toggle="control-sidebar"><i class="fa fa-comments"></i></a>
           </li>
         </ul>
       </div>
@@ -303,99 +303,7 @@ Instant Connect UI
 <!-- Then add the class direct-chat and choose the direct-chat-* contexual class -->
 <!-- The contextual class should match the box, so we are using direct-chat-danger -->
 
-<div class="chat-container">
-<div class="direct-chat">
- 
-  <div class="box-body">
-    <!-- Conversations are loaded here -->
-    <div class="direct-chat-messages">
-      <!-- Message. Default to the left -->
-      <div class="direct-chat-msg">
-        <div class="direct-chat-info clearfix">
-          <span class="direct-chat-name pull-left">Alexander Pierce</span>
-          <span class="direct-chat-timestamp pull-right">23 Jan 2:00 pm</span>
-        </div><!-- /.direct-chat-info -->
-        <img class="direct-chat-img" src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/user1-128x128.jpg" alt="message user image"><!-- /.direct-chat-img -->
-        <div class="direct-chat-text">
-          Is this template really for free? That's unbelievable!
-        </div><!-- /.direct-chat-text -->
-      </div><!-- /.direct-chat-msg -->
 
-      <!-- Message to the right -->
-      <div class="direct-chat-msg right">
-        <div class="direct-chat-info clearfix">
-          <span class="direct-chat-name pull-right">Sarah Bullock</span>
-          <span class="direct-chat-timestamp pull-left">23 Jan 2:05 pm</span>
-        </div><!-- /.direct-chat-info -->
-        <img class="direct-chat-img" src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/user3-128x128.jpg" alt="message user image"><!-- /.direct-chat-img -->
-        <div class="direct-chat-text">
-          You better believe it!
-        </div><!-- /.direct-chat-text -->
-      </div><!-- /.direct-chat-msg -->
-
-      <!-- Message. Default to the left -->
-      <div class="direct-chat-msg">
-        <div class="direct-chat-info clearfix">
-          <span class="direct-chat-name pull-left">Alexander Pierce</span>
-          <span class="direct-chat-timestamp pull-right">23 Jan 2:00 pm</span>
-        </div><!-- /.direct-chat-info -->
-        <img class="direct-chat-img" src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/user1-128x128.jpg" alt="message user image"><!-- /.direct-chat-img -->
-        <div class="direct-chat-text">
-          Is this template really for free? That's unbelievable!
-        </div><!-- /.direct-chat-text -->
-      </div><!-- /.direct-chat-msg -->
-
-      <!-- Message to the right -->
-      <div class="direct-chat-msg right">
-        <div class="direct-chat-info clearfix">
-          <span class="direct-chat-name pull-right">Sarah Bullock</span>
-          <span class="direct-chat-timestamp pull-left">23 Jan 2:05 pm</span>
-        </div><!-- /.direct-chat-info -->
-        <img class="direct-chat-img" src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/user3-128x128.jpg" alt="message user image"><!-- /.direct-chat-img -->
-        <div class="direct-chat-text">
-          You better believe it!
-        </div><!-- /.direct-chat-text -->
-      </div><!-- /.direct-chat-msg -->
-      <!-- Message. Default to the left -->
-      <div class="direct-chat-msg">
-        <div class="direct-chat-info clearfix">
-          <span class="direct-chat-name pull-left">Alexander Pierce</span>
-          <span class="direct-chat-timestamp pull-right">23 Jan 2:00 pm</span>
-        </div><!-- /.direct-chat-info -->
-        <img class="direct-chat-img" src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/user1-128x128.jpg" alt="message user image"><!-- /.direct-chat-img -->
-        <div class="direct-chat-text">
-          Is this template really for free? That's unbelievable!
-        </div><!-- /.direct-chat-text -->
-      </div><!-- /.direct-chat-msg -->
-
-      <!-- Message to the right -->
-      <div class="direct-chat-msg right">
-        <div class="direct-chat-info clearfix">
-          <span class="direct-chat-name pull-right">Sarah Bullock</span>
-          <span class="direct-chat-timestamp pull-left">23 Jan 2:05 pm</span>
-        </div><!-- /.direct-chat-info -->
-        <img class="direct-chat-img" src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/user3-128x128.jpg" alt="message user image"><!-- /.direct-chat-img -->
-        <div class="direct-chat-text">
-          You better believe it!
-        </div><!-- /.direct-chat-text -->
-      </div><!-- /.direct-chat-msg -->
-    </div><!--/.direct-chat-messages-->
-
-
-
-  
-  </div><!-- /.box-body -->
-  
-    <div class="input-group">
-      <input type="text" name="message" placeholder="Type Message ..." class="form-control">
-      <span class="input-group-btn">
-        <button type="button" class="btn btn-danger btn-flat">Send</button>
-      </span>
-    </div>
-  <!-- /.box-footer-->
-</div><!--/.direct-chat -->
-</div>
-      
 
       </div>
 <!-- End Video and Group Chat -->

@@ -74,7 +74,7 @@ if (scope.$last === true) {
     $timeout(function () {
         //scope.$emit(attr.onFinishRender);
 		jQuery(".chat-mothed").scrollTop(jQuery(".chat-mothed")[0].scrollHeight);
-    });
+    }, 1000);
 }
 }
 }
@@ -411,7 +411,6 @@ if (scope.$last === true) {
 	var statusRef = new Firebase('https://vinogautam.firebaseio.com/opentok/<?= $sessionId?>');
 	statusRef.on('child_added', function(snapshot) {
 		v = snapshot.val();
-		console.log(v);
 		if(typeof v.msg != "undefined")
 		{
 			hn = v.email ? v.email : v.name;
@@ -450,8 +449,10 @@ if (scope.$last === true) {
 	$id = new Date().getTime()+''+Math.round(Math.random()*100000);
 	$scope.data2 = {id:$id, name: 'user'+$id, email: 'user'+$id+'@gmai.com', msg:''};
 
-	$(".chat-mothed").height($(window).height()-180);
-
+	
+	$timeout(function(){
+		$(".chat-mothed").height($(window).height()-200);
+	}, 3000);
 	$scope.add = function(){
 		if(!$scope.data2.msg)
 			return;
@@ -459,6 +460,56 @@ if (scope.$last === true) {
 		statusRef.push($scope.data2);
 		$scope.data2.msg = '';
 		
+	};
+
+	$scope.send_noti = function(data)
+	{
+		data.time = new Date().getTime();
+		OTSession.session.signal( 
+		{  type: 'user-notifications',
+		   data: data
+		}, 
+		function(error) {
+			if (error) {
+			  console.log("signal error ("+ error.code + "): " + error.message);
+			} else {
+			  console.log("signal sent.");
+			}
+		});
+	};
+
+	$scope.typinguser = {};
+	OTSession.session.on('signal:user-notifications', function (event) {
+		if(event.data.type == 'usertyping')
+		{
+			$scope.$apply(function(){
+				if(event.data.data.id != $scope.data2.id)
+				{
+					if($scope.typinguser[event.data.data.id] === undefined)
+						$scope.typinguser[event.data.data.id] = {id:event.data.data.id, time:event.data.time, name:event.data.data.name};
+					else
+						$scope.typinguser[event.data.data.id].time = event.data.time;
+				}
+			});
+			jQuery(".control-sidebar").addClass("control-sidebar-open");
+			$timeout(function () {
+		        jQuery(".chat-mothed").scrollTop(jQuery(".chat-mothed")[0].scrollHeight);
+		    }, 1000);
+		}
+	});
+
+
+	$interval(function(){
+			angular.forEach($scope.typinguser, function(v,k){
+				console.log(v);
+				if(new Date().getTime() - v.time > 3000)
+					delete $scope.typinguser[k];
+			});
+	}, 3000);
+
+	$scope.size = function(obj)
+	{
+		return Object.size(obj);
 	};
 	/*Chat end here*/
 
@@ -557,5 +608,29 @@ if (scope.$last === true) {
         start = +start; //parse to int
         return input.slice(start);
     }
+})
+.filter('unique', function() {
+   return function(collection, keyname) {
+      var output = [], 
+          keys = [];
+
+      angular.forEach(collection, function(item) {
+          var key = item[keyname];
+          if(keys.indexOf(key) === -1) {
+              keys.push(key);
+              output.push(item);
+          }
+      });
+
+      return output;
+   };
 });
+
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
 </script>

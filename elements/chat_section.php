@@ -19,11 +19,14 @@
               <span class="ct-user-icon"><img ng-src="{{'//identicon.org/?t='+ch.id+'&s=35'}}"></span>
             </div>
         </div>
+        <div class="usertypingnoti" ng-show="size(typinguser)">
+            <span ng-repeat="item in typinguser">{{item.name}}</span> is typing...
+        </div>
      </div>
      <div class="chat-content">
      <div class="form-control1">
 <form>
-<textarea ng-model="data2.msg" ng-enter="add();" id="msg" placeholder="Type a message here" rows="2"></textarea>
+<textarea ng-change="send_noti({type:'usertyping', data:data2})" ng-model="data2.msg" ng-enter="add();" id="msg" placeholder="Type a message here" rows="2"></textarea>
 <button class="go1"><i class="fa fa-paperclip" aria-hidden="true"></i></button>
 <button ng-click="add();" class="go"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
 

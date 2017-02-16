@@ -93,6 +93,8 @@ Instant Connect UI
     .chat-mothed{overflow-y: auto;}
     .msg-bar-resive.msg-last-resive{background: #ccc;}
     .meeting_users:nth-child(even) .msg-bar-resive.msg-last-resive{background: #0085A6;color: #fff;}
+    .usertypingnoti span{color:#A05080;font-weight: bold;margin-right: 5px;display: inline-block;}
+    .usertypingnoti span:nth-child(even){color:#0085A6;}
     /*End here*/
   </style>
 

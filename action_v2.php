@@ -496,6 +496,12 @@ if (scope.$last === true) {
 		        jQuery(".chat-mothed").scrollTop(jQuery(".chat-mothed")[0].scrollHeight);
 		    }, 1000);
 		}
+		else if(event.data.type == 'show_video')
+		{
+			$scope.$apply(function(){
+				$scope.show_video = event.data.data;
+			});
+		}
 	});
 
 
@@ -506,11 +512,15 @@ if (scope.$last === true) {
 					delete $scope.typinguser[k];
 			});
 	}, 3000);
-
+	$(".close-icon").click(function(){
+		jQuery(".control-sidebar").removeClass("control-sidebar-open");
+	});
 	$scope.size = function(obj)
 	{
 		return Object.size(obj);
 	};
+
+	$scope.show_video = false;
 	/*Chat end here*/
 
 

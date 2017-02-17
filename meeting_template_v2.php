@@ -95,6 +95,14 @@ Instant Connect UI
     .meeting_users:nth-child(even) .msg-bar-resive.msg-last-resive{background: #0085A6;color: #fff;}
     .usertypingnoti span{color:#A05080;font-weight: bold;margin-right: 5px;display: inline-block;}
     .usertypingnoti span:nth-child(even){color:#0085A6;}
+    .video-container ot-layout{width: 100%;height: 100%;top:0;left:0;position: absolute;}
+    .video-container ot-publisher{width: 100%;height: 100%;border-radius:10px;}
+    .user-video-single-container,.user-video-multiple-container{margin-top: 20px;}
+    .user-video-single-container ot-subscriber{width: 100%;height: 100%;border-radius:10px;}
+    .client-videos-container{position: relative;}
+    .client-videos-container ot-layout{width: 100%;}
+    .user-video-multiple-container .video-container{height: 100px;}
+    .user-video-multiple-container .video-container ot-subscriber{width: 80% !important;border-radius:5px;height: 100%;left:0;right:0;margin:auto;}
     /*End here*/
   </style>
 
@@ -125,6 +133,8 @@ Instant Connect UI
       <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
           <!-- Messages: style can be found in dropdown.less-->
+          <li ng-show="show_video" ng-click="show_video=false;send_noti({type:'show_video', data:show_video})"><a>Disable video</a></li>
+          <li ng-hide="show_video" ng-click="show_video=true;send_noti({type:'show_video', data:show_video})"><a>Enable video</a></li>
           <li><a target="_blank" href="?user&sessionId=<?= $sessionId?>&token=<?= $token?>">Test user link</a></li>
           <li class="dropdown messages-menu">
             <!-- Menu toggle button -->
@@ -257,15 +267,45 @@ Instant Connect UI
         
         <div class="video-container agent">
             <div class="video-agent">
-            <img src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/agent-video-mock-up.jpg" class="img-responsive"/>
-
-                <div class="agent-name">Agent Name <span class="designations">C.F.C</span></div>
+              <img src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/agent-video-mock-up.jpg" class="img-responsive"/>
+              <ot-layout ng-if="show_video" props="{animate:true}">
+                <ot-publisher id="publisher" 
+                  props="{style: {nameDisplayMode: 'on'}, resolution: '500x300', frameRate: 30}">
+                </ot-publisher>
+              </ot-layout>
+              <div class="agent-name">Agent Name <span class="designations">C.F.C</span></div>
             </div>
          
         </div> 
 
-        <div class="client-videos-container">
+        <div ng-if="streams.length == 1" class="video-container agent user-video-single-container">
+            <div class="video-agent">
+              <img src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/agent-video-mock-up.jpg" class="img-responsive"/>
+              <ot-layout props="{animate:true}">
+                <ot-subscriber ng-repeat="stream in streams" 
+                  stream="stream" 
+                  props="{style: {nameDisplayMode: 'on'}}">
+                </ot-subscriber>
+              </ot-layout>
+              <div class="agent-name">User Name <span class="designations">C.F.C</span></div>
+            </div>
+         
+        </div>
+
+        <div ng-if="streams.length > 1" class="user-video-multiple-container">
+            <div ng-repeat="stream in streams" class="col-xs-6 video-container">
+              <ot-layout props="{animate:true}">
+                <ot-subscriber  
+                  stream="stream" 
+                  props="{style: {nameDisplayMode: 'on'}}">
+                </ot-subscriber>
+              </ot-layout>
+            </div>
+        </div>
+
+        <div class="client-videos-container hide">
            
+              
               <!--CLIENT VIDEO -->
               <div class="col-xs-4 video-container">
                   <div class="video">

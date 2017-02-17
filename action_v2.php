@@ -342,6 +342,11 @@ if (scope.$last === true) {
 	});
 	$scope.streams = OTSession.streams;
 	$scope.screenshare = OTSession.screenshare;
+	$scope.publisher = OTSession.publishers;
+
+	$scope.$on('otStreamCreated', function(newval, val){
+		$scope.data2.streamid = $scope.publisher[0].streamId;
+	});
 
 	$scope.initiate_screen_sharing = function(){
 		OTSession.initiate_screenshring();
@@ -447,7 +452,7 @@ if (scope.$last === true) {
 		}
 	};
 	$id = new Date().getTime()+''+Math.round(Math.random()*100000);
-	$scope.data2 = {id:$id, name: 'user'+$id, email: 'user'+$id+'@gmai.com', msg:''};
+	$scope.data2 = {id:$id, name: 'user'+$id, email: 'user'+$id+'@gmai.com', msg:'', streamid:''};
 
 	
 	$timeout(function(){

@@ -61,6 +61,7 @@ Instant Connect UI
   <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
   <![endif]-->
   <link rel="stylesheet" href="<?= plugin_dir_url(__FILE__); ?>css/opentok-whiteboard.css" type="text/css" media="screen" charset="utf-8">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
   <style type="text/css">
     .meet-icon li{background: url(<?= plugin_dir_url(__FILE__); ?>dist/v2/img/meet-icons.jpg);}
     
@@ -103,6 +104,15 @@ Instant Connect UI
     .client-videos-container ot-layout{width: 100%;}
     .user-video-multiple-container .video-container{height: 100px;}
     .user-video-multiple-container .video-container ot-subscriber{width: 80% !important;border-radius:5px;height: 100%;left:0;right:0;margin:auto;}
+    .fullwidthvideo .video-container-agent{position: fixed;z-index: 10000;}
+    .fullwidthvideo .user-video-single-container,.fullwidthvideo .user-video-multiple-container{position: fixed;left: 0;top: 0;width: 100%;height: 100%;background: #000;}
+    .fullwidthvideo .user-video-single-container .video-agent{width: 100%;height: 100%;}
+    .fullwidthvideo img, .fullwidthvideo .agent-name{display: none;}
+    .fullwidthvideo .user-video-single-container ot-subscriber{width: 80% !important;height: 80% !important;left:0 !important;right:0;top:0 !important;bottom: 0;margin: auto;}
+    .fullwidthvideo .user-video-multiple-container ot-subscriber{width: 80% !important;height: 100% !important;left:0 !important;right:0;top:0 !important;bottom: 0;margin: auto;}
+    .fullwidthvideo .user-video-multiple-container ot-subscriber{width: 80% !important;height: 100% !important;left:0 !important;right:0;top:0 !important;bottom: 0;margin: auto;}
+    .fullwidthvideo .user-video-multiple-container.two_streams .video-container{height: 80%;}
+    .fullwidthvideo .user-video-multiple-container.more_than_two_streams .video-container{height: 40%;}
     /*End here*/
   </style>
 
@@ -133,6 +143,9 @@ Instant Connect UI
       <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
           <!-- Messages: style can be found in dropdown.less-->
+          <li ng-show="show_video && fullwidthvideo" ng-click="fullwidthvideo=false;send_noti({type:'fullwidthvideo', data:fullwidthvideo})"><a>Video Minimize</a></li>
+          <li ng-show="show_video && !fullwidthvideo" ng-click="fullwidthvideo=true;send_noti({type:'fullwidthvideo', data:fullwidthvideo})"><a>Video Maximize</a></li>
+
           <li ng-show="show_video" ng-click="show_video=false;send_noti({type:'show_video', data:show_video})"><a>Disable video</a></li>
           <li ng-hide="show_video" ng-click="show_video=true;send_noti({type:'show_video', data:show_video})"><a>Enable video</a></li>
           <li><a target="_blank" href="?user&sessionId=<?= $sessionId?>&token=<?= $token?>">Test user link</a></li>
@@ -142,60 +155,108 @@ Instant Connect UI
               <i class="fa fa-users"></i>
               <span class="label label-success">4</span>
             </a>
-            <ul class="dropdown-menu">
-              <li class="header">You have 4 messages</li>
+            <ul class="dropdown-menu user-list-dropdown-menu">
+             <li class="header">User List</li>
               <li>
                 <!-- inner menu: contains the messages -->
-                <ul class="menu">
-                  <li><!-- start message -->
-                    <a href="#">
-                      <div class="pull-left">
-                        <!-- User Image -->
-                        <img src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/user2-160x160.jpg" class="img-circle" alt="User Image">
-                      </div>
-                      <!-- Message title and timestamp -->
-                      <h4>
-                        Support Team
-                        <small><i class="fa fa-clock-o"></i> 5 mins</small>
-                      </h4>
-                      <!-- The message -->
-                      <p>Why not buy a new awesome theme?</p>
+                <ul class="menu user-container">
+                <!-- start user item -->
+                  
+                  <li class="user-element">
+                    <div class="user-icon"><i class="fa fa-user" aria-hidden="true"></i></div>
+                    <div class="user-name">Sam Smith</div>
+                    <div class="user-controls">
+                    <a class="btn user-control">
+                      <i class="fa fa-edit"></i>
                     </a>
+                    <a class="btn user-control active">
+                      <i class="fa fa-video-camera" aria-hidden="true"></i>
+                    </a>
+
+                    <a class="btn user-control">
+                      <i class="fa fa-line-chart" aria-hidden="true"></i>
+                    </a>
+
+                     <a class="btn user-control">
+                      <i class="fa fa-times" aria-hidden="true"></i>
+                    </a>
+
+              </div>
+                      
+                   
                   </li>
-                  <!-- end message -->
+                  <!-- end user item -->
+
+                    <!-- start user item -->
+                  
+                  <li class="user-element">
+                    <div class="user-icon"><i class="fa fa-user" aria-hidden="true"></i></div>
+                    <div class="user-name">Sam Smith</div>
+                    <div class="user-controls">
+                    <a class="btn user-control">
+                      <i class="fa fa-edit"></i>
+                    </a>
+                    <a class="btn user-control active">
+                      <i class="fa fa-video-camera" aria-hidden="true"></i>
+                    </a>
+
+                    <a class="btn user-control">
+                      <i class="fa fa-line-chart" aria-hidden="true"></i>
+                    </a>
+
+                     <a class="btn user-control">
+                      <i class="fa fa-times" aria-hidden="true"></i>
+                    </a>
+
+              </div>
+                      
+                   
+                  </li>
+                  <!-- end user item -->
+
+                    <!-- start user item -->
+                  
+                  <li class="user-element">
+                    <div class="user-icon"><i class="fa fa-user" aria-hidden="true"></i></div>
+                    <div class="user-name">Jenifer Thomas this is</div>
+                    <div class="user-controls">
+                    <a class="btn user-control">
+                      <i class="fa fa-edit"></i>
+                    </a>
+                    <a class="btn user-control active">
+                      <i class="fa fa-video-camera" aria-hidden="true"></i>
+                    </a>
+
+                    <a class="btn user-control">
+                      <i class="fa fa-line-chart" aria-hidden="true"></i>
+                    </a>
+
+                     <a class="btn user-control">
+                      <i class="fa fa-times" aria-hidden="true"></i>
+                    </a>
+
+              </div>
+                      
+                   
+                  </li>
+                  <!-- end user item -->
+
+
+
+                  
+
+                
+                 
+
                 </ul>
                 <!-- /.menu -->
               </li>
-              <li class="footer"><a href="#">See All Messages</a></li>
+              <li class="footer users-footer">Close <i class="fa fa-times" aria-hidden="true"></i></li>
             </ul>
           </li>
           <!-- /.messages-menu -->
 
-          <!-- Notifications Menu -->
-          <li class="dropdown notifications-menu">
-            <!-- Menu toggle button -->
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <i class="fa fa-bell-o"></i>
-              <span class="label label-warning">10</span>
-            </a>
-            <ul class="dropdown-menu">
-              <li class="header">You have 10 notifications</li>
-              <li>
-                <!-- Inner Menu: contains the notifications -->
-                <ul class="menu">
-                  <li><!-- start notification -->
-                    <a href="#">
-                      <i class="fa fa-users text-aqua"></i> 5 new members joined today
-                    </a>
-                  </li>
-                  <!-- end notification -->
-                </ul>
-              </li>
-              <li class="footer"><a href="#">View all</a></li>
-            </ul>
-          </li>
-         
-          
+                   
           <!-- Control Sidebar Toggle Button -->
           <li>
             <a href="#" data-toggle="control-sidebar"><i class="fa fa-comments"></i></a>
@@ -263,14 +324,14 @@ Instant Connect UI
 
       <!-- Start Video and group chat -->
      <div class="row">
-     <div class="col-xs-12 col-md-3 col-sm-4 video-chat">
+     <div class="col-xs-12 col-md-3 col-sm-4 video-chat" ng-class="{fullwidthvideo: fullwidthvideo}">
         
-        <div class="video-container agent">
+        <div class="video-container agent video-container-agent">
             <div class="video-agent">
               <img src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/agent-video-mock-up.jpg" class="img-responsive"/>
               <ot-layout ng-if="show_video" props="{animate:true}">
                 <ot-publisher id="publisher" 
-                  props="{style: {nameDisplayMode: 'on'}, resolution: '500x300', frameRate: 30}">
+                  props="{style: {nameDisplayMode: 'on'}, resolution: '640x480', frameRate: 30}">
                 </ot-publisher>
               </ot-layout>
               <div class="agent-name">Agent Name <span class="designations">C.F.C</span></div>
@@ -291,8 +352,8 @@ Instant Connect UI
             </div>
          
         </div>
-
-        <div ng-if="streams.length > 1" class="user-video-multiple-container">
+        
+        <div ng-if="streams.length > 1" class="user-video-multiple-container" ng-class="{two_streams:streams.length == 2, more_than_two_streams:streams.length > 2}">
             <div ng-repeat="stream in streams" class="col-xs-6 video-container">
               <ot-layout props="{animate:true}">
                 <ot-subscriber  
@@ -443,7 +504,7 @@ Instant Connect UI
 <script src="<?= plugin_dir_url(__FILE__); ?>plugins/jQuery/jquery-2.2.3.min.js"></script>
 
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js" type="text/javascript" charset="utf-8"></script>
-
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <!-- TOOL TIP -->
 <script src="<?= plugin_dir_url(__FILE__); ?>dist/v2/js/jquery.toolbar.min.js"></script>
 <!-- Bootstrap 3.3.6 -->

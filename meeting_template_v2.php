@@ -161,7 +161,7 @@ Instant Connect UI
                 <!-- inner menu: contains the messages -->
                 <ul class="menu user-container">
                 <!-- start user item -->
-                  
+                  {{userlist}}
                   <li class="user-element">
                     <div class="user-icon"><i class="fa fa-user" aria-hidden="true"></i></div>
                     <div class="user-name">Sam Smith</div>

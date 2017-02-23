@@ -93,6 +93,7 @@ if (scope.$last === true) {
 
 	$scope.tabs = [];
 	$scope.current_tab = -1;
+	$scope.is_admin = <?= isset($_GET['admin']) ? 1 : 0;?>;
 
 	$scope.add_tab = function(type, name, data)
 	{
@@ -484,6 +485,42 @@ if (scope.$last === true) {
 	};
 
 	$scope.typinguser = {};
+	$scope.userlist = {};
+
+	OTSession.session.on({
+	    sessionConnected: function() {
+	    	if($scope.is_admin)
+	    	{
+	    		OTSession.session.signal( 
+				{  	type: 'IAMAGENT',
+					data:{}
+				}, 
+				function(error) {
+					if (error) {
+					  console.log("signal error ("+ error.code + "): " + error.message);
+					} else {
+					  console.log("signal sent.");
+					}
+				});
+	    	}
+	    	else
+	    	{
+	    		OTSession.session.signal( 
+				{  
+					type: 'IAMUSER',
+				   	data: $scope.data2
+				}, 
+				function(error) {
+					if (error) {
+					  console.log("signal error ("+ error.code + "): " + error.message);
+					} else {
+					  console.log("signal sent.");
+					}
+				});
+	    	}
+	    }
+   	});
+
 	OTSession.session.on('signal:user-notifications', function (event) {
 		if(event.data.type == 'usertyping')
 		{
@@ -509,6 +546,19 @@ if (scope.$last === true) {
 		}
 	});
 
+	OTSession.session.on('signal:IAMAGENT', function (event) {
+		if(!$scope.is_admin)
+	    {
+	    	window.location.reload();
+	    }
+	});
+
+	OTSession.session.on('signal:IAMUSER', function (event) {
+		if($scope.is_admin)
+	    {
+	    	$scope.userlist[event.data.id] = event.data;
+	    }
+	});
 
 	$interval(function(){
 			angular.forEach($scope.typinguser, function(v,k){

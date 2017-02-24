@@ -452,10 +452,26 @@ if (scope.$last === true) {
 			$scope.chat.push({id: msg.id, time: msg.time, msg:[msg]});
 		}
 	};
-	$id = new Date().getTime()+''+Math.round(Math.random()*100000);
-	$scope.data2 = {id:$id, name: 'user'+$id, email: 'user'+$id+'@gmai.com', msg:'', streamid:''};
+	$id = Math.round(Math.random()*100000)+''+new Date().getTime();
+	$scope.data2 = {id:$id, name: 'user'+$id, email: 'user'+$id+'@gmail.com', msg:'', streamid:'', whiteboard:0,presentation:0,chair:0,video:0};
+	$scope.chair_value = 0;
 
+	$scope.get_chair_value = function(){
+		$scope.chair_value++;
+
+		return angular.copy($scope.chair_value);
+	};
 	
+	$scope.getuserlist = function(){
+		var arr = [];
+
+		angular.forEach($scope.userlist, function(v,k){
+			arr.push(v);
+		});
+
+		return arr;
+	};
+
 	$timeout(function(){
 		$(".chat-mothed").height($(window).height()-200);
 	}, 3000);
@@ -467,6 +483,7 @@ if (scope.$last === true) {
 		$scope.data2.msg = '';
 		
 	};
+
 
 	$scope.send_noti = function(data)
 	{
@@ -547,6 +564,7 @@ if (scope.$last === true) {
 	});
 
 	OTSession.session.on('signal:IAMAGENT', function (event) {
+		console.log("dfgdfg");
 		if(!$scope.is_admin)
 	    {
 	    	window.location.reload();

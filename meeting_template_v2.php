@@ -12,7 +12,7 @@ if(isset($_GET['dev']))
   $sessionId = $ot['sessionId']; 
   $token = $ot['token'];
 }
-elseif(isset($_GET['user']))
+elseif(isset($_GET['sessionId']))
 {
   $sessionId = $_GET['sessionId']; 
   $token = $_GET['token'];
@@ -140,7 +140,7 @@ Instant Connect UI
         <span class="sr-only">Toggle navigation</span>
       </a>
       <!-- Navbar Right Menu -->
-      <div class="navbar-custom-menu">
+      <div class="navbar-custom-menu" ng-show="is_admin">
         <ul class="nav navbar-nav">
           <!-- Messages: style can be found in dropdown.less-->
           <li ng-show="show_video && fullwidthvideo" ng-click="fullwidthvideo=false;send_noti({type:'fullwidthvideo', data:fullwidthvideo})"><a>Video Minimize</a></li>
@@ -153,101 +153,39 @@ Instant Connect UI
             <!-- Menu toggle button -->
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               <i class="fa fa-users"></i>
-              <span class="label label-success">4</span>
+              <span class="label label-success">{{size(userlist)}}</span>
             </a>
             <ul class="dropdown-menu user-list-dropdown-menu">
              <li class="header">User List</li>
               <li>
                 <!-- inner menu: contains the messages -->
                 <ul class="menu user-container">
-                <!-- start user item -->
-                  {{userlist}}
-                  <li class="user-element">
+                  <!-- start user item -->
+                  <li ng-repeat="user in getuserlist() | orderBy:'-chair'" class="user-element">
                     <div class="user-icon"><i class="fa fa-user" aria-hidden="true"></i></div>
-                    <div class="user-name">Sam Smith</div>
-                    <div class="user-controls">
-                    <a class="btn user-control">
-                      <i class="fa fa-edit"></i>
-                    </a>
-                    <a class="btn user-control active">
-                      <i class="fa fa-video-camera" aria-hidden="true"></i>
-                    </a>
+                      <div class="user-name">{{user.name}}</div>
+                      <div class="user-controls">
+                      <a class="btn user-control" ng-class="{active:user.whiteboard}" ng-click="userlist[user.id].whiteboard = !user.whiteboard;">
+                        <i class="fa fa-edit"></i>
+                      </a>
+                      <a class="btn user-control" ng-class="{active:user.video}" ng-click="userlist[user.id].video = !user.video;">
+                        <i class="fa fa-video-camera" aria-hidden="true"></i>
+                      </a>
 
-                    <a class="btn user-control">
-                      <i class="fa fa-line-chart" aria-hidden="true"></i>
-                    </a>
+                      <a class="btn user-control" ng-class="{active:user.presentation}" ng-click="userlist[user.id].presentation = !user.presentation;">
+                        <i class="fa fa-line-chart" aria-hidden="true"></i>
+                      </a>
 
-                     <a class="btn user-control">
-                      <i class="fa fa-times" aria-hidden="true"></i>
-                    </a>
+                      <a class="btn user-control" ng-class="{active:user.chair}" ng-click="userlist[user.id].chair = user.chair ? 0 : get_chair_value();">
+                        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                      </a>
 
-              </div>
-                      
-                   
+                       <a class="btn user-control">
+                        <i class="fa fa-times" aria-hidden="true"></i>
+                      </a>
+                    </div>
                   </li>
                   <!-- end user item -->
-
-                    <!-- start user item -->
-                  
-                  <li class="user-element">
-                    <div class="user-icon"><i class="fa fa-user" aria-hidden="true"></i></div>
-                    <div class="user-name">Sam Smith</div>
-                    <div class="user-controls">
-                    <a class="btn user-control">
-                      <i class="fa fa-edit"></i>
-                    </a>
-                    <a class="btn user-control active">
-                      <i class="fa fa-video-camera" aria-hidden="true"></i>
-                    </a>
-
-                    <a class="btn user-control">
-                      <i class="fa fa-line-chart" aria-hidden="true"></i>
-                    </a>
-
-                     <a class="btn user-control">
-                      <i class="fa fa-times" aria-hidden="true"></i>
-                    </a>
-
-              </div>
-                      
-                   
-                  </li>
-                  <!-- end user item -->
-
-                    <!-- start user item -->
-                  
-                  <li class="user-element">
-                    <div class="user-icon"><i class="fa fa-user" aria-hidden="true"></i></div>
-                    <div class="user-name">Jenifer Thomas this is</div>
-                    <div class="user-controls">
-                    <a class="btn user-control">
-                      <i class="fa fa-edit"></i>
-                    </a>
-                    <a class="btn user-control active">
-                      <i class="fa fa-video-camera" aria-hidden="true"></i>
-                    </a>
-
-                    <a class="btn user-control">
-                      <i class="fa fa-line-chart" aria-hidden="true"></i>
-                    </a>
-
-                     <a class="btn user-control">
-                      <i class="fa fa-times" aria-hidden="true"></i>
-                    </a>
-
-              </div>
-                      
-                   
-                  </li>
-                  <!-- end user item -->
-
-
-
-                  
-
-                
-                 
-
                 </ul>
                 <!-- /.menu -->
               </li>

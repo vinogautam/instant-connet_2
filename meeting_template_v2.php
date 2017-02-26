@@ -290,9 +290,8 @@ Instant Connect UI
             </div>
          
         </div>
-        
         <div ng-if="streams.length > 1" class="user-video-multiple-container" ng-class="{two_streams:streams.length == 2, more_than_two_streams:streams.length > 2}">
-            <div ng-repeat="stream in streams" class="col-xs-6 video-container">
+            <div ng-repeat="stream in streams | orderBy:'vposition'" ng-init="stream.vposition===undefined?getstreamposition(stream.streamId):stream.vposition;" class="col-xs-6 video-container" data-pos="{{stream.vposition}}">
               <ot-layout props="{animate:true}">
                 <ot-subscriber  
                   stream="stream" 

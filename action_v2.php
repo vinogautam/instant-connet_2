@@ -345,10 +345,6 @@ if (scope.$last === true) {
 	$scope.screenshare = OTSession.screenshare;
 	$scope.publisher = OTSession.publishers;
 
-	$scope.$on('otStreamCreated', function(newval, val){
-		$scope.data2.streamid = $scope.publisher[0].streamId;
-	});
-
 	$scope.initiate_screen_sharing = function(){
 		OTSession.initiate_screenshring();
 	};
@@ -456,6 +452,11 @@ if (scope.$last === true) {
 	$scope.data2 = {id:$id, name: 'user'+$id, email: 'user'+$id+'@gmail.com', msg:'', streamid:'', whiteboard:0,presentation:0,chair:0,video:0};
 	$scope.chair_value = 0;
 
+	$scope.$on('otStreamCreated', function(newval, val){
+		$scope.data2.streamid = $scope.publisher[0].streamId;
+		$scope.send_noti({type:'userstream', id:$scope.data2.id, streamid:$scope.data2.streamid});
+	});
+
 	$scope.get_chair_value = function(){
 		$scope.chair_value++;
 
@@ -470,6 +471,18 @@ if (scope.$last === true) {
 		});
 
 		return arr;
+	};
+
+	$scope.getstreamposition = function(id)
+	{
+		console.log(id);
+		var pos = 0;
+		angular.forEach($scope.userlist, function(v,k){
+			if(v.streamid == id)
+				pos = v.streamid;
+		});
+
+		return pos;
 	};
 
 	$timeout(function(){
@@ -561,10 +574,15 @@ if (scope.$last === true) {
 				$scope.show_video = event.data.data;
 			});
 		}
+		else if(event.data.type == 'userstream')
+		{
+			$scope.$apply(function(){
+				$scope.userlist[event.data.id].streamid = event.data.streamid;
+			});
+		}
 	});
 
 	OTSession.session.on('signal:IAMAGENT', function (event) {
-		console.log("dfgdfg");
 		if(!$scope.is_admin)
 	    {
 	    	window.location.reload();

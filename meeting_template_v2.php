@@ -165,14 +165,14 @@ Instant Connect UI
                     <div class="user-icon"><i class="fa fa-user" aria-hidden="true"></i></div>
                       <div class="user-name">{{user.name}}</div>
                       <div class="user-controls">
-                      <a class="btn user-control" ng-class="{active:user.whiteboard}" ng-click="userlist[user.id].whiteboard = !user.whiteboard;">
+                      <a class="btn user-control" ng-class="{active:user.whiteboard}" ng-click="userlist[user.id].whiteboard = !user.whiteboard;send_noti({type:'whiteboard_control', data:{id:user.id, val:userlist[user.id].whiteboard}});">
                         <i class="fa fa-edit"></i>
                       </a>
-                      <a class="btn user-control" ng-class="{active:user.video}" ng-click="userlist[user.id].video = !user.video;">
+                      <a class="btn user-control" ng-class="{active:user.video}" ng-click="userlist[user.id].video = !user.video;send_noti({type:'video_control', data:{id:user.id, val:userlist[user.id].video}})">
                         <i class="fa fa-video-camera" aria-hidden="true"></i>
                       </a>
 
-                      <a class="btn user-control" ng-class="{active:user.presentation}" ng-click="userlist[user.id].presentation = !user.presentation;">
+                      <a class="btn user-control" ng-class="{active:user.presentation}" ng-click="userlist[user.id].presentation = !user.presentation;send_noti({type:'full_control', data:{id:user.id, val:userlist[user.id].presentation}})">
                         <i class="fa fa-line-chart" aria-hidden="true"></i>
                       </a>
 
@@ -180,7 +180,7 @@ Instant Connect UI
                         <i class="fa fa-arrow-up" aria-hidden="true"></i>
                       </a>
 
-                       <a class="btn user-control">
+                      <a class="btn user-control" ng-click="$parent.exit_user = user.id;" data-toggle="modal" data-target="#Exitmodal">
                         <i class="fa fa-times" aria-hidden="true"></i>
                       </a>
                     </div>
@@ -281,7 +281,7 @@ Instant Connect UI
             <div class="video-agent">
               <img src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/agent-video-mock-up.jpg" class="img-responsive"/>
               <ot-layout props="{animate:true}">
-                <ot-subscriber ng-repeat="stream in streams" 
+                <ot-subscriber ng-repeat="stream in streams" ng-init="stream.vposition===undefined?12:stream.vposition;"
                   stream="stream" 
                   props="{style: {nameDisplayMode: 'on'}}">
                 </ot-subscriber>
@@ -291,7 +291,7 @@ Instant Connect UI
          
         </div>
         <div ng-if="streams.length > 1" class="user-video-multiple-container" ng-class="{two_streams:streams.length == 2, more_than_two_streams:streams.length > 2}">
-            <div ng-repeat="stream in streams | orderBy:'vposition'" ng-init="stream.vposition===undefined?getstreamposition(stream.streamId):stream.vposition;" class="col-xs-6 video-container" data-pos="{{stream.vposition}}">
+            <div ng-repeat="stream in streams | orderBy:'vposition'" ng-init="stream.vposition===undefined?12:stream.vposition;" class="col-xs-6 video-container" data-pos="{{stream.vposition}}">
               <ot-layout props="{animate:true}">
                 <ot-subscriber  
                   stream="stream" 
@@ -429,6 +429,33 @@ Instant Connect UI
 
 <!-- ./wrapper -->
 <!--MODAL WINDOWS -->
+
+<div id="Exitmodal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Select a page to redirect user</h4>
+      </div>
+      <div class="modal-body">
+        <select ng-model="selected_page"  ng-init="selected_page=''">
+      <option value="">Select Page</option>
+      <?php foreach (get_pages() as $key => $value) {?>
+      <option value="<?= get_permalink($value->ID);?>"><?= $value->post_title;?></option>
+      <?php }?>
+    </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" ng-click="send_noti({type:'exit_user', data:{id:exit_user, val:selected_page}});" data-dismiss="modal">Ok</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <?php include 'elements/video_modal.php';?>
 <?php include 'elements/presentation_modal.php';?>
 <!-- REQUIRED JS SCRIPTS -->

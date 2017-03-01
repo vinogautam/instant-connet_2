@@ -475,7 +475,6 @@ if (scope.$last === true) {
 
 	$scope.getstreamposition = function(id)
 	{
-		console.log(id);
 		var pos = 0;
 		angular.forEach($scope.userlist, function(v,k){
 			if(v.streamid == id)
@@ -516,6 +515,11 @@ if (scope.$last === true) {
 
 	$scope.typinguser = {};
 	$scope.userlist = {};
+	
+	$scope.whiteboard_control = false;
+	$scope.video_control = false;
+	$scope.full_control = false;
+	$scope.exit_user = -1;
 
 	OTSession.session.on({
 	    sessionConnected: function() {
@@ -579,6 +583,55 @@ if (scope.$last === true) {
 			$scope.$apply(function(){
 				$scope.userlist[event.data.id].streamid = event.data.streamid;
 			});
+		}
+		else if(event.data.type == 'whiteboard_control')
+		{
+			if(event.data.data.id != $scope.data2.id)
+				return;
+
+			$scope.$apply(function(){
+				$scope.whiteboard_control = event.data.data.val;
+			});
+
+			if(event.data.data.val)
+				alert('Agent give whiteboard control to you');
+			else
+				alert('Agent get back your whiteboard control');
+		}
+		else if(event.data.type == 'video_control')
+		{
+			if(event.data.data.id != $scope.data2.id)
+				return;
+
+			$scope.$apply(function(){
+				$scope.video_control = event.data.data.val;
+			});
+
+			if(event.data.data.val)
+				alert('Agent enabled your video');
+			else
+				alert('Agent disabled your video');
+		}
+		else if(event.data.type == 'full_control')
+		{
+			if(event.data.data.id != $scope.data2.id)
+				return;
+
+			$scope.$apply(function(){
+				$scope.full_control = event.data.data.val;
+			});
+
+			if(event.data.data.val)
+				alert('Agent give full meeting room control to you');
+			else
+				alert('Agent get back your full meeting room control');
+		}
+		else if(event.data.type == 'exit_user')
+		{
+			if(event.data.data.id != $scope.data2.id)
+				return;
+
+			window.location.assign(event.data.data.val);
 		}
 	});
 

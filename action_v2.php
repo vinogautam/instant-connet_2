@@ -101,6 +101,8 @@ if (scope.$last === true) {
 		$scope.current_tab = $scope.tabs.length-1;
 
 		$scope.initiatescripts();
+
+		$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
 	};
 
 	$scope.tab_type_length = function(type, id)
@@ -217,6 +219,8 @@ if (scope.$last === true) {
 			$scope.current_tab = id;
 			$scope.initiatescripts();
 		}
+
+		$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
 	};
 
 	$scope.remove_tab = function(id)
@@ -237,6 +241,8 @@ if (scope.$last === true) {
 			$scope.current_tab = -1;
 			$scope.initiatescripts();
 		}
+
+		$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
 	};
 
 	$scope.parseInt = function(id)
@@ -351,6 +357,9 @@ if (scope.$last === true) {
 
 	$scope.trigger_draw_image = function()
 	{
+		if(!$scope.is_admin && !$scope.full_control)
+			return;
+
 		$timeout(function(){
 			$(".presentation-thumbs ul li:eq("+$scope.parseInt($scope.tabs[$scope.current_tab].currentpresentationindex)+")").trigger("click");
 		}, 500);
@@ -358,6 +367,9 @@ if (scope.$last === true) {
 
 	$scope.trigger_draw_whiteboard_image = function()
 	{
+		if(!$scope.is_admin && !$scope.full_control)
+			return;
+
 		$timeout(function(){
 			$(".draw_whiteboard").trigger("click");
 		}, 500);
@@ -632,6 +644,18 @@ if (scope.$last === true) {
 				return;
 
 			window.location.assign(event.data.data.val);
+		}
+		else if(event.data.type == 'tabs_data')
+		{
+			if($scope.is_admin)
+				return;
+
+			$scope.$apply(function(){
+				$scope.tabs = event.data.tabs;
+				$scope.current_tab = event.data.current_tab;
+
+				$scope.initiatescripts();
+			});
 		}
 	});
 

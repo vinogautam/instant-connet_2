@@ -212,15 +212,17 @@ if (scope.$last === true) {
 			$timeout(function(){
 				$scope.current_tab = id;
 				$scope.initiatescripts();
+
+				$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
 			},500);
 		}
 		else
 		{
 			$scope.current_tab = id;
 			$scope.initiatescripts();
-		}
 
-		$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
+			$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
+		}
 	};
 
 	$scope.remove_tab = function(id)
@@ -233,6 +235,8 @@ if (scope.$last === true) {
 				$scope.tabs.splice(id,1);
 				$scope.current_tab = -1;
 				$scope.initiatescripts();
+
+				$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
 			}, 500);
 		}
 		else
@@ -240,9 +244,11 @@ if (scope.$last === true) {
 			$scope.tabs.splice(id,1);
 			$scope.current_tab = -1;
 			$scope.initiatescripts();
+
+			$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
 		}
 
-		$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
+		
 	};
 
 	$scope.parseInt = function(id)
@@ -647,6 +653,8 @@ if (scope.$last === true) {
 		}
 		else if(event.data.type == 'tabs_data')
 		{
+			console.log(event.data);
+
 			if($scope.is_admin)
 				return;
 
@@ -670,6 +678,7 @@ if (scope.$last === true) {
 		if($scope.is_admin)
 	    {
 	    	$scope.userlist[event.data.id] = event.data;
+	    	$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
 	    }
 	});
 

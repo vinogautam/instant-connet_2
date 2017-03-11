@@ -63,7 +63,7 @@
     <div ng-hide="tab.hidethumbs" class="col-xs-2 presentation-thumbs no-pad">
 
         <ul>
-          <li ng-repeat="img in tab.data.files | orderBy:'':false" ng-class="{active:tab.currentpresentationindex==''+$index+''}" ng-click="tab.currentpresentationindex=''+$index+'';clear();draw_image(reset_value());"><img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/'+img}}" class="img-responsive"><p><span>Page {{$index+1}}</span></p></li>
+          <li ng-repeat="img in tab.data.files | orderBy:'':false" ng-class="{active:tab.currentpresentationindex==''+$index+''}" ng-click="tab.currentpresentationindex=''+$index+'';clear();draw_image(reset_value());send_noti({type:'tabs_data', tabs:tabs, current_tab:current_tab});"><img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/'+img}}" class="img-responsive"><p><span>Page {{$index+1}}</span></p></li>
            </ul> 
     </div>
   <div class="pane-footer col-xs-12">
@@ -73,13 +73,13 @@
      </div>
 
      <div class="col-sm-4 no-pad pagination">
-     <div ng-hide="parseInt(tab.currentpresentationindex)==0" class="per" ng-click="tab.currentpresentationindex=''+(parseInt(tab.currentpresentationindex)-1)+'';clear();draw_image(reset_value());thumb_position();"><i class="fa fa-arrow-left" aria-hidden="true"></i> PREV</div>
+     <div ng-hide="parseInt(tab.currentpresentationindex)==0" class="per" ng-click="tab.currentpresentationindex=''+(parseInt(tab.currentpresentationindex)-1)+'';clear();draw_image(reset_value());thumb_position();send_noti({type:'tabs_data', tabs:tabs, current_tab:current_tab});"><i class="fa fa-arrow-left" aria-hidden="true"></i> PREV</div>
      <div class="page-number">
-      <select ng-change="clear();draw_image(reset_value());thumb_position();" ng-model="tab.currentpresentationindex">
+      <select ng-change="clear();draw_image(reset_value());thumb_position();send_noti({type:'tabs_data', tabs:tabs, current_tab:current_tab});" ng-model="tab.currentpresentationindex">
         <option ng-repeat="img in tab.data.files" value="{{$index}}">Page {{$index+1}} of {{tab.data.files.length}}</option>
       </select>
      </div>
-     <div ng-hide="parseInt(tab.currentpresentationindex)==tab.data.files.length-1" class="next" ng-click="tab.currentpresentationindex=''+(parseInt(tab.currentpresentationindex)+1)+'';clear();draw_image(reset_value());thumb_position();">NEXT <i class="fa fa-arrow-right" aria-hidden="true"></i></div>
+     <div ng-hide="parseInt(tab.currentpresentationindex)==tab.data.files.length-1" class="next" ng-click="tab.currentpresentationindex=''+(parseInt(tab.currentpresentationindex)+1)+'';clear();draw_image(reset_value());thumb_position();send_noti({type:'tabs_data', tabs:tabs, current_tab:current_tab});">NEXT <i class="fa fa-arrow-right" aria-hidden="true"></i></div>
      </div>
 
      <div class="col-sm-5 no-pad">

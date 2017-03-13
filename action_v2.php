@@ -23,11 +23,13 @@ function onPlayerStateChange(event) {
 		break;
 	  case 1:
 		console.log('video playing from '+player.getCurrentTime());
-		//scope.video_noti('start', player.getCurrentTime());
+		if(scope.is_admin)
+			scope.send_noti({type:'video_start', vtime:player.getCurrentTime()});
 		break;
 	  case 2:
 		console.log('video paused at '+player.getCurrentTime());
-		//scope.video_noti('pause', player.getCurrentTime());
+		if(scope.is_admin)
+			scope.send_noti({type:'video_pause', vtime:player.getCurrentTime()});
 	}
 }
 function setCookie(cname, cvalue, exdays) {
@@ -94,6 +96,17 @@ if (scope.$last === true) {
 	$scope.tabs = [];
 	$scope.current_tab = -1;
 	$scope.is_admin = <?= isset($_GET['admin']) ? 1 : 0;?>;
+
+	window.addEventListener("beforeunload", function (e) {
+	 	var confirmationMessage = "\o/";
+
+		if(!$scope.is_admin)
+			$scope.send_noti({type:'exitalluser', id:$scope.data2.id});
+
+		(e || window.event).returnValue = confirmationMessage; 
+		return confirmationMessage; 
+	                             
+	});
 
 	$scope.add_tab = function(type, name, data)
 	{
@@ -664,6 +677,27 @@ if (scope.$last === true) {
 
 				$scope.initiatescripts();
 			});
+		}
+		else if(event.data.type == 'video_start')
+		{
+			if($scope.is_admin)
+				return;
+			player.seekTo(event.data.vtime, true);
+			player.playVideo();
+		}
+		else if(event.data.type == 'video_pause')
+		{
+			if($scope.is_admin)
+				return;
+			player.seekTo(event.data.vtime, true);
+			player.pauseVideo();
+		}
+		else if(event.data.type == 'exitalluser')
+		{
+			if($scope.userlist[event.data.id] === undefined)
+				return;
+
+			delete $scope.userlist[event.data.id];
 		}
 	});
 

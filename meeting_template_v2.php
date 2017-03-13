@@ -116,6 +116,7 @@ Instant Connect UI
     .client_view{pointer-events: none;}
     .client_view.full_control{pointer-events: auto;}
     .client_view.whiteboard_control .whiteboard_tab{pointer-events: none;}
+    .control-sidebar-open{pointer-events: auto;}
     /*End here*/
   </style>
 
@@ -143,7 +144,7 @@ Instant Connect UI
         <span class="sr-only">Toggle navigation</span>
       </a>
       <!-- Navbar Right Menu -->
-      <div class="navbar-custom-menu" ng-show="is_admin">
+      <div class="navbar-custom-menu" ng-show="is_admin || full_control">
         <ul class="nav navbar-nav">
           <!-- Messages: style can be found in dropdown.less-->
           <li ng-show="show_video && fullwidthvideo" ng-click="fullwidthvideo=false;send_noti({type:'fullwidthvideo', data:fullwidthvideo})"><a>Video Minimize</a></li>
@@ -228,7 +229,7 @@ Instant Connect UI
      
 
       <!-- Sidebar Menu -->
-      <ul class="sidebar-menu">
+      <ul class="sidebar-menu" ng-show="is_admin || full_control">
         <li class="header">Meeting Room Controls</li>
         <!-- Optionally, you can add icons to the links -->
         <li><a href="#" data-toggle="modal" data-target="#presentationsModal"><i class="fa ion-easel"></i> <span>Presentations</span></a></li>
@@ -355,7 +356,7 @@ Instant Connect UI
 <div class="col-xs-12 col-sm-9 meeting-panel-container" ng-init="tabindex=0">
     <div class="meeting-panel row">
         
-        <div class="col-xs-12 panel-header no-pad">
+        <div class="col-xs-12 panel-header no-pad" ng-show="is_admin || full_control">
         <div ng-click="set_tab(-1);" class="home-label">Start</div>
         <ul>
             <li ng-repeat="tab in tabs track by $index" ng-class="{active:current_tab == $index}" ng-show="$index >= tabindex && $index <= tabindex+4"><a ng-click="set_tab($index);">{{short_text(tab.name, 10)}} <span ng-click="$event.stopPropagation();remove_tab($index);" class="close-window">&times;</span></a></li>

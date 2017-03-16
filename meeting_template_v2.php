@@ -271,7 +271,7 @@ Instant Connect UI
         <div class="video-container agent video-container-agent">
             <div class="video-agent">
               <img src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/agent-video-mock-up.jpg" class="img-responsive"/>
-              <ot-layout ng-if="show_video" props="{animate:true}">
+              <ot-layout ng-if="(is_admin && show_video) || video_control" props="{animate:true}">
                 <ot-publisher id="publisher" 
                   props="{style: {nameDisplayMode: 'on'}, resolution: '640x480', frameRate: 30}">
                 </ot-publisher>
@@ -470,7 +470,7 @@ Instant Connect UI
 </script>
 <!-- jQuery 2.2.3 -->
 <script src="<?= plugin_dir_url(__FILE__); ?>plugins/jQuery/jquery-2.2.3.min.js"></script>
-
+<script src="<?= plugin_dir_url(__FILE__); ?>js/notify.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js" type="text/javascript" charset="utf-8"></script>
 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <!-- TOOL TIP -->

@@ -625,9 +625,9 @@ if (scope.$last === true) {
 			});
 
 			if(event.data.data.val)
-				alert('Agent give whiteboard control to you');
+				$.notify("Agent give whiteboard control to you", "success");
 			else
-				alert('Agent get back your whiteboard control');
+				$.notify("Agent get back your whiteboard control", "info");
 		}
 		else if(event.data.type == 'video_control')
 		{
@@ -639,9 +639,9 @@ if (scope.$last === true) {
 			});
 
 			if(event.data.data.val)
-				alert('Agent enabled your video');
+				$.notify("Agent enabled your video", "success");
 			else
-				alert('Agent disabled your video');
+				$.notify("Agent disabled your video", "info");
 		}
 		else if(event.data.type == 'full_control')
 		{
@@ -653,9 +653,9 @@ if (scope.$last === true) {
 			});
 
 			if(event.data.data.val)
-				alert('Agent give full meeting room control to you');
+				$.notify("Agent give full meeting room control to you", "success");
 			else
-				alert('Agent get back your full meeting room control');
+				$.notify("Agent get back your full meeting room control", "info");
 		}
 		else if(event.data.type == 'exit_user')
 		{

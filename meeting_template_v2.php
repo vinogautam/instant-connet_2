@@ -113,7 +113,7 @@ Instant Connect UI
     .fullwidthvideo .user-video-multiple-container ot-subscriber{width: 80% !important;height: 100% !important;left:0 !important;right:0;top:0 !important;bottom: 0;margin: auto;}
     .fullwidthvideo .user-video-multiple-container.two_streams .video-container{height: 80%;}
     .fullwidthvideo .user-video-multiple-container.more_than_two_streams .video-container{height: 40%;}
-    .client_view{pointer-events: none;}
+    .client_view,.admin_view.user_have_control .meeting-pane{pointer-events: none;}
     .client_view.full_control{pointer-events: auto;}
     .client_view.whiteboard_control .whiteboard_tab{pointer-events: none;}
     .control-sidebar-open{pointer-events: auto;}
@@ -123,7 +123,7 @@ Instant Connect UI
 
 </head>
 
-<body class="hold-transition skin-red sidebar-collapse sidebar-mini instant-connect <?= isset($_GET['admin']) ? 'admin_view' : 'client_view'; ?>" ng-class="{whiteboard_control:whiteboard_control, video_control:video_control, full_control:full_control}" ng-controller="MyCtrl">
+<body class="hold-transition skin-red sidebar-collapse sidebar-mini instant-connect <?= isset($_GET['admin']) ? 'admin_view' : 'client_view'; ?>" ng-class="{whiteboard_control:whiteboard_control, video_control:video_control, full_control:full_control, user_have_control: user_have_control()}" ng-controller="MyCtrl">
 <div class="wrapper">
 
   <!-- Main Header -->

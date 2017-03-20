@@ -267,7 +267,19 @@ Instant Connect UI
       <!-- Start Video and group chat -->
      <div class="row">
      <div class="col-xs-12 col-md-3 col-sm-4 video-chat" ng-class="{fullwidthvideo: fullwidthvideo}">
-        
+        <div style="margin-top: 0;margin-bottom: 20px;" ng-if="!is_admin" class="video-container agent user-video-single-container">
+            <div class="video-agent" ng-repeat="stream in streams" ng-if="stream.streamId == adminstream">
+              <img src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/agent-video-mock-up.jpg" class="img-responsive"/>
+              <ot-layout props="{animate:true}">
+                <ot-subscriber  stream="stream" 
+                  props="{style: {nameDisplayMode: 'on'}}">
+                </ot-subscriber>
+              </ot-layout>
+              <div class="agent-name">Agent Name <span class="designations">C.F.C</span></div>
+            </div>
+         
+        </div>
+
         <div class="video-container agent video-container-agent">
             <div class="video-agent">
               <img src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/agent-video-mock-up.jpg" class="img-responsive"/>
@@ -281,11 +293,11 @@ Instant Connect UI
          
         </div> 
 
-        <div ng-if="streams.length == 1" class="video-container agent user-video-single-container">
+        <div ng-if="streams.length == 1 && is_admin" class="video-container agent user-video-single-container">
             <div class="video-agent">
               <img src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/agent-video-mock-up.jpg" class="img-responsive"/>
               <ot-layout props="{animate:true}">
-                <ot-subscriber ng-repeat="stream in streams" ng-init="stream.vposition===undefined?12:stream.vposition;"
+                <ot-subscriber ng-repeat="stream in streams" data-val="{{stream.streamId}}"
                   stream="stream" 
                   props="{style: {nameDisplayMode: 'on'}}">
                 </ot-subscriber>
@@ -295,7 +307,7 @@ Instant Connect UI
          
         </div>
         <div ng-if="streams.length > 1" class="user-video-multiple-container" ng-class="{two_streams:streams.length == 2, more_than_two_streams:streams.length > 2}">
-            <div ng-repeat="stream in streams | orderBy:'vposition'" ng-init="stream.vposition===undefined?12:stream.vposition;" class="col-xs-6 video-container" data-pos="{{stream.vposition}}">
+            <div ng-repeat="stream in streams" ng-if="is_admin || (stream.streamId != adminstream)" class="col-xs-6 video-container" data-pos="{{stream.vposition}}">
               <ot-layout props="{animate:true}">
                 <ot-subscriber  
                   stream="stream" 

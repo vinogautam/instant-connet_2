@@ -494,7 +494,10 @@ if (scope.$last === true) {
 
 	$scope.$on('otStreamCreated', function(newval, val){
 		$scope.data2.streamid = $scope.publisher[0].streamId;
-		$scope.send_noti({type:'userstream', id:$scope.data2.id, streamid:$scope.data2.streamid});
+		if(!$scope.is_admin)
+			$scope.send_noti({type:'userstream', id:$scope.data2.id, streamid:$scope.data2.streamid});
+		else
+			$scope.send_noti({type:'adminstream', streamid:$scope.data2.streamid});
 	});
 
 	$scope.get_chair_value = function(){
@@ -560,6 +563,7 @@ if (scope.$last === true) {
 	$scope.video_control = false;
 	$scope.full_control = false;
 	$scope.exit_user = -1;
+	$scope.adminstream = '';
 
 	OTSession.session.on({
 	    sessionConnected: function() {
@@ -620,9 +624,21 @@ if (scope.$last === true) {
 		}
 		else if(event.data.type == 'userstream')
 		{
+			if(!$scope.is_admin)
+				return;
 			$scope.$apply(function(){
 				$scope.userlist[event.data.id].streamid = event.data.streamid;
 			});
+		}
+		else if(event.data.type == 'adminstream')
+		{
+			if($scope.is_admin)
+				return;
+			$scope.$apply(function(){
+				$scope.adminstream = event.data.streamid;
+			});
+
+			console.log('adminstream'+event.data.streamid);
 		}
 		else if(event.data.type == 'whiteboard_control')
 		{

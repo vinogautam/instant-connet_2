@@ -115,7 +115,7 @@ Instant Connect UI
     .fullwidthvideo .user-video-multiple-container.more_than_two_streams .video-container{height: 40%;}
     .client_view,.admin_view.user_have_control .meeting-panel-container{pointer-events: none;}
     .client_view.full_control{pointer-events: auto;}
-    .client_view.whiteboard_control .whiteboard_tab{pointer-events: none;}
+    .client_view.whiteboard_control .whiteboardtab{pointer-events: auto;}
     .control-sidebar-open{pointer-events: auto;}
     /*End here*/
   </style>

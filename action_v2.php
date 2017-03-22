@@ -115,7 +115,7 @@ if (scope.$last === true) {
 
 		$scope.initiatescripts();
 
-		$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
+		$scope.send_noti({type:'tabs_data', tabs:$scope.fiter_tabs($scope.tabs), current_tab:$scope.current_tab});
 	};
 
 	$scope.tab_type_length = function(type, id)
@@ -217,6 +217,17 @@ if (scope.$last === true) {
 		}, 100);
 	};
 
+	$scope.fiter_tabs = function(){
+		var tab_data2 = angular.copy($scope.tabs);
+		angular.forEach(tab_data2, function(v,k){
+			if(v.type == 'presentation' || v.type == 'whiteboard')
+			{
+				delete v.slide_image;
+			}
+		});
+		return tab_data2;
+	};
+
 	$scope.set_tab = function(id)
 	{
 		if($scope.current_tab != -1 && ($scope.tabs[$scope.current_tab].type == 'presentation' || $scope.tabs[$scope.current_tab].type == 'whiteboard'))
@@ -226,7 +237,7 @@ if (scope.$last === true) {
 				$scope.current_tab = id;
 				$scope.initiatescripts();
 
-				$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
+				$scope.send_noti({type:'tabs_data', tabs:$scope.fiter_tabs($scope.tabs), current_tab:$scope.current_tab});
 			},500);
 		}
 		else
@@ -234,7 +245,7 @@ if (scope.$last === true) {
 			$scope.current_tab = id;
 			$scope.initiatescripts();
 
-			$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
+			$scope.send_noti({type:'tabs_data', tabs:$scope.fiter_tabs($scope.tabs), current_tab:$scope.current_tab});
 		}
 	};
 
@@ -249,7 +260,7 @@ if (scope.$last === true) {
 				$scope.current_tab = -1;
 				$scope.initiatescripts();
 
-				$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
+				$scope.send_noti({type:'tabs_data', tabs:$scope.fiter_tabs($scope.tabs), current_tab:$scope.current_tab});
 			}, 500);
 		}
 		else
@@ -258,7 +269,7 @@ if (scope.$last === true) {
 			$scope.current_tab = -1;
 			$scope.initiatescripts();
 
-			$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
+			$scope.send_noti({type:'tabs_data', tabs:$scope.fiter_tabs($scope.tabs), current_tab:$scope.current_tab});
 		}
 
 		
@@ -737,7 +748,7 @@ if (scope.$last === true) {
 		if($scope.is_admin)
 	    {
 	    	$scope.userlist[event.data.id] = event.data;
-	    	$scope.send_noti({type:'tabs_data', tabs:$scope.tabs, current_tab:$scope.current_tab});
+	    	$scope.send_noti({type:'tabs_data', tabs:$scope.fiter_tabs($scope.tabs), current_tab:$scope.current_tab});
 	    }
 	});
 

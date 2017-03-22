@@ -11,8 +11,8 @@
  define('IC_PLUGIN_URL', plugin_dir_url( __FILE__ ));
  define('IC_PLUGIN_DIR',$dir['dirname']);
 
- define("API_KEY", "45778162");
- define("API_SECRET", "6cf8def7aa19bab496a75e8b549dfaa6624d6db5");
+ define("API_KEY", "45801502");
+ define("API_SECRET", "5558f266cf702a6788ca783a990284579083f323");
  
  include 'includes.php';
  include 'pusher/pusher.php';

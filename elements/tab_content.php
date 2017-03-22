@@ -1,7 +1,7 @@
 <!-- WHITEBOARD WINDOW -->
 <div ng-if="tab.type == 'whiteboard'" class="col-xs-12 no-pad meeting-pane whiteboardtab" ng-init="tab.slide_image = tab.slide_image === undefined ? [] : tab.slide_image;trigger_draw_whiteboard_image();">
   <div class="hide clear_whiteboard" ng-click="clear();"></div>
- <div class="hide draw_whiteboard" ng-click="draw_image(tab.slide_image);"></div>
+ <div class="hide draw_whiteboard" ng-click="draw_image(tab.slide_image, (is_admin || full_control));"></div>
  <div class="col-sm-12 no-pad wh100 tab-inner-div">
     <ot-whiteboard  width="700" height="420"></ot-whiteboard>
  </div>
@@ -22,10 +22,10 @@
       </div>
       <li class="pencil"><div class="pen"><i class="pencil-tool-fa fa fa-pencil"></i></div>
        
-      </li>
-   
+      </li> 
       <li class="position-change">
         <ul>
+           <li><a ng-click="clear();" href="#" id="eraser-tool"><i class="fa fa-trash"></i></a></li>
            <li ng-click="undo()"><img src="<?= IC_PLUGIN_URL; ?>dist/v2/img/tarn-left.png"></li>
            <li ng-click="redo()"><img src="<?= IC_PLUGIN_URL; ?>dist/v2/img/tarn--right.png"></li>
         </ul>
@@ -35,11 +35,11 @@
      </li>
      <li class="color-picker">
        <ul>
-          <li ng-click="color='yellow';" class="yellow"></li>
-          <li ng-click="color='black';" class="block"></li>
-          <li ng-click="color='white';" class="wight"></li>
-          <li ng-click="color='red';" class="red"></li>
-          <li ng-click="color='blue';" class="blue"></li>
+          <li ng-class="{active: color=='yellow'}" ng-click="color='yellow';" class="yellow"></li>
+          <li ng-class="{active: color=='black'}" ng-click="color='black';" class="block"></li>
+          <li ng-class="{active: color=='white'}" ng-click="color='white';" class="wight"></li>
+          <li ng-class="{active: color=='red'}" ng-click="color='red';" class="red"></li>
+          <li ng-class="{active: color=='blue'}" ng-click="color='blue';" class="blue"></li>
       </ul>
      </li>
     

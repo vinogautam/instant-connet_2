@@ -21,7 +21,7 @@ if (typeof paper === 'undefined' && typeof require !== 'undefined') {
 }
 
 var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
-.directive('otWhiteboard', ['OTSession', '$window', '$rootScope', function (OTSession, $window, $rootScope) {
+.directive('otWhiteboard', ['OTSession', '$window', '$rootScope', '$timeout', function (OTSession, $window, $rootScope, $timeout) {
     return {
         restrict: 'E',
         template: '<canvas hidpi="off"></canvas>',
@@ -100,8 +100,8 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                 scope.erasing = false;
             };
 
-            scope.changeColor(scope.colors[Math.floor(Math.random() * scope.colors.length)]);
-
+            //scope.changeColor(scope.colors[Math.floor(Math.random() * scope.colors.length)]);
+            scope.color = 'black';
             scope.clear = function () {
                 clearCanvas();
                 if (OTSession.session) {
@@ -119,8 +119,8 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                 return drawHistory;
             };
 
-            scope.draw_image = function(updates){
-                drawUpdates(updates);
+            scope.draw_image = function(updates, st){
+                drawUpdates(updates, st);
                 scope.$emit('otWhiteboardUpdate');
             };
 
@@ -237,9 +237,13 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                 scope.clear();
             });
 
-            var drawUpdates = function (updates) {
+            var drawUpdates = function (updates, st) {
                 updates.forEach(function (update) {
                     draw(update);
+                    if(typeof st != "undefined" && st)
+                    {
+                        sendUpdate('otWhiteboard_update', update);
+                    }
                 });
             };
 

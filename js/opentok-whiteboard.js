@@ -237,6 +237,14 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                 scope.clear();
             });
 
+            $rootScope.$on('colorchange', function(event, data){
+                scope.color = data;
+            });
+
+            $rootScope.$on('lineWidthchange', function(event, data){
+                scope.lineWidth = data;
+            });
+
             var drawUpdates = function (updates, st) {
                 updates.forEach(function (update) {
                     draw(update);

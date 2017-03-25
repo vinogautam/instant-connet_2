@@ -31,15 +31,15 @@
         </ul>
       </li>
       <li class="range-slider"><img src="<?= IC_PLUGIN_URL; ?>dist/v2/img/bar.png">
-      <div class="range"><input ng-model="lineWidth" type="range" min="0" max="10" orient="vertical" /></div>
+      <div class="range"><input ng-change="send_noti({type:'lineWidth', val: lineWidth});" ng-model="lineWidth" type="range" min="0" max="10" orient="vertical" /></div>
      </li>
      <li class="color-picker">
        <ul>
-          <li ng-class="{active: color=='yellow'}" ng-click="color='yellow';" class="yellow"></li>
-          <li ng-class="{active: color=='black'}" ng-click="color='black';" class="block"></li>
-          <li ng-class="{active: color=='white'}" ng-click="color='white';" class="wight"></li>
-          <li ng-class="{active: color=='red'}" ng-click="color='red';" class="red"></li>
-          <li ng-class="{active: color=='blue'}" ng-click="color='blue';" class="blue"></li>
+          <li ng-class="{active: color=='yellow'}" ng-click="color='yellow';send_noti({type:'color', val: color});" class="yellow"></li>
+          <li ng-class="{active: color=='black'}" ng-click="color='black';send_noti({type:'color', val: color});" class="block"></li>
+          <li ng-class="{active: color=='white'}" ng-click="color='white';send_noti({type:'color', val: color});" class="wight"></li>
+          <li ng-class="{active: color=='red'}" ng-click="color='red';send_noti({type:'color', val: color});" class="red"></li>
+          <li ng-class="{active: color=='blue'}" ng-click="color='blue';send_noti({type:'color', val: color});" class="blue"></li>
       </ul>
      </li>
     
@@ -95,6 +95,7 @@
    
       <li class="position-change">
         <ul>
+           <li><a ng-click="clear();" href="#" id="eraser-tool"><i class="fa fa-trash"></i></a></li>
            <li ng-click="undo()"><img src="<?= IC_PLUGIN_URL; ?>dist/v2/img/tarn-left.png"></li>
            <li ng-click="redo()"><img src="<?= IC_PLUGIN_URL; ?>dist/v2/img/tarn--right.png"></li>
         </ul>

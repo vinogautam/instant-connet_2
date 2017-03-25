@@ -453,7 +453,7 @@ if (scope.$last === true) {
 	$scope.user_have_control = function(){
 		varr = false;
 		angular.forEach($scope.userlist, function(v,k){
-			if(v.presentation)
+			if(v.presentation || v.whiteboard_control)
 				varr = true;
 		});
 		return varr;
@@ -734,6 +734,24 @@ if (scope.$last === true) {
 				return;
 
 			delete $scope.userlist[event.data.id];
+		}
+		else if(event.data.type == 'lineWidth')
+		{
+			if(($scope.is_admin && !$scope.user_have_control()) || $scope.full_control)
+				return;
+
+			$scope.$apply(function(){
+				$rootScope.$broadcast('lineWidthchange', event.data.val);
+			});
+		}
+		else if(event.data.type == 'color')
+		{
+			if(($scope.is_admin && !$scope.user_have_control()) || $scope.full_control)
+				return;
+
+			$scope.$apply(function(){
+				$rootScope.$broadcast('colorchange', event.data.val);
+			});
 		}
 	});
 

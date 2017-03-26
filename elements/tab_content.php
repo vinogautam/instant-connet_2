@@ -57,7 +57,7 @@
     <div class="hide clear_whiteboard" ng-click="clear();"></div>
     <div ng-class="{'col-xs-12':tab.hidethumbs || (!is_admin && !full_control), 'col-xs-10': !tab.hidethumbs && (is_admin || full_control)}" class="col-xs-10 presentation-room presentation-room-inner tab-inner-div no-pad h100">
       <ot-whiteboard  width="700" height="420"></ot-whiteboard>
-      <img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/'+tab.data.files[tab.currentpresentationindex]}}" class="img-responsive absolute_center img_whm100">
+      <img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/file-page'+ (parseInt(tab.currentpresentationindex) + 1)+'.jpg'}}" class="img-responsive absolute_center img_whm100">
     </div>
 
     <div ng-hide="tab.hidethumbs || (!is_admin && !full_control)" class="col-xs-2 presentation-thumbs no-pad">

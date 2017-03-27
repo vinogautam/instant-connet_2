@@ -6,7 +6,7 @@
     <ot-whiteboard  width="700" height="420"></ot-whiteboard>
  </div>
 
- <div class="pane-footer col-xs-12" ng-show="is_admin || full_control">
+ <div class="pane-footer col-xs-12" ng-show="is_admin || full_control || whiteboard_control">
    
    <div class="col-sm-10 col-lg-12 col-md-10 col-xs-12 whiteboard-tools no-pad">
    <div class="col-sm-3 no-pad">
@@ -66,7 +66,7 @@
           <li ng-repeat="img in tab.data.files | orderBy:'':false" ng-class="{active:tab.currentpresentationindex==''+$index+''}" ng-click="tab.currentpresentationindex=''+$index+'';clear();draw_image(reset_value());send_noti({type:'tabs_data', tabs:tabs, current_tab:current_tab});"><img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/'+img}}" class="img-responsive"><p><span>Page {{$index+1}}</span></p></li>
            </ul> 
     </div>
-  <div class="pane-footer col-xs-12" ng-show="is_admin || full_control">
+  <div class="pane-footer col-xs-12" ng-show="is_admin || full_control || whiteboard_control">
      <div class="col-sm-12 col-xs-12 whiteboard-tools no-pad">
      <div class="col-sm-3 no-pad"> 
      <div ng-click="remove_tab(tab.index);" class="clos-pre">Close Presentation</div>

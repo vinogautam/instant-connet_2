@@ -286,6 +286,7 @@ if (scope.$last === true) {
 	};
 
 	$rootScope.$on('Presentation_changed', function(event, data){
+		return;
 		if($scope.tabs[$scope.current_tab].type == 'presentation')
         {    
         	if(!$scope.$$phase) {
@@ -301,6 +302,7 @@ if (scope.$last === true) {
 	});
 
 	$rootScope.$on('Whiteboard_changed', function(event, data){
+		return;
 		if(data.tab.type == 'whiteboard')
         {
         	if(!$scope.$$phase) {
@@ -387,7 +389,7 @@ if (scope.$last === true) {
 
 	$scope.trigger_draw_image = function()
 	{
-		if(!$scope.is_admin && !$scope.full_control)
+		//if(!$scope.is_admin && !$scope.full_control)
 			return;
 
 		$timeout(function(){
@@ -397,7 +399,7 @@ if (scope.$last === true) {
 
 	$scope.trigger_draw_whiteboard_image = function()
 	{
-		if(!$scope.is_admin && !$scope.full_control)
+		//if(!$scope.is_admin && !$scope.full_control)
 			return;
 
 		$timeout(function(){
@@ -453,7 +455,7 @@ if (scope.$last === true) {
 	$scope.user_have_control = function(){
 		varr = false;
 		angular.forEach($scope.userlist, function(v,k){
-			if(v.presentation || v.whiteboard_control)
+			if(v.presentation || v.whiteboard)
 				varr = true;
 		});
 		return varr;
@@ -737,18 +739,12 @@ if (scope.$last === true) {
 		}
 		else if(event.data.type == 'lineWidth')
 		{
-			if(($scope.is_admin && !$scope.user_have_control()) || $scope.full_control)
-				return;
-
 			$scope.$apply(function(){
 				$rootScope.$broadcast('lineWidthchange', event.data.val);
 			});
 		}
 		else if(event.data.type == 'color')
 		{
-			if(($scope.is_admin && !$scope.user_have_control()) || $scope.full_control)
-				return;
-
 			$scope.$apply(function(){
 				$rootScope.$broadcast('colorchange', event.data.val);
 			});

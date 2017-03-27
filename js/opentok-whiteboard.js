@@ -320,7 +320,7 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                 }
 
                 event.preventDefault();
-
+                drawHistoryReceivedFrom = true;
                 var offset = ng.element(canvas).offset(),
                     scaleX = canvas.width / element.width(),
                     scaleY = canvas.height / element.height(),
@@ -442,8 +442,14 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                         // We will receive these from everyone in the room, only listen to the first
                         // person. Also the data is chunked together so we need all of that person's
                         if (!drawHistoryReceivedFrom || drawHistoryReceivedFrom === event.from.connectionId) {
-                            drawHistoryReceivedFrom = event.from.connectionId;
-                            drawUpdates(JSON.parse(event.data));
+                            var parseddata = JSON.parse(event.data);
+
+                            if(parseddata[parseddata.length-1].event == 'end')
+                                drawHistoryReceivedFrom = true;
+                            else
+                                drawHistoryReceivedFrom = event.from.connectionId;
+
+                            drawUpdates(parseddata);
                             scope.$emit('otWhiteboardUpdate');
                         }
                     },

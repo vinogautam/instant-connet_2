@@ -9,7 +9,7 @@
  <div class="pane-footer col-xs-12" ng-show="is_admin || full_control || whiteboard_control">
    
    <div class="col-sm-10 col-lg-12 col-md-10 col-xs-12 whiteboard-tools no-pad">
-   <div class="col-sm-3 no-pad">
+   <div class="col-sm-3 no-pad" ng-show="is_admin || full_control">
       <div ng-click="remove_tab(tab.index);" class="clos-pre">Close Whiteboard</div>
    </div>
 
@@ -68,11 +68,11 @@
     </div>
   <div class="pane-footer col-xs-12" ng-show="is_admin || full_control || whiteboard_control">
      <div class="col-sm-12 col-xs-12 whiteboard-tools no-pad">
-     <div class="col-sm-3 no-pad"> 
+     <div class="col-sm-3 no-pad" ng-show="is_admin || full_control"> 
      <div ng-click="remove_tab(tab.index);" class="clos-pre">Close Presentation</div>
      </div>
 
-     <div class="col-sm-4 no-pad pagination">
+     <div class="col-sm-4 no-pad pagination" ng-show="is_admin || full_control">
      <div ng-hide="parseInt(tab.currentpresentationindex)==0" class="per" ng-click="tab.currentpresentationindex=''+(parseInt(tab.currentpresentationindex)-1)+'';clear();draw_image(reset_value());thumb_position();send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});"><i class="fa fa-arrow-left" aria-hidden="true"></i> PREV</div>
      <div class="page-number">
       <select ng-change="clear();draw_image(reset_value());thumb_position();send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});" ng-model="tab.currentpresentationindex">

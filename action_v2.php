@@ -756,12 +756,14 @@ if (scope.$last === true) {
 		}
 		else if(event.data.type == 'lineWidth')
 		{
+			return;
 			$scope.$apply(function(){
 				$rootScope.$broadcast('lineWidthchange', event.data.val);
 			});
 		}
 		else if(event.data.type == 'color')
 		{
+			return;
 			$scope.$apply(function(){
 				$rootScope.$broadcast('colorchange', event.data.val);
 			});

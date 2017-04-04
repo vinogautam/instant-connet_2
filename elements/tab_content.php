@@ -63,7 +63,7 @@
     <div ng-hide="tab.hidethumbs || (!is_admin && !full_control)" class="col-xs-2 presentation-thumbs no-pad">
 
         <ul>
-          <li ng-repeat="img in tab.data.files | orderBy:'':false" ng-class="{active:tab.currentpresentationindex==''+$index+''}" ng-click="tab.currentpresentationindex=''+$index+'';clear();draw_image(reset_value());send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});"><img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/'+img}}" class="img-responsive"><p><span>Page {{$index+1}}</span></p></li>
+          <li ng-repeat="img in tab.data.files | orderBy:'':false" ng-class="{active:tab.currentpresentationindex==''+$index+''}" ng-click="tab.currentpresentationindex=''+$index+'';clear();draw_image(reset_value(), (is_admin || full_control));send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});"><img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/'+img}}" class="img-responsive"><p><span>Page {{$index+1}}</span></p></li>
            </ul> 
     </div>
   <div class="pane-footer col-xs-12" ng-show="is_admin || full_control || whiteboard_control">
@@ -73,13 +73,13 @@
      </div>
 
      <div class="col-sm-4 no-pad pagination" ng-show="is_admin || full_control">
-     <div ng-hide="parseInt(tab.currentpresentationindex)==0" class="per" ng-click="tab.currentpresentationindex=''+(parseInt(tab.currentpresentationindex)-1)+'';clear();draw_image(reset_value());thumb_position();send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});"><i class="fa fa-arrow-left" aria-hidden="true"></i> PREV</div>
+     <div ng-hide="parseInt(tab.currentpresentationindex)==0" class="per" ng-click="tab.currentpresentationindex=''+(parseInt(tab.currentpresentationindex)-1)+'';clear();draw_image(reset_value(), (is_admin || full_control));thumb_position();send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});"><i class="fa fa-arrow-left" aria-hidden="true"></i> PREV</div>
      <div class="page-number">
-      <select ng-change="clear();draw_image(reset_value());thumb_position();send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});" ng-model="tab.currentpresentationindex">
+      <select ng-change="clear();draw_image(reset_value(), (is_admin || full_control));thumb_position();send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});" ng-model="tab.currentpresentationindex">
         <option ng-repeat="img in tab.data.files" value="{{$index}}">Page {{$index+1}} of {{tab.data.files.length}}</option>
       </select>
      </div>
-     <div ng-hide="parseInt(tab.currentpresentationindex)==tab.data.files.length-1" class="next" ng-click="tab.currentpresentationindex=''+(parseInt(tab.currentpresentationindex)+1)+'';clear();draw_image(reset_value());thumb_position();send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});">NEXT <i class="fa fa-arrow-right" aria-hidden="true"></i></div>
+     <div ng-hide="parseInt(tab.currentpresentationindex)==tab.data.files.length-1" class="next" ng-click="tab.currentpresentationindex=''+(parseInt(tab.currentpresentationindex)+1)+'';clear();draw_image(reset_value(), (is_admin || full_control));thumb_position();send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});">NEXT <i class="fa fa-arrow-right" aria-hidden="true"></i></div>
      </div>
 
      <div class="col-sm-5 no-pad">

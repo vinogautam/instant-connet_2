@@ -189,7 +189,7 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
 
                         path.selected = false;
                         path.strokeColor = update.color;
-                        path.strokeWidth = scope.lineWidth;
+                        path.strokeWidth = update.lineWidth;
                         path.strokeCap = scope.strokeCap;
                         path.strokeJoin = scope.strokeJoin;
                         path.uuid = update.uuid;
@@ -352,6 +352,7 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                         fromY: client.lastY,
                         mode: mode,
                         color: scope.color,
+                        lineWidth: scope.lineWidth,
                         event: 'start'
                     };
 

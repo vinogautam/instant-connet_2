@@ -96,6 +96,14 @@ if (scope.$last === true) {
 	$scope.tabs = [];
 	$scope.current_tab = -1;
 	$scope.is_admin = <?= isset($_GET['admin']) ? 1 : 0;?>;
+	$scope.preloader = true;
+
+	$(window).load(function(){
+		console.log("fdf  f");
+		$scope.$apply(function(){
+			$scope.preloader = false;
+		});
+	});
 
 	window.addEventListener("beforeunload", function (e) {
 	 	var confirmationMessage = "\o/";
@@ -110,6 +118,7 @@ if (scope.$last === true) {
 
 	$scope.add_tab = function(type, name, data, notify)
 	{
+		$scope.preloader = true;
 		$scope.tabs.push({type:type, name:name, data:data});
 		$scope.current_tab = $scope.tabs.length-1;
 
@@ -117,6 +126,10 @@ if (scope.$last === true) {
 		console.log(notify);
 		if(notify === undefined)
 		$scope.send_noti({type:'add_tab', data:{type:type, name:name, data:data}});
+
+		$timeout(function(){
+			$scope.preloader = false;
+		}, 1000);
 	};
 
 	$scope.tab_type_length = function(type, id)
@@ -547,6 +560,9 @@ if (scope.$last === true) {
 		
 	};
 
+	$scope.show_msg = function(msg, type){
+		$.notify(msg, type);
+	};
 
 	$scope.send_noti = function(data)
 	{
@@ -701,9 +717,12 @@ if (scope.$last === true) {
 		{
 			if(($scope.is_admin && !$scope.user_have_control()) || $scope.full_control)
 				return;
-
+			console.log(event.data);
 			$scope.$apply(function(){
 				$scope.set_tab(event.data.id, 1);
+
+				if(typeof event.data.pid != "undefined")
+					$scope.tabs[event.data.id].currentpresentationindex= event.data.pid;
 			});
 		}
 		else if(event.data.type == 'remove_tab')
@@ -719,7 +738,7 @@ if (scope.$last === true) {
 		{
 			if(($scope.is_admin && !$scope.user_have_control()) || $scope.full_control)
 				return;
-
+			console.log(event.data);
 			$scope.$apply(function(){
 				$scope.add_tab(event.data.data.type, event.data.data.name, event.data.data.data, 1);
 			});
@@ -783,13 +802,17 @@ if (scope.$last === true) {
 	    	$scope.userlist[event.data.id] = event.data;
 
 	    	angular.forEach($scope.tabs, function(v,k){
-	    		$scope.send_noti({type:'add_tab', data:v});
+	    		$timeout(function(){
+	    			console.log("send", v);
+	    			$scope.send_noti({type:'add_tab', data:v});
+
+	    			if($scope.tabs.length-1 == k)
+	    			$scope.send_noti({type:'set_tab', id:$scope.current_tab, pid:$scope.tabs[$scope.current_tab].currentpresentationindex});
+	    		}, 100);
 	    	});
 	    	
 	    	console.log("received and send ack");
 
-	    	if($scope.tabs.length)
-	    	$scope.send_noti({type:'set_tab', id:$scope.current_tab});
 	    }
 	});
 

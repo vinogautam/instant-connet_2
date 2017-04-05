@@ -102,12 +102,15 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
 
             //scope.changeColor(scope.colors[Math.floor(Math.random() * scope.colors.length)]);
             scope.color = 'black';
-            scope.clear = function () {
-                clearCanvas();
-                if (OTSession.session) {
-                    OTSession.session.signal({
-                        type: 'otWhiteboard_clear'
-                    });
+            scope.clear = function (st) {
+                if(st === undefined || st)
+                {
+                    clearCanvas();
+                    if (OTSession.session) {
+                        OTSession.session.signal({
+                            type: 'otWhiteboard_clear'
+                        });
+                    }
                 }
             };
 

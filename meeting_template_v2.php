@@ -117,6 +117,8 @@ Instant Connect UI
     .client_view.full_control{pointer-events: auto;}
     .client_view.whiteboard_control .whiteboardtab, .client_view.whiteboard_control .presentation-room{pointer-events: auto;}
     .control-sidebar-open{pointer-events: auto;}
+    .preloader{position: fixed;width: 100%;height: 100%;background: rgba(0,0,0,0.5); z-index: 99999;}
+    .preloader span{position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;display: inline-block;width: 50px;height: 50px;color: #fff;font-size: 20px;}
     /*End here*/
   </style>
 
@@ -124,6 +126,9 @@ Instant Connect UI
 </head>
 
 <body class="hold-transition skin-red sidebar-collapse sidebar-mini instant-connect <?= isset($_GET['admin']) ? 'admin_view' : 'client_view'; ?>" ng-class="{whiteboard_control:whiteboard_control, video_control:video_control, full_control:full_control, user_have_control: user_have_control()}" ng-controller="MyCtrl">
+<div class="preloader" ng-if="preloader">
+  <span><i class="fa fa-spinner fa-pulse fa-3x fa-fw margin-bottom"></i></span>
+</div>
 <div class="wrapper">
 
   <!-- Main Header -->
@@ -144,7 +149,7 @@ Instant Connect UI
         <span class="sr-only">Toggle navigation</span>
       </a>
       <!-- Navbar Right Menu -->
-      <div class="navbar-custom-menu" ng-show="is_admin || full_control">
+      <div class="navbar-custom-menu" ng-show="is_admin">
         <ul class="nav navbar-nav">
           <!-- Messages: style can be found in dropdown.less-->
           <li ng-show="show_video && fullwidthvideo" ng-click="fullwidthvideo=false;send_noti({type:'fullwidthvideo', data:fullwidthvideo})"><a>Video Minimize</a></li>
@@ -176,7 +181,11 @@ Instant Connect UI
                         <i class="fa fa-video-camera" aria-hidden="true"></i>
                       </a>
 
-                      <a class="btn user-control" ng-class="{active:user.presentation}" ng-click="userlist[user.id].presentation = !user.presentation;send_noti({type:'full_control', data:{id:user.id, val:userlist[user.id].presentation}})">
+                      <a ng-show="!user_have_control() || user.presentation" class="btn user-control" ng-class="{active:user.presentation}" ng-click="userlist[user.id].presentation = !user.presentation;send_noti({type:'full_control', data:{id:user.id, val:userlist[user.id].presentation}})">
+                        <i class="fa fa-line-chart" aria-hidden="true"></i>
+                      </a>
+
+                      <a ng-hide="!user_have_control() || (user_have_control() && user.presentation)" ng-click="show_msg('Deselect already having user control and then try.', 'info');" class="btn user-control" >
                         <i class="fa fa-line-chart" aria-hidden="true"></i>
                       </a>
 

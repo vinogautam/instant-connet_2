@@ -117,8 +117,9 @@ Instant Connect UI
     .client_view.full_control{pointer-events: auto;}
     .client_view.whiteboard_control .whiteboardtab, .client_view.whiteboard_control .presentation-room{pointer-events: auto;}
     .control-sidebar-open{pointer-events: auto;}
-    .preloader{position: fixed;width: 100%;height: 100%;background: rgba(0,0,0,0.5); z-index: 99999;}
+    .preloader{position: fixed;width: 100%;height: 100%;background: rgba(0,0,0,0.8); z-index: 99999;}
     .preloader span{position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;display: inline-block;width: 50px;height: 50px;color: #fff;font-size: 20px;}
+    .opacity_0{opacity: 0;}
     /*End here*/
   </style>
 
@@ -129,7 +130,7 @@ Instant Connect UI
 <div class="preloader" ng-if="preloader">
   <span><i class="fa fa-spinner fa-pulse fa-3x fa-fw margin-bottom"></i></span>
 </div>
-<div class="wrapper">
+<div class="wrapper" ng-class="{opacity_0: preloader}">
 
   <!-- Main Header -->
   <header class="main-header">
@@ -377,7 +378,7 @@ Instant Connect UI
 <div class="col-xs-12 col-sm-9 meeting-panel-container" ng-init="tabindex=0">
     <div class="meeting-panel row">
         
-        <div class="col-xs-12 panel-header no-pad" ng-show="is_admin || full_control">
+        <div class="col-xs-12 panel-header no-pad" ng-show="(is_admin && !user_have_control()) || full_control">
         <div ng-click="set_tab(-1);" class="home-label">Start</div>
         <ul>
             <li ng-repeat="tab in tabs track by $index" ng-class="{active:current_tab == $index}" ng-show="$index >= tabindex && $index <= tabindex+4"><a ng-click="set_tab($index);">{{short_text(tab.name, 10)}} <span ng-click="$event.stopPropagation();remove_tab($index);" class="close-window">&times;</span></a></li>

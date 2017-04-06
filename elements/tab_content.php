@@ -9,7 +9,7 @@
  <div class="pane-footer col-xs-12" ng-show="is_admin || full_control || whiteboard_control">
    
    <div class="col-sm-10 col-lg-12 col-md-10 col-xs-12 whiteboard-tools no-pad">
-   <div class="col-sm-3 no-pad" ng-show="is_admin || full_control">
+   <div class="col-sm-3 no-pad" ng-show="(is_admin && !user_have_control()) || full_control || full_control">
       <div ng-click="remove_tab(tab.index);" class="clos-pre">Close Whiteboard</div>
    </div>
 
@@ -55,12 +55,12 @@
 <!-- PRESENTATION WINDOW -->
 <div ng-if="tab.type == 'presentation'" class="col-xs-12 no-pad meeting-pane presentation-room thumbs-active" ng-init="tab.currentpresentationindex=tab.currentpresentationindex===undefined ? '0' : tab.currentpresentationindex;tab.hidethumbs= tab.hidethumbs===undefined ? false : tab.hidethumbs;tab.slide_image = tab.slide_image === undefined ? {} : tab.slide_image;trigger_draw_image();">
     <div class="hide clear_whiteboard" ng-click="clear((is_admin || full_control));"></div>
-    <div ng-class="{'col-xs-12':tab.hidethumbs || (!is_admin && !full_control), 'col-xs-10': !tab.hidethumbs && (is_admin || full_control)}" class="col-xs-10 presentation-room presentation-room-inner tab-inner-div no-pad h100">
+    <div ng-class="{'col-xs-12':tab.hidethumbs || (!is_admin && !full_control), 'col-xs-10': !tab.hidethumbs && ((is_admin && !user_have_control()) || full_control)}" class="col-xs-10 presentation-room presentation-room-inner tab-inner-div no-pad h100">
       <ot-whiteboard  width="700" height="420"></ot-whiteboard>
       <img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/file-page'+ (parseInt(tab.currentpresentationindex) + 1)+'.jpg'}}" class="img-responsive absolute_center img_whm100">
     </div>
 
-    <div ng-hide="tab.hidethumbs || (!is_admin && !full_control)" class="col-xs-2 presentation-thumbs no-pad">
+    <div ng-hide="tab.hidethumbs || (!is_admin && !full_control) || (is_admin && user_have_control())" class="col-xs-2 presentation-thumbs no-pad">
 
         <ul>
           <li ng-repeat="img in tab.data.files | orderBy:'':false" ng-class="{active:tab.currentpresentationindex==''+$index+''}" ng-click="tab.currentpresentationindex=''+$index+'';clear();draw_image(reset_value(), (is_admin || full_control));send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});"><img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/'+img}}" class="img-responsive"><p><span>Page {{$index+1}}</span></p></li>
@@ -68,11 +68,11 @@
     </div>
   <div class="pane-footer col-xs-12" ng-show="is_admin || full_control || whiteboard_control">
      <div class="col-sm-12 col-xs-12 whiteboard-tools no-pad">
-     <div class="col-sm-3 no-pad" ng-show="is_admin || full_control"> 
+     <div class="col-sm-3 no-pad" ng-show="(is_admin && !user_have_control()) || full_control"> 
      <div ng-click="remove_tab(tab.index);" class="clos-pre">Close Presentation</div>
      </div>
 
-     <div class="col-sm-4 no-pad pagination" ng-show="is_admin || full_control">
+     <div class="col-sm-4 no-pad pagination" ng-show="(is_admin && !user_have_control()) || full_control">
      <div ng-hide="parseInt(tab.currentpresentationindex)==0" class="per" ng-click="tab.currentpresentationindex=''+(parseInt(tab.currentpresentationindex)-1)+'';clear();draw_image(reset_value(), (is_admin || full_control));thumb_position();send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});"><i class="fa fa-arrow-left" aria-hidden="true"></i> PREV</div>
      <div class="page-number">
       <select ng-change="clear();draw_image(reset_value(), (is_admin || full_control));thumb_position();send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});" ng-model="tab.currentpresentationindex">

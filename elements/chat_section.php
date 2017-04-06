@@ -9,14 +9,14 @@
               <span class="chat-persion">{{ch.msg[0].name}}</span>
               <p ng-repeat="c in ch.msg track by $index"><span class="msg-bar-resive msg-last-resive">{{c.msg}}</span></p>
               <span class="del chat-persion">Delivered {{ch.time | date:'h:mm a'}}</span>
-              <span class="ct-user-icon1"><img ng-src="{{'//identicon.org/?t='+ch.msg[0].email+'&s=35'}}"></span>
+              <span ng-if="ch.msg[0].name == 'Agent'" class="ct-user-icon1"><img ng-src="{{'//identicon.org/?t='+ch.msg[0].name+'&s=35'}}"></span>
             </div>
             
             <div class="messages" ng-if="ch.id == data2.id">
-              <span class="chat-persion">Agent Name </span>
+              <span class="chat-persion">{{ch.msg[0].name}}</span>
               <p ng-repeat="c in ch.msg track by $index"><span class="msg-bar msg-last">{{c.msg}}</span></p>
-              <span class="del">Delivered 11:29 PM</span>
-              <span class="ct-user-icon"><img ng-src="{{'//identicon.org/?t='+ch.id+'&s=35'}}"></span>
+              <span class="del">Delivered {{ch.time | date:'h:mm a'}}</span>
+              <span ng-if="ch.msg[0].name == 'Agent'" class="ct-user-icon"><img ng-src="{{'//identicon.org/?t='+ch.msg[0].name+'&s=35'}}"></span>
             </div>
         </div>
         <div class="usertypingnoti" ng-show="size(typinguser)">

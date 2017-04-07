@@ -469,6 +469,15 @@ if (scope.$last === true) {
 		return varr;
 	};
 
+	$scope.user_have_admin_control = function(){
+		varr = false;
+		angular.forEach($scope.userlist, function(v,k){
+			if(v.presentation)
+				varr = true;
+		});
+		return varr;
+	};
+
 	$scope.chat = [];
 
 	var statusRef = new Firebase('https://vinogautam.firebaseio.com/opentok/<?= $sessionId?>');

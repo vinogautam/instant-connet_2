@@ -113,7 +113,8 @@ Instant Connect UI
     .fullwidthvideo .user-video-multiple-container ot-subscriber{width: 80% !important;height: 100% !important;left:0 !important;right:0;top:0 !important;bottom: 0;margin: auto;}
     .fullwidthvideo .user-video-multiple-container.two_streams .video-container{height: 80%;}
     .fullwidthvideo .user-video-multiple-container.more_than_two_streams .video-container{height: 40%;}
-    /*.client_view,.admin_view.user_have_control .meeting-panel-container{pointer-events: none;}*/
+    .client_view{pointer-events: none;}
+    /*.admin_view.user_have_control .meeting-panel-container{pointer-events: none;}*/
     .client_view.full_control{pointer-events: auto;}
     .client_view.whiteboard_control .whiteboardtab, .client_view.whiteboard_control .presentation-room{pointer-events: auto;}
     .control-sidebar-open{pointer-events: auto;}
@@ -182,17 +183,17 @@ Instant Connect UI
                         <i class="fa fa-video-camera" aria-hidden="true"></i>
                       </a>
 
-                      <a ng-show="!user_have_control() || user.presentation" class="btn user-control" ng-class="{active:user.presentation}" ng-click="userlist[user.id].presentation = !user.presentation;send_noti({type:'full_control', data:{id:user.id, val:userlist[user.id].presentation}})">
+                      <a ng-show="!user_have_admin_control() || user.presentation" class="btn user-control" ng-class="{active:user.presentation}" ng-click="userlist[user.id].presentation = !user.presentation;send_noti({type:'full_control', data:{id:user.id, val:userlist[user.id].presentation}})">
                         <i class="fa fa-line-chart" aria-hidden="true"></i>
                       </a>
 
-                      <a ng-hide="!user_have_control() || (user_have_control() && user.presentation)" ng-click="show_msg('Deselect already having user control and then try.', 'info');" class="btn user-control" >
+                      <a ng-hide="!user_have_admin_control() || (user_have_admin_control() && user.presentation)" ng-click="show_msg('Deselect already having user control and then try.', 'info');" class="btn user-control" >
                         <i class="fa fa-line-chart" aria-hidden="true"></i>
                       </a>
 
-                      <a class="btn user-control" ng-class="{active:user.chair}" ng-click="userlist[user.id].chair = user.chair ? 0 : get_chair_value();">
+                      <!--<a class="btn user-control" ng-class="{active:user.chair}" ng-click="userlist[user.id].chair = user.chair ? 0 : get_chair_value();">
                         <i class="fa fa-arrow-up" aria-hidden="true"></i>
-                      </a>
+                      </a>-->
 
                       <a class="btn user-control" ng-click="$parent.exit_user = user.id;" data-toggle="modal" data-target="#Exitmodal">
                         <i class="fa fa-times" aria-hidden="true"></i>
@@ -290,7 +291,7 @@ Instant Connect UI
          
         </div>
 
-        <div class="video-container agent video-container-agent">
+        <div ng-if="is_admin" class="video-container agent video-container-agent">
             <div class="video-agent">
               <img src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/agent-video-mock-up.jpg" class="img-responsive"/>
               <ot-layout ng-if="(is_admin && show_video) || video_control" props="{animate:true}">
@@ -316,7 +317,25 @@ Instant Connect UI
             </div>
          
         </div>
-        <div ng-if="streams.length > 1" class="user-video-multiple-container" ng-class="{two_streams:streams.length == 2, more_than_two_streams:streams.length > 2}">
+        <div ng-if="streams.length > 1  && is_admin" class="user-video-multiple-container" ng-class="{two_streams:streams.length == 2, more_than_two_streams:streams.length > 2}">
+            <div ng-repeat="stream in streams" ng-if="is_admin || (stream.streamId != adminstream)" class="col-xs-6 video-container" data-pos="{{stream.vposition}}">
+              <ot-layout props="{animate:true}">
+                <ot-subscriber  
+                  stream="stream" 
+                  props="{style: {nameDisplayMode: 'on'}}">
+                </ot-subscriber>
+              </ot-layout>
+            </div>
+        </div>
+
+        <div ng-if="(streams.length || video_control) && !is_admin" class="user-video-multiple-container" ng-class="{two_streams:streams.length == 2, more_than_two_streams:streams.length > 2}">
+            <div ng-if="video_control" class="col-xs-6 video-container" data-pos="{{stream.vposition}}">
+              <ot-layout  props="{animate:true}">
+                <ot-publisher id="publisher" 
+                  props="{style: {nameDisplayMode: 'on'}, resolution: '640x480', frameRate: 30}">
+                </ot-publisher>
+              </ot-layout>
+            </div>
             <div ng-repeat="stream in streams" ng-if="is_admin || (stream.streamId != adminstream)" class="col-xs-6 video-container" data-pos="{{stream.vposition}}">
               <ot-layout props="{animate:true}">
                 <ot-subscriber  
@@ -378,7 +397,7 @@ Instant Connect UI
 <div class="col-xs-12 col-sm-9 meeting-panel-container" ng-init="tabindex=0">
     <div class="meeting-panel row">
         
-        <div class="col-xs-12 panel-header no-pad" ng-show="(is_admin && !user_have_control()) || full_control">
+        <div class="col-xs-12 panel-header no-pad" ng-show="(is_admin && !user_have_admin_control()) || full_control">
         <div ng-click="set_tab(-1);" class="home-label">Start</div>
         <ul>
             <li ng-repeat="tab in tabs track by $index" ng-class="{active:current_tab == $index}" ng-show="$index >= tabindex && $index <= tabindex+4"><a ng-click="set_tab($index);">{{short_text(tab.name, 10)}} <span ng-click="$event.stopPropagation();remove_tab($index);" class="close-window">&times;</span></a></li>
@@ -392,7 +411,7 @@ Instant Connect UI
 
     <div class="tab-content">
 
-      <div class="tab-pane active" ng-if="current_tab == -1" ng-show="is_admin || full_control">
+      <div class="tab-pane active" ng-if="current_tab == -1" ng-show="(is_admin && !user_have_admin_control()) || full_control">
         <div class="col-xs-12 no-pad meeting-pane">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
               <ul class="meet-icon">

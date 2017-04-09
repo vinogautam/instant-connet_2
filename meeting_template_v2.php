@@ -52,7 +52,7 @@ Instant Connect UI
   <!-- Theme style -->
   <link rel="stylesheet" href="<?= plugin_dir_url(__FILE__); ?>dist/v2/css/instantconnect.min.css">
   
-  <link rel="stylesheet" href="<?= plugin_dir_url(__FILE__); ?>dist/v2/css/skins/skin-red.min.css">
+  <link rel="stylesheet" href="<?= plugin_dir_url(__FILE__); ?>dist/v2/css/skins/skin-blue.min.css">
 
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -66,68 +66,13 @@ Instant Connect UI
     .meet-icon li{background: url(<?= plugin_dir_url(__FILE__); ?>dist/v2/img/meet-icons.jpg);}
     
 
-    /*Need to add this styes in less*/
-    ot-whiteboard {display: block;width: 100%;height:100%;position: absolute;left: 0;right: 0;z-index:11;}
-    .meet-icon{ padding: 0; text-align: center; margin-top: 12%; }
-    .meet-icon li, .meet-icon li a{ list-style-type: none;  width:142px; height: 142px;  margin:12px;
-      background-repeat: no-repeat; display: inline-block;}
-    .meet-icon .presen-img{ background-position: -32px -33px;  }
-    .meet-icon .presen-img:hover{ background-position: -32px -180px;  }
-    .meet-icon .screen-share{background-position: -185px -33px;}
-    .meet-icon .screen-share:hover{background-position: -185px -180px;}
-    .meet-icon .whith-board{background-position: -339px -33px; border-bottom:1px solid #ededed;}
-    .meet-icon .whith-board:hover{background-position: -339px -180px;}
-    .meet-icon .youtube{background-position: -491px -33px; border-top:1px solid #ededed;}
-    .meet-icon .youtube:hover{background-position: -491px -180px;}
-
-    .pane-footer{z-index:9999;}
-    .absolute_center{position:absolute;left:0;right:0;top:0;bottom:0;margin:auto;}
-    .img_whm100{width:auto;height:auto;max-width:100%;max-height:100%;}
-    .wh100{width:100%;height:100%;}
-    .w100{width:100%;}
-    .h100{height:100%;}
-    .instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li.active img{outline:2px solid #790303}
-    .instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li.active p span{background:#790303;color:#fff;padding:1px 20px 4px;border-radius:20px}
-    .tabnavigation{position: absolute;right: 0;}
-    .tabnavigation i{margin: 0 5px;}
-    .control-sidebar-dark, .control-sidebar-dark + .control-sidebar-bg{ background: #fff; border-left:1px solid #ccc; position: fixed;}
-    .chat-mothed{overflow-y: auto;}
-    .msg-bar-resive.msg-last-resive{background: #ccc;}
-    .meeting_users:nth-child(even) .msg-bar-resive.msg-last-resive{background: #0085A6;color: #fff;}
-    .usertypingnoti span{color:#A05080;font-weight: bold;margin-right: 5px;display: inline-block;}
-    .usertypingnoti span:nth-child(even){color:#0085A6;}
-    .video-container ot-layout{width: 100%;height: 100%;top:0;left:0;position: absolute;}
-    .video-container ot-publisher{width: 100%;height: 100%;border-radius:10px;}
-    .user-video-single-container,.user-video-multiple-container{margin-top: 20px;}
-    .user-video-single-container ot-subscriber{width: 100%;height: 100%;border-radius:10px;}
-    .client-videos-container{position: relative;}
-    .client-videos-container ot-layout{width: 100%;}
-    .user-video-multiple-container .video-container{height: 100px;}
-    .user-video-multiple-container .video-container ot-subscriber{width: 80% !important;border-radius:5px;height: 100%;left:0;right:0;margin:auto;}
-    .fullwidthvideo .video-container-agent{position: fixed;z-index: 10000;}
-    .fullwidthvideo .user-video-single-container,.fullwidthvideo .user-video-multiple-container{position: fixed;left: 0;top: 0;width: 100%;height: 100%;background: #000;}
-    .fullwidthvideo .user-video-single-container .video-agent{width: 100%;height: 100%;}
-    .fullwidthvideo img, .fullwidthvideo .agent-name{display: none;}
-    .fullwidthvideo .user-video-single-container ot-subscriber{width: 80% !important;height: 80% !important;left:0 !important;right:0;top:0 !important;bottom: 0;margin: auto;}
-    .fullwidthvideo .user-video-multiple-container ot-subscriber{width: 80% !important;height: 100% !important;left:0 !important;right:0;top:0 !important;bottom: 0;margin: auto;}
-    .fullwidthvideo .user-video-multiple-container ot-subscriber{width: 80% !important;height: 100% !important;left:0 !important;right:0;top:0 !important;bottom: 0;margin: auto;}
-    .fullwidthvideo .user-video-multiple-container.two_streams .video-container{height: 80%;}
-    .fullwidthvideo .user-video-multiple-container.more_than_two_streams .video-container{height: 40%;}
-    .client_view{pointer-events: none;}
-    /*.admin_view.user_have_control .meeting-panel-container{pointer-events: none;}*/
-    .client_view.full_control{pointer-events: auto;}
-    .client_view.whiteboard_control .whiteboardtab, .client_view.whiteboard_control .presentation-room{pointer-events: auto;}
-    .control-sidebar-open{pointer-events: auto;}
-    .preloader{position: fixed;width: 100%;height: 100%;background: rgba(0,0,0,0.8); z-index: 99999;}
-    .preloader span{position: absolute;top: 0;left: 0;right: 0;bottom: 0;margin: auto;display: inline-block;width: 50px;height: 50px;color: #fff;font-size: 20px;}
-    .opacity_0{opacity: 0;}
-    /*End here*/
+    
   </style>
 
 
 </head>
 
-<body class="hold-transition skin-red sidebar-collapse sidebar-mini instant-connect <?= isset($_GET['admin']) ? 'admin_view' : 'client_view'; ?>" ng-class="{whiteboard_control:whiteboard_control, video_control:video_control, full_control:full_control, user_have_control: user_have_control()}" ng-controller="MyCtrl">
+<body class="hold-transition skin-blue sidebar-collapse sidebar-mini instant-connect <?= isset($_GET['admin']) ? 'admin_view' : 'client_view'; ?>" ng-class="{whiteboard_control:whiteboard_control, video_control:video_control, full_control:full_control, user_have_control: user_have_control()}" ng-controller="MyCtrl">
 <div class="preloader" ng-if="preloader">
   <span><i class="fa fa-spinner fa-pulse fa-3x fa-fw margin-bottom"></i></span>
 </div>
@@ -243,22 +188,10 @@ Instant Connect UI
       <ul class="sidebar-menu" ng-show="is_admin || full_control">
         <li class="header">Meeting Room Controls</li>
         <!-- Optionally, you can add icons to the links -->
-        <li><a href="#" data-toggle="modal" data-target="#presentationsModal"><i class="fa ion-easel"></i> <span>Presentations</span></a></li>
+        <li><a href="#" data-toggle="modal" data-target="#presentationsModal"><i class="fa fa-line-chart" aria-hidden="true"></i> <span>Presentations</span></a></li>
         <li><a href="#" data-toggle="modal" data-target="#youtubeModal"><i class="fa fa-youtube-play"></i> <span>Videos</span></a></li>
         
-        <li class="treeview">
-          <a href="#"><i class="fa fi-logo"></i> <span class="folio">Financial Folios</span>
-            <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
-          </a>
-          <ul class="treeview-menu">
-              <li><a href="#">Financial Planning</a></li>
-              <li><a href="#">Insurance Planning</a></li>
-              <li><a href="#">Retirement Planning</a></li>
-              <li><a href="#">Investment Planning</a></li>
-          </ul>
-        </li>
+       
         <li><a href="#"><i class="fa fa-question-circle"></i> <span>Help</span></a></li>
       </ul>
       <!-- /.sidebar-menu -->
@@ -398,9 +331,10 @@ Instant Connect UI
     <div class="meeting-panel row">
         
         <div class="col-xs-12 panel-header no-pad" ng-show="(is_admin && !user_have_admin_control()) || full_control">
-        <div ng-click="set_tab(-1);" class="home-label">Start</div>
+        <div ng-click="set_tab(-1);" class="home-label"><i class="fa fa-home" aria-hidden="true"></i>
+ Start</div>
         <ul>
-            <li ng-repeat="tab in tabs track by $index" ng-class="{active:current_tab == $index}" ng-show="$index >= tabindex && $index <= tabindex+4"><a ng-click="set_tab($index);">{{short_text(tab.name, 10)}} <span ng-click="$event.stopPropagation();remove_tab($index);" class="close-window">&times;</span></a></li>
+            <li class="tab-{{tab.type}}" ng-repeat="tab in tabs track by $index" ng-class="{active:current_tab == $index}" ng-show="$index >= tabindex && $index <= tabindex+4"><a ng-click="set_tab($index);">{{short_text(tab.name, 10)}} <span ng-click="$event.stopPropagation();remove_tab($index);" class="close-window">&times;</span></a></li>
         </ul>
         <span ng-if="tabs.length > 4" class="tabnavigation">
           <i ng-show="tabindex" ng-click="$parent.tabindex = $parent.tabindex-1" class="fa fa-arrow-left"></i>

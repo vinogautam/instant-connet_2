@@ -123,7 +123,7 @@ if (scope.$last === true) {
 		$scope.current_tab = $scope.tabs.length-1;
 
 		$scope.initiatescripts();
-		console.log(notify);
+		
 		if(notify === undefined)
 		$scope.send_noti({type:'add_tab', data:{type:type, name:name, data:data}});
 
@@ -244,6 +244,7 @@ if (scope.$last === true) {
 
 	$scope.set_tab = function(id, notify)
 	{
+		
 		if($scope.current_tab != -1 && ($scope.tabs[$scope.current_tab].type == 'presentation' || $scope.tabs[$scope.current_tab].type == 'whiteboard'))
 		{
 			$scope.broadcast();
@@ -832,7 +833,7 @@ if (scope.$last === true) {
 					delete $scope.typinguser[k];
 			});
 	}, 3000);
-	$(".close-icon").click(function(){
+	$(".chat-close-icon").click(function(){
 		jQuery(".control-sidebar").removeClass("control-sidebar-open");
 	});
 	$scope.size = function(obj)

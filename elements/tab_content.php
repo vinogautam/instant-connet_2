@@ -10,7 +10,7 @@
    
    <div class="col-sm-10 col-lg-12 col-md-10 col-xs-12 whiteboard-tools no-pad">
    <div class="col-sm-3 no-pad" ng-show="(is_admin && !user_have_admin_control()) || full_control || full_control">
-      <div ng-click="remove_tab(tab.index);" class="clos-pre">Close Whiteboard</div>
+      <div ng-click="remove_tab(tab.index);" class="clos-pre">Close <i class="close-svg"></i> </div>
    </div>
 
 
@@ -69,7 +69,7 @@
   <div class="pane-footer col-xs-12" ng-show="is_admin || full_control || whiteboard_control">
      <div class="col-sm-12 col-xs-12 whiteboard-tools no-pad">
      <div class="col-sm-3 no-pad" ng-show="(is_admin && !user_have_admin_control()) || full_control"> 
-     <div ng-click="remove_tab(tab.index);" class="clos-pre">Close Presentation</div>
+     <div ng-click="remove_tab(tab.index);" class="clos-pre">Close <i class="close-svg"></i></div>
      </div>
 
      <div class="col-sm-4 no-pad pagination" ng-show="(is_admin && !user_have_admin_control()) || full_control">
@@ -96,8 +96,8 @@
       <li class="position-change">
         <ul>
            <li><a ng-click="clear();" href="#" id="eraser-tool"><i class="fa fa-trash"></i></a></li>
-           <li ng-click="undo()"><img src="<?= IC_PLUGIN_URL; ?>dist/v2/img/tarn-left.png"></li>
-           <li ng-click="redo()"><img src="<?= IC_PLUGIN_URL; ?>dist/v2/img/tarn--right.png"></li>
+           <li class="wb-control" ng-click="undo()"><img src="<?= IC_PLUGIN_URL; ?>dist/v2/img/tarn-left.png"></li>
+           <li class="wb-control" ng-click="redo()"><img src="<?= IC_PLUGIN_URL; ?>dist/v2/img/tarn--right.png"></li>
         </ul>
       </li>
       <li class="range-slider"><img src="<?= IC_PLUGIN_URL; ?>dist/v2/img/bar.png">
@@ -105,14 +105,14 @@
      </li>
      <li class="color-picker">
        <ul>
-          <li ng-click="color='yellow';" class="yellow"></li>
-          <li ng-click="color='black';" class="block"></li>
-          <li ng-click="color='white';" class="wight"></li>
-          <li ng-click="color='red';" class="red"></li>
-          <li ng-click="color='blue';" class="blue"></li>
+          <li ng-click="color='yellow';" class="yellow wb-control"></li>
+          <li ng-click="color='black';" class="block wb-control"></li>
+          <li ng-click="color='white';" class="wight wb-control"></li>
+          <li ng-click="color='red';" class="red wb-control"></li>
+          <li ng-click="color='blue';" class="blue wb-control"></li>
       </ul>
      </li>
-      <li ng-click="tab.hidethumbs=!tab.hidethumbs;" class="tip-option">
+      <li ng-click="tab.hidethumbs=!tab.hidethumbs;" class="tip-option wb-control">
         <img ng-if="tab.hidethumbs" src="<?= IC_PLUGIN_URL; ?>dist/v2/img/theme.png" data-toggle="tooltip" data-placement="top" title="Show Thumbs">
         <img ng-if="!tab.hidethumbs" src="<?= IC_PLUGIN_URL; ?>dist/v2/img/theme.png" data-toggle="tooltip" data-placement="top" title="Hide Thumbs">
       </li>
@@ -139,7 +139,7 @@
     </div>
      <div class="pane-footer whiteboard-tools col-xs-12">
         <div class="col-sm-3 no-pad"> 
-          <div ng-click="remove_tab(tab.index);" class="clos-pre">Close Screen share</div>
+          <div ng-click="remove_tab(tab.index);" class="clos-pre">Close <i class="close-svg"></i></div>
         </div>
      </div>
 </div>
@@ -154,7 +154,7 @@
     </div>
      <div class="pane-footer whiteboard-tools col-xs-12" ng-show="is_admin || full_control">
         <div class="col-sm-3 no-pad"> 
-          <div ng-click="remove_tab(tab.index);" class="clos-pre">Close Youtube Video</div>
+          <div ng-click="remove_tab(tab.index);" class="clos-pre">Close <i class="close-svg"></i> </div>
         </div>
      </div>
 </div>

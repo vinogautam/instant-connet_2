@@ -1,7 +1,7 @@
 <aside class="control-sidebar control-sidebar-dark">
   <div class="meeting-msg">
-    <h5><i class="fa fa-comments"></i> <span>Meeting Message</span></h5>
-    <div class="close-icon"><i class="fa fa-times close" aria-hidden="true"></i></div>
+    <h5><i class="fa fa-comments"></i> <span>Chat</span></h5>
+    <div class="chat-close-icon"><div class="close-svg"></div></div>
     </div>
       <div class="chat-mothed">
         <div ng-repeat="ch in chat track by $index" on-finish-render ng-class="{meeting_users:ch.id != data2.id}">
@@ -24,7 +24,7 @@
         </div>
      </div>
      <div class="chat-content">
-     <div class="form-control1">
+     <div class="form-chat-meeting-room">
 <form>
 <textarea ng-change="send_noti({type:'usertyping', data:data2})" ng-model="data2.msg" ng-enter="add();" id="msg" placeholder="Type a message here" rows="2"></textarea>
 <button class="go1"><i class="fa fa-paperclip" aria-hidden="true"></i></button>

@@ -95,7 +95,7 @@ ng.module('opentok', [])
 
           
           OT.registerScreenSharingExtension('chrome', extensionId, 2);
-
+        
           this.trigger('init');
         },
         initiate_screenshring : function(){

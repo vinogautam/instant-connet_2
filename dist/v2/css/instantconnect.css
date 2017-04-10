@@ -24,7 +24,8 @@ body {
   font-family: 'Nunito', sans-serif;
   font-weight: 400;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden;
+  box-sizing: border-box;
 }
 /* Layout */
 .wrapper {
@@ -296,7 +297,7 @@ a:focus {
   line-height: 50px;
   text-align: center;
   width: 360px;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Nunito', sans-serif;
   padding: 0 15px;
   font-weight: 300;
   overflow: hidden;
@@ -2874,6 +2875,7 @@ table.text-center th {
   /* MAIN FOOTER */
 }
 .instant-connect .content {
+  min-height: calc(100vh - 100px);
   padding: 0px;
 }
 .instant-connect .main-sidebar .sidebar a {
@@ -2891,6 +2893,7 @@ table.text-center th {
   background-size: 100%;
 }
 .instant-connect .video-chat {
+  min-height: calc(100vh - 100px);
   padding: 16px 16px 0px 32px;
   z-index: 1;
   background: #fafafb;
@@ -3036,20 +3039,30 @@ table.text-center th {
   content: " ";
   clear: both;
 }
-.instant-connect .btn-red {
+.instant-connect .btn-blue {
   background-color: #3c8dbc;
   border-color: #367fa9;
   color: white;
+  border-radius: 100px;
+  cursor: pointer;
 }
-.instant-connect .btn-red:hover,
-.instant-connect .btn-red:active,
-.instant-connect .btn-red.hover {
-  background-color: #367fa9;
+.instant-connect .btn-blue:hover {
+  background-color: #307095;
+}
+.instant-connect .presentation-upload:hover {
+  cursor: pointer;
+}
+.instant-connect .presentation-upload:hover .btn-blue {
+  background-color: #307095;
+}
+.instant-connect .tab-inner-div {
+  height: calc(100vh - 222px);
 }
 .instant-connect .meeting-panel-container {
   z-index: 0;
 }
 .instant-connect .meeting-panel-container .meeting-panel {
+  min-height: calc(100vh - 140px);
   border-radius: 10px;
   -webkit-box-shadow: 3px 0 20px 0 rgba(0, 0, 0, 0.2);
   -moz-box-shadow: 3px 0 20px 0 rgba(0, 0, 0, 0.2);
@@ -3141,9 +3154,10 @@ table.text-center th {
 .instant-connect .meeting-panel-container .meeting-pane .pane-footer {
   padding-top: 7px;
   height: 40px;
-  position: absolute;
-  bottom: 0;
   border-top: 1px solid #d2d6de;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  background: #fff;
 }
 .instant-connect .meeting-panel-container .meeting-pane .pane-footer .clos-pre {
   padding-left: 20px!important;
@@ -3360,10 +3374,15 @@ table.text-center th {
   margin-top: -3px;
 }
 .instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul {
+  height: calc(100vh - 222px);
   padding: 0;
-  background: #dddddd;
+  background: #ecf0f5;
   overflow-y: auto;
   margin-bottom: 0;
+  -webkit-box-shadow: 3px 0 20px 0 rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 3px 0 20px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 3px 0 20px 0 rgba(0, 0, 0, 0.2);
+  border-left: 1px solid #d2d6de;
 }
 .instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li {
   list-style-type: none;
@@ -3374,17 +3393,24 @@ table.text-center th {
 }
 .instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li p {
   text-align: center;
-  margin-top: 5px;
-  margin-bottom: 6px;
+  margin-top: 7px;
+  margin-bottom: 7px;
 }
-.instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li:hover img {
+.instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li:hover,
+.instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li.active {
+  cursor: pointer;
+}
+.instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li:hover img,
+.instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li.active img {
   outline: 2px solid #3c8dbc;
 }
-.instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li:hover p span {
-  background: #790303;
+.instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li:hover p span,
+.instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li.active p span {
+  background: #3c8dbc;
   color: #fff;
-  padding: 1px 20px 4px;
-  border-radius: 20px;
+  padding: 3px 20px 4px;
+  border-radius: 100px;
+  font-weight: 700;
 }
 .instant-connect .main-footer {
   text-align: center;
@@ -3775,12 +3801,6 @@ ot-whiteboard {
 .instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li.active img {
   outline: 2px solid #3c8dbc;
 }
-.instant-connect .meeting-panel-container .meeting-pane .presentation-thumbs ul li.active p span {
-  background: #3c8dbc;
-  color: #fff;
-  padding: 1px 20px 4px;
-  border-radius: 20px;
-}
 .tabnavigation {
   position: absolute;
   right: 0;
@@ -3796,6 +3816,7 @@ ot-whiteboard {
 }
 .chat-mothed {
   overflow-y: auto;
+  height: calc(100vh - 195px);
 }
 .msg-bar-resive.msg-last-resive {
   background: #ccc;
@@ -3967,7 +3988,15 @@ ot-whiteboard {
 .wb-control {
   cursor: pointer;
 }
-/* ICONS FOR TABS */
+/* Video Controls */
+.OT_video-element {
+  border-radius: 10px;
+}
+/* CLIENT VIEW */
+.client_view .tab-inner-div {
+  height: calc(100vh - 142px) !important;
+  width: 100%!important;
+}
 /*@import "mailbox.less";*/
 /*@import "lockscreen.less";
 @import "login_and_register.less";

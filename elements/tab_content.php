@@ -3,7 +3,8 @@
   <div class="hide clear_whiteboard" ng-click="clear((is_admin || full_control));"></div>
  <div class="hide draw_whiteboard" ng-click="draw_image(tab.slide_image, (is_admin || full_control));"></div>
  <div class="col-sm-12 no-pad wh100 tab-inner-div">
-    <ot-whiteboard  width="700" height="420"></ot-whiteboard>
+     <ot-whiteboard  width="700" height="420"></ot-whiteboard> 
+
  </div>
 
  <div class="pane-footer col-xs-12" ng-show="is_admin || full_control || whiteboard_control">

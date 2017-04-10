@@ -74,9 +74,9 @@
       </div>
       <div class="modal-footer">
           
-          <div class="col-xs-4 no-pad">
-            <input style="opacity: 0;" id="convert_ppt" type="file" >
-            <button style="position: absolute;pointer-events: none;top:0;" type="button" class="btn btn-red" data-dismiss="modal" data-toggle="tooltip" data-placement="top" title="Microsoft PowerPoint files accepted only">Upload Presentation</button>
+          <div class="col-xs-4 no-pad presentation-upload">
+            <input style="opacity: 0;" id="convert_ppt" type="file" />
+            <button style="position: absolute;pointer-events: none;top:0;" type="button" class="btn btn-blue" data-dismiss="modal" data-toggle="tooltip" data-placement="top" title="Microsoft PowerPoint files accepted only">Upload Presentation</button>
           </div>
           <div class="col-xs-4 col-xs-push-4 close-btn"><button type="button" class="btn btn-default no-margin-right" data-dismiss="modal">Close</button></div>
         

@@ -225,7 +225,8 @@ if (scope.$last === true) {
 	        
 	        if($(".tab-inner-div").length)
 	        {
-	        	$(".tab-inner-div").height($(".meeting-pane").height()-40);
+	        	console.log("Height: " + $(".meeting-pane").height());
+	        	//$(".tab-inner-div").height($(".meeting-pane").height()-40);
 	        }
 
 		}, 100);
@@ -559,7 +560,7 @@ if (scope.$last === true) {
 	};
 
 	$timeout(function(){
-		$(".chat-mothed").height($(window).height()-200);
+		//$(".chat-mothed").height($(window).height()-200);
 	}, 3000);
 	$scope.add = function(){
 		if(!$scope.data2.msg)

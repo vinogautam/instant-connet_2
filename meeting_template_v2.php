@@ -128,7 +128,7 @@ Instant Connect UI
                         <i class="fa fa-video-camera" aria-hidden="true"></i>
                       </a>
 
-                      <a ng-show="!user_have_admin_control() || user.presentation" class="btn user-control" ng-class="{active:user.presentation}" ng-click="userlist[user.id].presentation = !user.presentation;send_noti({type:'full_control', data:{id:user.id, val:userlist[user.id].presentation}})">
+                      <!--<a ng-show="!user_have_admin_control() || user.presentation" class="btn user-control" ng-class="{active:user.presentation}" ng-click="userlist[user.id].presentation = !user.presentation;send_noti({type:'full_control', data:{id:user.id, val:userlist[user.id].presentation}})">
                         <i class="fa fa-line-chart" aria-hidden="true"></i>
                       </a>
 
@@ -136,7 +136,7 @@ Instant Connect UI
                         <i class="fa fa-line-chart" aria-hidden="true"></i>
                       </a>
 
-                      <!--<a class="btn user-control" ng-class="{active:user.chair}" ng-click="userlist[user.id].chair = user.chair ? 0 : get_chair_value();">
+                      <a class="btn user-control" ng-class="{active:user.chair}" ng-click="userlist[user.id].chair = user.chair ? 0 : get_chair_value();">
                         <i class="fa fa-arrow-up" aria-hidden="true"></i>
                       </a>-->
 
@@ -212,13 +212,15 @@ Instant Connect UI
      <div class="row">
      <div class="col-xs-12 col-md-3 col-sm-4 video-chat" ng-class="{fullwidthvideo: fullwidthvideo}">
         <div style="margin-top: 0;margin-bottom: 20px;" ng-if="!is_admin" class="video-container agent user-video-single-container">
-            <div class="video-agent" ng-repeat="stream in streams" ng-if="stream.streamId == adminstream">
+            <div class="video-agent" >
               <img src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/agent-video-mock-up.jpg" class="img-responsive"/>
+              <div ng-repeat="stream in streams" ng-if="stream.streamId == adminstream">
               <ot-layout props="{animate:true}">
                 <ot-subscriber  stream="stream" 
                   props="{style: {nameDisplayMode: 'on'}}">
                 </ot-subscriber>
               </ot-layout>
+              </div>
               <div class="agent-name">Agent Name <span class="designations">C.F.C</span></div>
             </div>
          

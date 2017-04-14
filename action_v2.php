@@ -123,7 +123,6 @@ if (scope.$last === true) {
 	    });
 	}
 
-
 	$scope.add_tab = function(type, name, data, notify)
 	{
 		$scope.preloader = true;
@@ -397,6 +396,9 @@ if (scope.$last === true) {
 			});
 		}
 	});
+	console.log(OTSession);
+	$scope.adminstreamm = OTSession.adminstream;
+	$scope.userstreams = OTSession.userstreams;
 	$scope.streams = OTSession.streams;
 	$scope.screenshare = OTSession.screenshare;
 	$scope.publisher = OTSession.publishers;
@@ -533,6 +535,10 @@ if (scope.$last === true) {
 	$scope.chair_value = 0;
 
 	$scope.$on('otStreamCreated', function(newval, val){
+		console.log("publisher"+$scope.publisher.length, $scope.publisher);
+		$timeout(function(){
+			console.log("publisher"+$scope.publisher.length, $scope.publisher[0].streamId);
+		}, 500);
 		$scope.data2.streamid = $scope.publisher[0].streamId;
 		if(!$scope.is_admin)
 			$scope.send_noti({type:'userstream', id:$scope.data2.id, streamid:$scope.data2.streamid});
@@ -679,6 +685,7 @@ if (scope.$last === true) {
 				return;
 			$scope.$apply(function(){
 				$scope.adminstream = event.data.streamid;
+				$rootScope.adminstream = event.data.streamid;
 			});
 
 			console.log('adminstream'+event.data.streamid);

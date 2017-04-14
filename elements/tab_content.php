@@ -36,11 +36,11 @@
      </li>
      <li class="color-picker">
        <ul>
-          <li ng-class="{active: color=='yellow'}" ng-click="color='yellow';send_noti({type:'color', val: color});" class="yellow"></li>
-          <li ng-class="{active: color=='black'}" ng-click="color='black';send_noti({type:'color', val: color});" class="block"></li>
-          <li ng-class="{active: color=='white'}" ng-click="color='white';send_noti({type:'color', val: color});" class="wight"></li>
-          <li ng-class="{active: color=='red'}" ng-click="color='red';send_noti({type:'color', val: color});" class="red"></li>
-          <li ng-class="{active: color=='blue'}" ng-click="color='blue';send_noti({type:'color', val: color});" class="blue"></li>
+          <li ng-click="color='yellow';" ng-class="{active:color=='yellow'}" class="yellow wb-control"></li>
+          <li ng-click="color='black';" ng-class="{active:color=='black'}" class="block wb-control"></li>
+          <li ng-click="color='white';" ng-class="{active:color=='white'}" class="wight wb-control"></li>
+          <li ng-click="color='red';" ng-class="{active:color=='red'}" class="red wb-control"></li>
+          <li ng-click="color='blue';" ng-class="{active:color=='blue'}" class="blue wb-control"></li>
       </ul>
      </li>
     
@@ -106,11 +106,11 @@
      </li>
      <li class="color-picker">
        <ul>
-          <li ng-click="color='yellow';" class="yellow wb-control"></li>
-          <li ng-click="color='black';" class="block wb-control"></li>
-          <li ng-click="color='white';" class="wight wb-control"></li>
-          <li ng-click="color='red';" class="red wb-control"></li>
-          <li ng-click="color='blue';" class="blue wb-control"></li>
+          <li ng-click="color='yellow';" ng-class="{active:color=='yellow'}" class="yellow wb-control"></li>
+          <li ng-click="color='black';" ng-class="{active:color=='black'}" class="block wb-control"></li>
+          <li ng-click="color='white';" ng-class="{active:color=='white'}" class="wight wb-control"></li>
+          <li ng-click="color='red';" ng-class="{active:color=='red'}" class="red wb-control"></li>
+          <li ng-click="color='blue';" ng-class="{active:color=='blue'}" class="blue wb-control"></li>
       </ul>
      </li>
       <li ng-click="tab.hidethumbs=!tab.hidethumbs;" class="tip-option wb-control">

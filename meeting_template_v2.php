@@ -214,14 +214,14 @@ Instant Connect UI
         <div style="margin-top: 0;margin-bottom: 20px;" ng-if="!is_admin" class="video-container agent user-video-single-container">
             <div class="video-agent" >
               <img src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/agent-video-mock-up.jpg" class="img-responsive"/>
-              <div ng-repeat="stream in streams" ng-if="stream.streamId == adminstream">
+              <div ng-if="adminstreamm.length">
               <ot-layout props="{animate:true}">
-                <ot-subscriber  stream="stream" 
+                <ot-subscriber  stream="adminstreamm[0]" 
                   props="{style: {nameDisplayMode: 'on'}}">
                 </ot-subscriber>
               </ot-layout>
               </div>
-              <div class="agent-name">Agent Name <span class="designations">C.F.C</span></div>
+              <div class="agent-name hide">Agent Name</div>
             </div>
          
         </div>
@@ -231,10 +231,10 @@ Instant Connect UI
               <img src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/agent-video-mock-up.jpg" class="img-responsive"/>
               <ot-layout ng-if="(is_admin && show_video) || video_control" props="{animate:true}">
                 <ot-publisher id="publisher" 
-                  props="{style: {nameDisplayMode: 'on'}, resolution: '640x480', frameRate: 30}">
+                  props="{style: {nameDisplayMode: 'on'}, resolution: '640x480', frameRate: 30, name: data2.name}">
                 </ot-publisher>
               </ot-layout>
-              <div class="agent-name">Agent Name <span class="designations">C.F.C</span></div>
+              <div class="agent-name hide">Agent Name <span class="designations">C.F.C</span></div>
             </div>
          
         </div> 
@@ -248,12 +248,12 @@ Instant Connect UI
                   props="{style: {nameDisplayMode: 'on'}}">
                 </ot-subscriber>
               </ot-layout>
-              <div class="agent-name">User Name <span class="designations">C.F.C</span></div>
+              <div class="agent-name hide">User Name <span class="designations">C.F.C</span></div>
             </div>
          
         </div>
         <div ng-if="streams.length > 1  && is_admin" class="user-video-multiple-container" ng-class="{two_streams:streams.length == 2, more_than_two_streams:streams.length > 2}">
-            <div ng-repeat="stream in streams" ng-if="is_admin || (stream.streamId != adminstream)" class="col-xs-6 video-container" data-pos="{{stream.vposition}}">
+            <div ng-repeat="stream in streams" class="col-xs-6 video-container" data-pos="{{stream.vposition}}">
               <ot-layout props="{animate:true}">
                 <ot-subscriber  
                   stream="stream" 
@@ -263,15 +263,17 @@ Instant Connect UI
             </div>
         </div>
 
-        <div ng-if="(streams.length || video_control) && !is_admin" class="user-video-multiple-container" ng-class="{two_streams:streams.length == 2, more_than_two_streams:streams.length > 2}">
-            <div ng-if="video_control" class="col-xs-6 video-container" data-pos="{{stream.vposition}}">
+        <div ng-if="(userstreams.length || video_control) && !is_admin" ng-class="{'video-container agent user-video-single-container': ((userstreams.length==0 && video_control) || (!video_control && userstreams.length==1)), 'user-video-multiple-container': !((userstreams.length==0 && video_control) || (!video_control && userstreams.length==1)), two_streams:userstreams.length == 2, more_than_two_streams:userstreams.length > 2}">
+            <div ng-if="video_control" ng-class="{'video-agent': ((userstreams.length==0 && video_control) || (!video_control && userstreams.length==1)), 'col-xs-6 video-container': !((userstreams.length==0 && video_control) || (!video_control && userstreams.length==1))}" data-pos="{{stream.vposition}}">
+              <img ng-if="((userstreams.length==0 && video_control) || (!video_control && userstreams.length==1))" src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/agent-video-mock-up.jpg" class="img-responsive"/>
               <ot-layout  props="{animate:true}">
                 <ot-publisher id="publisher" 
-                  props="{style: {nameDisplayMode: 'on'}, resolution: '640x480', frameRate: 30}">
+                  props="{style: {nameDisplayMode: 'on'}, resolution: '640x480', frameRate: 30, name: data2.name}">
                 </ot-publisher>
               </ot-layout>
             </div>
-            <div ng-repeat="stream in streams" ng-if="is_admin || (stream.streamId != adminstream)" class="col-xs-6 video-container" data-pos="{{stream.vposition}}">
+            <div ng-repeat="stream in userstreams" ng-class="{'video-agent': ((userstreams.length==0 && video_control) || (!video_control && userstreams.length==1)), 'col-xs-6 video-container': !((userstreams.length==0 && video_control) || (!video_control && userstreams.length==1))}" data-pos="{{stream.vposition}}">
+              <img ng-if="((userstreams.length==0 && video_control) || (!video_control && userstreams.length==1))" src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/agent-video-mock-up.jpg" class="img-responsive"/>
               <ot-layout props="{animate:true}">
                 <ot-subscriber  
                   stream="stream" 

@@ -27,13 +27,15 @@ ng.module('opentok', [])
   .factory('OT', function() {
     return OT;
   })
-  .factory('OTSession', ['OT', '$rootScope',
-    function(OT, $rootScope) {
+  .factory('OTSession', ['OT', '$rootScope', '$timeout',
+    function(OT, $rootScope, $timeout) {
       var OTSession = {
         streams: [],
         screenshare: [],
         connections: [],
         publishers: [],
+        adminstream: [],
+        userstreams: [],
         init: function(apiKey, sessionId, token, cb) {
           this.session = OT.initSession(apiKey, sessionId);
 
@@ -51,6 +53,14 @@ ng.module('opentok', [])
                 else
                 {
                   OTSession.streams.push(event.stream);
+                  
+                  if('Agent' == event.stream.name){
+                    OTSession.adminstream.push(event.stream);
+                  }
+                  else{
+                    OTSession.userstreams.push(event.stream);
+                  }
+                  
                 }
               });
             },
@@ -62,6 +72,13 @@ ng.module('opentok', [])
                 else
                 {
                   OTSession.streams.splice(OTSession.streams.indexOf(event.stream), 1);
+                  
+                  if('Agent' == event.stream.name){
+                    OTSession.adminstream.splice(OTSession.adminstream.indexOf(event.stream), 1);
+                  }
+                  else{
+                    OTSession.userstreams.splice(OTSession.userstreams.indexOf(event.stream), 1);
+                  }
                 }
               });
             },
@@ -73,6 +90,13 @@ ng.module('opentok', [])
                 else
                 {
                   OTSession.streams.splice(0, OTSession.streams.length);
+
+                  if('Agent' == event.stream.name){
+                    OTSession.adminstream.splice(0, OTSession.adminstream.length);
+                  }
+                  else{
+                    OTSession.userstreams.splice(0, OTSession.userstreams.length);
+                  }
                 }
                 OTSession.connections.splice(0, OTSession.connections.length);
               });

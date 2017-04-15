@@ -1,7 +1,7 @@
 <aside class="control-sidebar control-sidebar-dark">
   <div class="meeting-msg">
     <h5><i class="fa fa-comments"></i> <span>Chat</span></h5>
-    <div class="chat-close-icon"><div class="close-svg"></div></div>
+    <div ng-click="check_chat_opened()" class="chat-close-icon"><div class="close-svg"></div></div>
     </div>
       <div class="chat-mothed">
         <div ng-repeat="ch in chat track by $index" on-finish-render ng-class="{meeting_users:ch.id != data2.id}">

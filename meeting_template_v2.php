@@ -156,7 +156,7 @@ Instant Connect UI
 
                    
           <!-- Control Sidebar Toggle Button -->
-          <li>
+          <li ng-click="check_chat_opened()">
             <a href="#" data-toggle="control-sidebar"><i class="fa fa-comments"></i></a>
           </li>
         </ul>

@@ -116,6 +116,11 @@ if (scope.$last === true) {
 	                             
 	});
 
+	$scope.check_chat_opened = function(){
+		if($(".control-sidebar.control-sidebar-dark.control-sidebar-open").length==0 && $scope.is_admin)
+		$scope.send_noti({type:'close_chat'});
+	};
+
 	$scope.urlify = function(text) {
 	    var urlRegex = /(https?:\/\/[^\s]+)/g;
 	    return text.replace(urlRegex, function(url) {
@@ -741,7 +746,7 @@ if (scope.$last === true) {
 		}
 		else if(event.data.type == 'set_tab')
 		{
-			if(($scope.is_admin && !$scope.user_have_control()) || $scope.full_control)
+			if(($scope.is_admin && !$scope.user_have_admin_control()) || $scope.full_control)
 				return;
 			console.log(event.data);
 			$scope.$apply(function(){
@@ -753,7 +758,7 @@ if (scope.$last === true) {
 		}
 		else if(event.data.type == 'remove_tab')
 		{
-			if(($scope.is_admin && !$scope.user_have_control()) || $scope.full_control)
+			if(($scope.is_admin && !$scope.user_have_admin_control()) || $scope.full_control)
 				return;
 
 			$scope.$apply(function(){
@@ -762,7 +767,7 @@ if (scope.$last === true) {
 		}
 		else if(event.data.type == 'add_tab')
 		{
-			if(($scope.is_admin && !$scope.user_have_control()) || $scope.full_control)
+			if(($scope.is_admin && !$scope.user_have_admin_control()) || $scope.full_control)
 				return;
 			console.log(event.data);
 			$scope.$apply(function(){
@@ -771,7 +776,7 @@ if (scope.$last === true) {
 		}
 		else if(event.data.type == 'currentpresentationindex')
 		{
-			if(($scope.is_admin && !$scope.user_have_control()) || $scope.full_control)
+			if(($scope.is_admin && !$scope.user_have_admin_control()) || $scope.full_control)
 				return;
 
 			$scope.$apply(function(){
@@ -812,6 +817,10 @@ if (scope.$last === true) {
 			$scope.$apply(function(){
 				$rootScope.$broadcast('colorchange', event.data.val);
 			});
+		}
+		else if(event.data.type == 'close_chat')
+		{
+			$(".control-sidebar-dark").removeClass("control-sidebar-open");
 		}
 	});
 

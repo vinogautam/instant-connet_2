@@ -309,6 +309,24 @@ if (scope.$last === true) {
 		$rootScope.$broadcast('get_image_data', {ind:$scope.current_tab, tab:$scope.tabs[$scope.current_tab]});
 	};
 
+	$scope.whiteboard_control = true;
+	$scope.active_whiteboard_user = {};
+
+	$rootScope.$on('draw_status', function(event, data){
+		if($scope.data2.id == data.user.id) return;
+
+		if(data.st == 'start'){
+			$scope.whiteboard_control = false;
+			$scope.active_whiteboard_user = data.user;
+			$.notify(data.user.name+" is drawing. You will wait to finish up", "info");
+		}
+		else{
+			$scope.whiteboard_control = true;
+			$scope.active_whiteboard_user = {};
+			$.notify(data.user.name+" draw end. You can draw now", "info");
+		}
+	});
+
 	$rootScope.$on('Presentation_changed', function(event, data){
 		if($scope.tabs[$scope.current_tab].type == 'presentation')
         {    
@@ -414,7 +432,7 @@ if (scope.$last === true) {
 
 	$scope.trigger_draw_image = function()
 	{
-		if(!$scope.is_admin && !$scope.full_control)
+		//if(!$scope.is_admin && !$scope.full_control)
 			return;
 
 		$timeout(function(){
@@ -424,7 +442,7 @@ if (scope.$last === true) {
 
 	$scope.trigger_draw_whiteboard_image = function()
 	{
-		if(!$scope.is_admin && !$scope.full_control)
+		//if(!$scope.is_admin && !$scope.full_control)
 			return;
 
 		$timeout(function(){
@@ -537,6 +555,9 @@ if (scope.$last === true) {
 	};
 	$id = Math.round(Math.random()*100000)+''+new Date().getTime();
 	$scope.data2 = {id:$id, name: $scope.is_admin ? 'Agent' : 'user'+$id, email: 'user'+$id+'@gmail.com', msg:'', streamid:'', whiteboard:0,presentation:0,chair:0,video:0};
+
+	$rootScope.user = {id:$scope.data2.id, name:$scope.data2.name};
+
 	$scope.chair_value = 0;
 
 	$scope.$on('otStreamCreated', function(newval, val){
@@ -613,7 +634,7 @@ if (scope.$last === true) {
 	$scope.typinguser = {};
 	$scope.userlist = {};
 	
-	$scope.whiteboard_control = false;
+	//$scope.whiteboard_control = false;
 	$scope.video_control = false;
 	$scope.full_control = false;
 	$scope.exit_user = -1;

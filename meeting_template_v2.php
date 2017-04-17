@@ -65,7 +65,12 @@ Instant Connect UI
   <style type="text/css">
     .meet-icon li{background: url(<?= plugin_dir_url(__FILE__); ?>dist/v2/img/meet-icons.jpg);}
     
-
+    .admin_view .whiteboardtab, .admin_view .presentation-room {
+        pointer-events: none;
+    }
+    .admin_view.whiteboard_control .whiteboardtab, .admin_view.whiteboard_control .presentation-room {
+        pointer-events: auto;
+    }
     
   </style>
 
@@ -121,9 +126,9 @@ Instant Connect UI
                     <div class="user-icon"><i class="fa fa-user" aria-hidden="true"></i></div>
                       <div class="user-name">{{user.name}}</div>
                       <div class="user-controls">
-                      <a class="btn user-control" ng-class="{active:user.whiteboard}" ng-click="userlist[user.id].whiteboard = !user.whiteboard;send_noti({type:'whiteboard_control', data:{id:user.id, val:userlist[user.id].whiteboard}});">
+                      <!--<a class="btn user-control" ng-class="{active:user.whiteboard}" ng-click="userlist[user.id].whiteboard = !user.whiteboard;send_noti({type:'whiteboard_control', data:{id:user.id, val:userlist[user.id].whiteboard}});">
                         <i class="fa fa-edit"></i>
-                      </a>
+                      </a>-->
                       <a class="btn user-control" ng-class="{active:user.video}" ng-click="userlist[user.id].video = !user.video;send_noti({type:'video_control', data:{id:user.id, val:userlist[user.id].video}})">
                         <i class="fa fa-video-camera" aria-hidden="true"></i>
                       </a>

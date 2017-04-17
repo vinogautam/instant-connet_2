@@ -15,7 +15,7 @@
    </div>
 
 
-   <div class="col-sm-9 col-xs-12 tool pull-right" ng-class="{'col-sm-offset-3':!((is_admin && !user_have_admin_control()) || full_control), 'no-pad':((is_admin && !user_have_admin_control()) || full_control)}">
+   <div class="col-sm-9 col-xs-12 tool pull-right" ng-show="whiteboard_control" ng-class="{'col-sm-offset-3':!((is_admin && !user_have_admin_control()) || full_control), 'no-pad':((is_admin && !user_have_admin_control()) || full_control)}">
    <ul>
       <div id="toolbar-options" class="hidden">
             <a ng-click="erasing=false;" href="#" id="pencil-tool"><i class="fa fa-pencil"></i></a>
@@ -83,7 +83,7 @@
      <div ng-hide="parseInt(tab.currentpresentationindex)==tab.data.files.length-1" class="next" ng-click="tab.currentpresentationindex=''+(parseInt(tab.currentpresentationindex)+1)+'';clear();draw_image(reset_value(), (is_admin || full_control));thumb_position();send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});">NEXT <i class="fa fa-arrow-right" aria-hidden="true"></i></div>
      </div>
 
-     <div class="col-sm-5" ng-class="{'col-sm-offset-7':!((is_admin && !user_have_admin_control()) || full_control), 'no-pad':((is_admin && !user_have_admin_control()) || full_control)}">
+     <div class="col-sm-5" ng-show="whiteboard_control" ng-class="{'col-sm-offset-7':!((is_admin && !user_have_admin_control()) || full_control), 'no-pad':((is_admin && !user_have_admin_control()) || full_control)}">
      <div class="tool">
      <ul>
       <div id="toolbar-options" class="hidden">

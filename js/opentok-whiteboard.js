@@ -211,6 +211,7 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                         p.view.draw();
 
                         pathStack.push(path);
+                        $rootScope.$broadcast('draw_status', {st:'start', user:update.user});
                         break;
                     case 'drag':
                         pathStack.forEach(function(path) {
@@ -228,6 +229,7 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                                 p.view.draw();
                             }
                         });
+                        $rootScope.$broadcast('draw_status', {st:'end', user:update.user});
                         break;
                 }
 
@@ -356,7 +358,8 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                         mode: mode,
                         color: scope.color,
                         lineWidth: scope.lineWidth,
-                        event: 'start'
+                        event: 'start',
+                        user:$rootScope.user
                     };
 
                     draw(update);
@@ -381,7 +384,8 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                             fromY: client.lastY,
                             toX: x,
                             toY: y,
-                            event: 'drag'
+                            event: 'drag',
+                            user:$rootScope.user
                         };
                         count++;
                         redoStack = [];
@@ -400,7 +404,8 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                             id: OTSession.session && OTSession.session.connection &&
                                 OTSession.session.connection.connectionId,
                             uuid: client.uuid,
-                            event: 'end'
+                            event: 'end',
+                            user:$rootScope.user
                         };
 
                         draw(update);

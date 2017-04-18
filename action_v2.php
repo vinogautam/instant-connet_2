@@ -313,17 +313,17 @@ if (scope.$last === true) {
 	$scope.active_whiteboard_user = {};
 
 	$rootScope.$on('draw_status', function(event, data){
-		if($scope.data2.id == data.user.id) return;
+		if($scope.data2.id == data.user.id || $scope.active_whiteboard_user.id == data.user.id) return;
 
 		if(data.st == 'start'){
 			$scope.whiteboard_control = false;
 			$scope.active_whiteboard_user = data.user;
-			$.notify(data.user.name+" is drawing. You will wait to finish up", "info");
+			//$.notify(data.user.name+" is drawing. You will wait to finish up", "info");
 		}
 		else{
 			$scope.whiteboard_control = true;
 			$scope.active_whiteboard_user = {};
-			$.notify(data.user.name+" draw end. You can draw now", "info");
+			//$.notify(data.user.name+" draw end. You can draw now", "info");
 		}
 	});
 

@@ -106,13 +106,13 @@ if (scope.$last === true) {
 	});
 
 	window.addEventListener("beforeunload", function (e) {
-	 	var confirmationMessage = "\o/";
+	 	//var confirmationMessage = "\o/";
 
 		if(!$scope.is_admin)
 			$scope.send_noti({type:'exitalluser', id:$scope.data2.id});
 
-		(e || window.event).returnValue = confirmationMessage; 
-		return confirmationMessage; 
+		//(e || window.event).returnValue = confirmationMessage; 
+		//return confirmationMessage; 
 	                             
 	});
 
@@ -309,11 +309,11 @@ if (scope.$last === true) {
 		$rootScope.$broadcast('get_image_data', {ind:$scope.current_tab, tab:$scope.tabs[$scope.current_tab]});
 	};
 
-	$scope.whiteboard_control = true;
+	$scope.whiteboard_control = $scope.is_admin ? true : false;
 	$scope.active_whiteboard_user = {};
 
 	$rootScope.$on('draw_status', function(event, data){
-		if($scope.data2.id == data.user.id || $scope.active_whiteboard_user.id == data.user.id) return;
+		if(!$scope.is_admin || $scope.data2.id == data.user.id) return;
 
 		if(data.st == 'start'){
 			$scope.whiteboard_control = false;
@@ -442,7 +442,7 @@ if (scope.$last === true) {
 
 	$scope.trigger_draw_whiteboard_image = function()
 	{
-		//if(!$scope.is_admin && !$scope.full_control)
+		if(!$scope.is_admin && !$scope.full_control)
 			return;
 
 		$timeout(function(){

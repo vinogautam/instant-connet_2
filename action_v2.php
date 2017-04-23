@@ -99,7 +99,6 @@ if (scope.$last === true) {
 	$scope.preloader = true;
 
 	$(window).load(function(){
-		console.log("fdf  f");
 		$scope.$apply(function(){
 			$scope.preloader = false;
 		});
@@ -117,7 +116,7 @@ if (scope.$last === true) {
 	});
 
 	$scope.check_chat_opened = function(){
-		if($(".control-sidebar.control-sidebar-dark.control-sidebar-open").length==0 && $scope.is_admin)
+		if($(".control-sidebar.control-sidebar-dark.control-sidebar-open").length == 0 && $scope.is_admin)
 		$scope.send_noti({type:'close_chat'});
 	};
 
@@ -328,6 +327,7 @@ if (scope.$last === true) {
 	});
 
 	$rootScope.$on('Presentation_changed', function(event, data){
+		return;
 		if($scope.tabs[$scope.current_tab].type == 'presentation')
         {    
         	if(!$scope.$$phase) {
@@ -343,6 +343,7 @@ if (scope.$last === true) {
 	});
 
 	$rootScope.$on('Whiteboard_changed', function(event, data){
+		return;
 		if(data.tab.type == 'whiteboard')
         {
         	if(!$scope.$$phase) {
@@ -442,7 +443,7 @@ if (scope.$last === true) {
 
 	$scope.trigger_draw_whiteboard_image = function()
 	{
-		if(!$scope.is_admin && !$scope.full_control)
+		//if(!$scope.is_admin && !$scope.full_control)
 			return;
 
 		$timeout(function(){

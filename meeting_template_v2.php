@@ -71,7 +71,10 @@ Instant Connect UI
     .admin_view.whiteboard_control .whiteboardtab, .admin_view.whiteboard_control .presentation-room {
         pointer-events: auto;
     }
-    
+    ot-whiteboard{height: calc(100% - 80px);top: 0;bottom:0;margin:auto;}
+    ot-whiteboard.presentation_thumb_active{width: calc(100% - 17%);right: auto;}
+    .tab-pane{position: relative;}
+    .instant-connect .meeting-panel-container .meeting-panel .panel-header{z-index: 12;}
   </style>
 
 
@@ -352,9 +355,9 @@ Instant Connect UI
         </div>
  
 
-    <div class="tab-content">
+    <div class="tab-content clearfix">
 
-      <div class="tab-pane active" ng-if="current_tab == -1" ng-show="(is_admin && !user_have_admin_control()) || full_control">
+      <div class="tab-pane active clearfix" ng-if="current_tab == -1" ng-show="(is_admin && !user_have_admin_control()) || full_control">
         <div class="col-xs-12 no-pad meeting-pane">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
               <ul class="meet-icon">
@@ -371,7 +374,7 @@ Instant Connect UI
             </div>
         </div>
       </div>
-      <div class="tab-pane" ng-repeat="tab in tabs track by $index" ng-if="current_tab != -1 && current_tab == $index" ng-class="{active:current_tab == $index}" ng-init="tab.index = $index">
+      <div class="tab-pane clearfix" ng-repeat="tab in tabs track by $index" ng-if="current_tab != -1 && current_tab == $index" ng-class="{active:current_tab == $index}" ng-init="tab.index = $index">
          <?php include 'elements/tab_content.php';?>
       </div>
 

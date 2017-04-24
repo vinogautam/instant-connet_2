@@ -97,6 +97,7 @@ if (scope.$last === true) {
 	$scope.current_tab = -1;
 	$scope.is_admin = <?= isset($_GET['admin']) ? 1 : 0;?>;
 	$scope.preloader = true;
+	$scope.isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
 
 	$(window).load(function(){
 		$scope.$apply(function(){

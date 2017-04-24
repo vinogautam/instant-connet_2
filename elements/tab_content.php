@@ -113,8 +113,8 @@
       </ul>
      </li>
       <li ng-click="tab.hidethumbs=!tab.hidethumbs;" class="tip-option wb-control">
-        <img ng-if="tab.hidethumbs" src="<?= IC_PLUGIN_URL; ?>dist/v2/img/theme.png" data-toggle="tooltip" data-placement="top" title="Show Thumbs">
-        <img ng-if="!tab.hidethumbs" src="<?= IC_PLUGIN_URL; ?>dist/v2/img/theme.png" data-toggle="tooltip" data-placement="top" title="Hide Thumbs">
+        <img ng-show="tab.hidethumbs" src="<?= IC_PLUGIN_URL; ?>dist/v2/img/theme.png" data-toggle="tooltip" data-placement="top" title="Show Thumbs">
+        <img ng-show="!tab.hidethumbs" src="<?= IC_PLUGIN_URL; ?>dist/v2/img/theme.png" data-toggle="tooltip" data-placement="top" title="Hide Thumbs">
       </li>
    </ul>
    </div>

@@ -71,6 +71,9 @@ Instant Connect UI
     .admin_view.whiteboard_control .whiteboardtab, .admin_view.whiteboard_control .presentation-room {
         pointer-events: auto;
     }
+    .client_view.whiteboard_control ot-whiteboard, .client_view.whiteboard_control ot-whiteboard {
+        pointer-events: auto;
+    }
     ot-whiteboard{height: calc(100% - 80px);top: 0;bottom:0;margin:auto;}
     ot-whiteboard.presentation_thumb_active{width: calc(100% - 17%);right: auto;}
     .tab-pane{position: relative;}
@@ -362,12 +365,13 @@ Instant Connect UI
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
               <ul class="meet-icon">
                 <li class="presen-img"><a href="#" data-toggle="modal" data-target="#presentationsModal"></a></li>
-                <li class="screen-share">
+                <li ng-show="isChrome" class="screen-share">
                   <a ng-hide="tab_type_length('screenshare');" ng-click="add_tab('screenshare', 'Screen Share');" href="#"></a>
-                  <a ng-show="tab_type_length('screenshare');" href="#"></a>
+                  <a ng-click="show_msg('Screenshare already opened', 'info');" ng-show="tab_type_length('screenshare');" href="#"></a>
                 </li>
                 <li class="whith-board">
-                  <a ng-click="add_tab('whiteboard', 'WhiteBoard');" href="#"></a>
+                  <a ng-hide="tab_type_length('whiteboard');" ng-click="add_tab('whiteboard', 'WhiteBoard');" href="#"></a>
+                  <a ng-click="show_msg('WhiteBoard already opened', 'info');"  ng-show="tab_type_length('whiteboard');" href="#"></a>
                 </li>
                 <li class="youtube"><a href="#" data-toggle="modal" data-target="#youtubeModal"></a></li>
               </ul>

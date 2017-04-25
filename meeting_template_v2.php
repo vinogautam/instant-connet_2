@@ -76,8 +76,14 @@ Instant Connect UI
     }
     ot-whiteboard{height: calc(100% - 80px);top: 0;bottom:0;margin:auto;}
     ot-whiteboard.presentation_thumb_active{width: calc(100% - 17%);right: auto;}
+    .client_view ot-whiteboard.presentation_thumb_active{width: 100%;}
     .tab-pane{position: relative;}
     .instant-connect .meeting-panel-container .meeting-panel .panel-header{z-index: 12;}
+    .client_view .tab-inner-div {
+        height: calc(100vh - 222px) !important;
+        margin-top: 40px;
+    }
+    .client_view ot-whiteboard{height: calc(100% - 40px);top: 40px;}
   </style>
 
 

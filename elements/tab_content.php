@@ -63,7 +63,7 @@
     <div ng-hide="tab.hidethumbs || (!is_admin && !full_control) || (is_admin && user_have_admin_control())" class="col-xs-2 presentation-thumbs no-pad">
 
         <ul>
-          <li ng-repeat="img in tab.data.files | orderBy:'':false" ng-class="{active:tab.currentpresentationindex==''+$index+''}" ng-click="tab.currentpresentationindex=''+$index+'';clear();draw_image(reset_value(), (is_admin || full_control));send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});"><img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/'+img}}" class="img-responsive"><p><span>Page {{$index+1}}</span></p></li>
+          <li ng-repeat="img in tab.data.files" ng-class="{active:tab.currentpresentationindex==''+$index+''}" ng-click="tab.currentpresentationindex=''+$index+'';clear();draw_image(reset_value(), (is_admin || full_control));send_noti({type:'currentpresentationindex', current_tab:current_tab, ind: tab.currentpresentationindex});"><img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/file-page'+ ($index + 1) +'.jpg'}}" class="img-responsive"><p><span>Page {{$index+1}}</span></p></li>
            </ul> 
     </div>
   <div class="pane-footer col-xs-12" ng-show="is_admin || full_control || whiteboard_control">

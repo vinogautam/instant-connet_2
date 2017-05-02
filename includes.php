@@ -3,6 +3,7 @@ include 'admin/ic-admin.php';
 include 'admin/ic-mail_class.php';
 include 'admin/ic-metabox.php';
 include 'admin/ic-ajax.php';
+include 'admin/ic-agent-api.php';
 //include 'phpmailer/PHPMailerAutoload.php';
 
 include 'frontend/ic-frontend.php';

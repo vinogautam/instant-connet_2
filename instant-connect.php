@@ -48,6 +48,7 @@
 		new IC_Metabox();
 		new IC_ajax();
 		new IC_front();
+		new IC_agent_api();
 	}
 	
 	function ic_meta_boxes() {

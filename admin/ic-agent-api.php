@@ -53,13 +53,78 @@ class IC_agent_api{
 		} else {
 			$response = array('status' => 'Error', 'msg' => 'User already exists.  Password inherited.');
 		}
+
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_endorser_list(){
 		global $wpdb;
 
-		$_POST = (array) json_decode(file_get_contents('php://input'));
+		$data = objectToArray(get_users(array('role'=>'endorser')));
+        $newdat = array();
+		foreach($data as $v){
+			$item = $v['data'];
+			if(!get_user_meta($item['ID'], 'imcomplete_profile', true)){
+				$item['invitation'] = get_user_meta($item['ID'], 'invitation_sent', true) 
+				? get_user_meta($item['ID'], 'invitation_sent', true) 
+				: "-";
+				$item['converted'] = array('email' => get_user_meta($item['ID'], "tracked_invitation", true), 'fb' => get_user_meta($item['ID'], "tracked_fb_invitation", true), 'tw' => get_user_meta($item['ID'], "tracked_tw_invitation", true));
 
+				$item['converted_new'] = array('email' => get_user_meta($item['ID'], "tracked_counter", true), 'fb' => get_user_meta($item['ID'], "tracked_fb_counter", true), 'tw' => get_user_meta($item['ID'], "tracked_tw_counter", true));
+
+				$re = get_user_meta($item['ID'], 'endorser_letter', true);
+				$result = $wpdb->get_row("select name from ". $wpdb->prefix . "mailtemplates where id=".$re);
+				$re = get_user_meta($item['ID'], 'endorsement_letter', true);
+				$result2 = $wpdb->get_row("select name from ". $wpdb->prefix . "mailtemplates where id=".$re);
+
+				$item['endorser_letter'] = ($result->name ? $result->name : 'Default') ;
+				$item['endorsement_letter'] = ($result2->name ? $result2->name : 'Default') ;
+
+				$newdat[] = $item;
+			}
+		}
+		$response = array('status' => 'Success', 'data' => $newdat);
+		echo json_encode($response);
+		die(0);
 		
 	}
+
+	function ic_add_create_email_template() {
+		global $wpdb;
+
+
+		$letter = (array) json_decode(file_get_contents('php://input'));
+
+		$letter['created'] = date("Y-m-d H:i:s");
+		$res = $wpdb->insert($wpdb->prefix . "mailtemplates", $letter);
+
+		if (  is_wp_error( $res ) ) {
+			$response = array('status' => 'Error', 'msg' => 'Something went wrong. Try Again!!!.');
+		} else {
+			$response = array('status' => 'Success', 'data' => $res, 'msg' => 'Letter template created successfully');
+		}
+
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_endorser_letter_list() {
+		global $wpdb;
+
+		$response = array('status' => 'Success', 'data' => $wpdb->get_results('select * from '.$wpdb->prefix . "mailtemplates where type = 'Endorser")); 
+
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_endorsement_letter_list() {
+		global $wpdb;
+
+		$response = array('status' => 'Success', 'data' => $wpdb->get_results('select * from '.$wpdb->prefix . "mailtemplates where type = 'Endorsement")); 
+
+		echo json_encode($response);
+		die(0);
+	}
+
 }

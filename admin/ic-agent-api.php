@@ -2,14 +2,41 @@
 class IC_agent_api{
 
 	function __construct() {
+
+
+	    header('Access-Control-Allow-Origin: *');
+	    header('Access-Control-Allow-Methods: GET, POST');
+	    header("Access-Control-Allow-Headers: X-Requested-With");
+
 		add_action( 'wp_ajax_ic_agent_login', array( &$this, 'ic_agent_login') );
 		add_action( 'wp_ajax_nopriv_ic_agent_login', array( &$this, 'ic_agent_login') );
 
 		add_action( 'wp_ajax_ic_add_endorser', array( &$this, 'ic_add_endorser') );
 		add_action( 'wp_ajax_nopriv_ic_add_endorser', array( &$this, 'ic_add_endorser') );
 
+		add_action( 'wp_ajax_ic_update_endorser', array( &$this, 'ic_update_endorser') );
+		add_action( 'wp_ajax_nopriv_ic_update_endorser', array( &$this, 'ic_update_endorser') );
+
 		add_action( 'wp_ajax_ic_endorser_list', array( &$this, 'ic_endorser_list') );
 		add_action( 'wp_ajax_nopriv_ic_endorser_list', array( &$this, 'ic_endorser_list') );
+
+		add_action( 'wp_ajax_ic_add_create_email_template', array( &$this, 'ic_add_create_email_template') );
+		add_action( 'wp_ajax_nopriv_ic_add_create_email_template', array( &$this, 'ic_add_create_email_template') );
+
+		add_action( 'wp_ajax_ic_update_email_template', array( &$this, 'ic_update_email_template') );
+		add_action( 'wp_ajax_nopriv_ic_update_email_template', array( &$this, 'ic_update_email_template') );
+
+		add_action( 'wp_ajax_ic_endorser_letter_list', array( &$this, 'ic_endorser_letter_list') );
+		add_action( 'wp_ajax_nopriv_ic_endorser_letter_list', array( &$this, 'ic_endorser_letter_list') );
+
+		add_action( 'wp_ajax_ic_endorsement_letter_list', array( &$this, 'ic_endorsement_letter_list') );
+		add_action( 'wp_ajax_nopriv_ic_endorsement_letter_list', array( &$this, 'ic_endorsement_letter_list') );
+
+		add_action( 'wp_ajax_ic_delete_endorser', array( &$this, 'ic_delete_endorser') );
+		add_action( 'wp_ajax_nopriv_ic_delete_endorser', array( &$this, 'ic_delete_endorser') );
+
+		add_action( 'wp_ajax_ic_delete_letter', array( &$this, 'ic_delete_letter') );
+		add_action( 'wp_ajax_nopriv_ic_delete_letter', array( &$this, 'ic_delete_letter') );
 	}
 
 
@@ -54,6 +81,19 @@ class IC_agent_api{
 			$response = array('status' => 'Error', 'msg' => 'User already exists.  Password inherited.');
 		}
 
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_update_endorser() {
+		$user = (array) json_decode(file_get_contents('php://input'));
+
+		update_user_meta($user['id'], 'endorser_letter', $user['endorser_letter']);
+		update_user_meta($user['id'], 'endorsement_letter', $user['endorsement_letter']);
+		update_user_meta($user['id'], 'first_name', $user['first_name']);
+		update_user_meta($user['id'], 'last_name', $user['last_name']);
+
+		$response = array('status' => 'Success', 'msg' => 'Endorser updated successfully');
 		echo json_encode($response);
 		die(0);
 	}
@@ -127,4 +167,38 @@ class IC_agent_api{
 		die(0);
 	}
 
+	function ic_update_email_template(){
+		global $wpdb;
+
+
+		$letter = (array) json_decode(file_get_contents('php://input'));
+		$res = $wpdb->update($wpdb->prefix . "mailtemplates", $letter, array('id' => $letter['id']));
+
+		if (  is_wp_error( $res ) ) {
+			$response = array('status' => 'Error', 'msg' => 'Something went wrong. Try Again!!!.');
+		} else {
+			$response = array('status' => 'Success', 'data' => $res, 'msg' => 'Letter template updated successfully');
+		}
+
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_delete_endorser(){
+		wpmu_delete_user($_GET['id']);
+
+		$response = array('status' => 'Success', 'msg' => 'Endorser deleted successfully');
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_delete_letter(){
+		global $wpdb;
+
+		$wpdb->delete($wpdb->prefix . "mailtemplates", array( 'id' => $_GET['id'] ) );
+
+		$response = array('status' => 'Success', 'msg' => 'Mail Letter template deleted successfully');
+		echo json_encode($response);
+		die(0);
+	}
 }

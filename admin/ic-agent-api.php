@@ -37,11 +37,20 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_delete_letter', array( &$this, 'ic_delete_letter') );
 		add_action( 'wp_ajax_nopriv_ic_delete_letter', array( &$this, 'ic_delete_letter') );
+
+		add_action( 'wp_ajax_ic_new_lead', array( &$this, 'ic_new_lead') );
+		add_action( 'wp_ajax_nopriv_ic_new_lead', array( &$this, 'ic_new_lead') );
+
+		add_action( 'wp_ajax_ic_noti_to_agent', array( &$this, 'ic_noti_to_agent') );
+		add_action( 'wp_ajax_nopriv_ic_noti_to_agent', array( &$this, 'ic_noti_to_agent') );
+
+		add_action( 'wp_ajax_ic_noti_to_user', array( &$this, 'ic_noti_to_user') );
+		add_action( 'wp_ajax_nopriv_ic_noti_to_user', array( &$this, 'ic_noti_to_user') );
 	}
 
 
 	function ic_agent_login(){
-		$_POST = (array) json_decode(file_get_contents('php://input'));
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		$user = wp_signon( $creds, false );
 
 		if ( is_wp_error($user) ) {
@@ -57,7 +66,7 @@ class IC_agent_api{
 	function ic_add_endorser(){
 		//global $ntm_mail;
 
-		$user = (array) json_decode(file_get_contents('php://input'));
+		$user = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		$user['role'] = 'endorser';
 		$user['user_login'] = strtolower($user['first_name'].'_'.$user['last_name']);
 		
@@ -86,7 +95,7 @@ class IC_agent_api{
 	}
 
 	function ic_update_endorser() {
-		$user = (array) json_decode(file_get_contents('php://input'));
+		$user = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
 		update_user_meta($user['id'], 'endorser_letter', $user['endorser_letter']);
 		update_user_meta($user['id'], 'endorsement_letter', $user['endorsement_letter']);
@@ -134,7 +143,7 @@ class IC_agent_api{
 		global $wpdb;
 
 
-		$letter = (array) json_decode(file_get_contents('php://input'));
+		$letter = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
 		$letter['created'] = date("Y-m-d H:i:s");
 		$res = $wpdb->insert($wpdb->prefix . "mailtemplates", $letter);
@@ -171,7 +180,7 @@ class IC_agent_api{
 		global $wpdb;
 
 
-		$letter = (array) json_decode(file_get_contents('php://input'));
+		$letter = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		$res = $wpdb->update($wpdb->prefix . "mailtemplates", $letter, array('id' => $letter['id']));
 
 		if (  is_wp_error( $res ) ) {
@@ -200,5 +209,35 @@ class IC_agent_api{
 		$response = array('status' => 'Success', 'msg' => 'Mail Letter template deleted successfully');
 		echo json_encode($response);
 		die(0);
+	}
+
+	function ic_noti_to_user(){
+
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		$subject = 'Notification - You have new message from agent';
+		$message = 'Agent waiting for your reply Please join the chat.';
+		NTM_mail_template::send_mail($_POST['email'], $subject, $message);
+	}
+
+	function ic_noti_to_agent(){
+		
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+		$user_info = get_userdata($agent_id);
+		$subject = 'Notification - You have new message from '.$_POST['email'];
+		$message = 'User waiting for your repy.';
+		NTM_mail_template::send_mail($user_info->user_email, $subject, $message);
+	}
+
+	function ic_new_lead() {
+		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$wpdb->insert("wp_leads", $lead_data);
+		$lead_id = $wpdb->insert_id;
+
+		$message = 'Thanks for signing up FinancialInsiders. <a href="'.site_url().'?action=update_lead_status&id='.base64_encode(base64_encode($lead_id)).'">Click here to confirm your registration</a>';
+		
+		NTM_mail_template::send_mail($lead['email'], 'Registered with FinancialInsiders successfly.', $message);
 	}
 }

@@ -46,8 +46,72 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_noti_to_user', array( &$this, 'ic_noti_to_user') );
 		add_action( 'wp_ajax_nopriv_ic_noti_to_user', array( &$this, 'ic_noti_to_user') );
+
+		add_action( 'wp_ajax_ic_resend_gift', array( &$this, 'ic_resend_gift') );
+		add_action( 'wp_ajax_nopriv_ic_resend_gift', array( &$this, 'ic_resend_gift') );
+
+		add_action( 'wp_ajax_ic_send_gift', array( &$this, 'ic_send_gift') );
+		add_action( 'wp_ajax_nopriv_ic_send_gift', array( &$this, 'ic_send_gift') );
 	}
 
+	function ic_send_gift(){
+		global $wpdb;
+
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		$data = array(
+						'endorser_id' =>$_POST['endorser_id'],
+						'amout' => $_POST['gift_amount'],
+						'fb_count'	=> get_user_meta($_POST['id'], "tracked_fb_counter", true),
+						'twitter_count'	=> get_user_meta($_POST['id'], "tracked_tw_counter", true),
+						"agent_id" => $current_user->ID,
+						'created'	=> date("Y-m-d H:i:s")
+						);
+		$wpdb->insert($wpdb->prefix . "gift_transaction", $data);
+		$gift_id = $wpdb->insert_id;
+		$get_results = $wpdb->get_results("select * from ".$wpdb->prefix . "endorsements where endorser_id=".$_POST['endorser_id']." and track_status is not null and gift_status is null");
+		
+		foreach($get_results as $res)
+		{
+			$wpdb->insert($wpdb->prefix . "giftendorsements", array(
+																"gift_id" => $gift_id, 
+																"endorser_id" => $_POST['endorser_id'], 
+																"endorsement_id" => $res->id
+																)
+							);
+			$wpdb->update($wpdb->prefix . "endorsements", array('gift_status' => 1), array('id' => $res->id));
+		}
+		
+		update_user_meta($_POST['endorser_id'], "tracked_fb_counter", 0);
+		update_user_meta($_POST['endorser_id'], "tracked_tw_counter", 0);
+		update_user_meta($_POST['endorser_id'], "tracked_counter", 0);
+		NTM_mail_template::send_gift_mail('get_gift_mail', $_POST['endorser_id'], $gift_id);
+	}
+
+	function ic_resend_gift(){
+		global $wpdb;
+
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$data = array(
+						'endorser_id' =>$_POST['endorser_id'],
+						'amout' => $_POST['gift_amount'],
+						'agent_id' => get_current_user_id(),
+						'created'	=> date("Y-m-d H:i:s")
+						);
+		$wpdb->insert($wpdb->prefix . "gift_transaction", $data);
+		$gift_id = $wpdb->insert_id;
+		foreach($_POST['endorsement'] as $res)
+		{
+			$wpdb->insert($wpdb->prefix . "giftendorsements", array(
+																"gift_id" => $gift_id, 
+																"endorser_id" => $_POST['endorser_id'], 
+																"endorsement_id" => $res
+																)
+							);
+			$wpdb->update($wpdb->prefix . "endorsements", array('gift_status' => 2), array('id' => $res->id));
+		}
+		NTM_mail_template::send_gift_mail('get_regift_mail', $_POST['endorser_id'], $gift_id);
+	}
 
 	function ic_agent_login(){
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));

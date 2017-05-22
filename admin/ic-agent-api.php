@@ -85,6 +85,10 @@ class IC_agent_api{
 		update_user_meta($_POST['endorser_id'], "tracked_tw_counter", 0);
 		update_user_meta($_POST['endorser_id'], "tracked_counter", 0);
 		NTM_mail_template::send_gift_mail('get_gift_mail', $_POST['endorser_id'], $gift_id);
+
+		$response = array('status' => 'Success', 'msg' => 'Gift send');
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_resend_gift(){
@@ -111,6 +115,10 @@ class IC_agent_api{
 			$wpdb->update($wpdb->prefix . "endorsements", array('gift_status' => 2), array('id' => $res->id));
 		}
 		NTM_mail_template::send_gift_mail('get_regift_mail', $_POST['endorser_id'], $gift_id);
+
+		$response = array('status' => 'Success', 'msg' => 'Gift Resend');
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_agent_login(){
@@ -280,7 +288,13 @@ class IC_agent_api{
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		$subject = 'Notification - You have new message from agent';
 		$message = 'Agent waiting for your reply Please join the chat.';
-		NTM_mail_template::send_mail($_POST['email'], $subject, $message);
+		
+		if(NTM_mail_template::send_mail($_POST['email'], $subject, $message))
+			$response = array('status' => 'Success', 'msg' => 'Notifications send to user');
+		else
+			$response = array('status' => 'Error', 'msg' => 'Notifications failed to send');
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_noti_to_agent(){
@@ -291,7 +305,14 @@ class IC_agent_api{
 		$user_info = get_userdata($agent_id);
 		$subject = 'Notification - You have new message from '.$_POST['email'];
 		$message = 'User waiting for your repy.';
-		NTM_mail_template::send_mail($user_info->user_email, $subject, $message);
+
+		if(NTM_mail_template::send_mail($user_info->user_email, $subject, $message))
+			$response = array('status' => 'Success', 'msg' => 'Notifications send to agent');
+		else
+			$response = array('status' => 'Error', 'msg' => 'Notifications failed to send');
+		echo json_encode($response);
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_new_lead() {
@@ -300,8 +321,17 @@ class IC_agent_api{
 		$wpdb->insert("wp_leads", $lead_data);
 		$lead_id = $wpdb->insert_id;
 
-		$message = 'Thanks for signing up FinancialInsiders. <a href="'.site_url().'?action=update_lead_status&id='.base64_encode(base64_encode($lead_id)).'">Click here to confirm your registration</a>';
+		if($lead_id) {
+			$message = 'Thanks for signing up FinancialInsiders. <a href="'.site_url().'?action=update_lead_status&id='.base64_encode(base64_encode($lead_id)).'">Click here to confirm your registration</a>';
 		
-		NTM_mail_template::send_mail($lead['email'], 'Registered with FinancialInsiders successfly.', $message);
+			NTM_mail_template::send_mail($lead['email'], 'Registered with FinancialInsiders successfly.', $message);
+
+			$response = array('status' => 'Success', 'msg' => 'Lead created successfully');
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+		}
+		
+		echo json_encode($response);
+		die(0);
 	}
 }

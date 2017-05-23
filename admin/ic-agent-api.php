@@ -316,6 +316,8 @@ class IC_agent_api{
 	}
 
 	function ic_new_lead() {
+		global $wpdb;
+
 		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
 		$wpdb->insert("wp_leads", $lead_data);
@@ -331,6 +333,16 @@ class IC_agent_api{
 			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
 		}
 		
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_get_endorsement() {
+		global $wpdb;
+
+		$res = $wpdb->get_results("select * from ".$wpdb->prefix . "endorsements");
+
+		$response = array('status' => 'Success', 'data' => $res);
 		echo json_encode($response);
 		die(0);
 	}

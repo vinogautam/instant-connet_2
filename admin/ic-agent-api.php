@@ -52,8 +52,20 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_send_gift', array( &$this, 'ic_send_gift') );
 		add_action( 'wp_ajax_nopriv_ic_send_gift', array( &$this, 'ic_send_gift') );
+
+		add_action( 'wp_ajax_ic_get_sites', array( &$this, 'ic_get_sites') );
+		add_action( 'wp_ajax_nopriv_ic_get_sites', array( &$this, 'ic_get_sites') );
 	}
 
+	function ic_get_sites(){
+		$data = [];
+		foreach(get_sites() as $sites ) {
+			$data[] = array('site_id' => $sites->blog_id, 'domain' => $sites->domain.$sites->path, 'domainname' => str_replace('/', '', $sites->path));
+		}
+		echo json_encode($data);
+		die(0);
+	}
+	
 	function ic_send_gift(){
 		global $wpdb;
 
@@ -179,13 +191,27 @@ class IC_agent_api{
 		die(0);
 	}
 
+	function objectToArray($d){
+		if (is_object($d)) {
+			$d = get_object_vars($d);
+		}
+ 
+		if (is_array($d)) {
+			return array_map(__FUNCTION__, $d);
+		}
+		else {
+			return $d;
+		}
+	}
+
 	function ic_endorser_list(){
 		global $wpdb;
-
-		$data = objectToArray(get_users(array('role'=>'endorser')));
+		$data = (array)get_users(array('role'=>'endorser'));
+		
         $newdat = array();
 		foreach($data as $v){
-			$item = $v['data'];
+			$v = (array)$v;
+			$item = (array)$v['data'];
 			if(!get_user_meta($item['ID'], 'imcomplete_profile', true)){
 				$item['invitation'] = get_user_meta($item['ID'], 'invitation_sent', true) 
 				? get_user_meta($item['ID'], 'invitation_sent', true) 

@@ -8,11 +8,21 @@ class IC_agent_api{
 	    header('Access-Control-Allow-Methods: GET, POST');
 	    header("Access-Control-Allow-Headers: X-Requested-With");
 
+	    
+	    add_action( 'wp_ajax_ic_all_letter_list', array( &$this, 'ic_all_letter_list') );
+		add_action( 'wp_ajax_nopriv_ic_all_letter_list', array( &$this, 'ic_all_letter_list') );
+
 		add_action( 'wp_ajax_ic_agent_login', array( &$this, 'ic_agent_login') );
 		add_action( 'wp_ajax_nopriv_ic_agent_login', array( &$this, 'ic_agent_login') );
 
+		add_action( 'wp_ajax_ic_site_pages', array( &$this, 'ic_site_pages') );
+		add_action( 'wp_ajax_nopriv_ic_site_pages', array( &$this, 'ic_site_pages') );
+
 		add_action( 'wp_ajax_ic_add_endorser', array( &$this, 'ic_add_endorser') );
 		add_action( 'wp_ajax_nopriv_ic_add_endorser', array( &$this, 'ic_add_endorser') );
+
+		add_action( 'wp_ajax_ic_send_invitation', array( &$this, 'ic_send_invitation') );
+		add_action( 'wp_ajax_nopriv_ic_send_invitation', array( &$this, 'ic_send_invitation') );
 
 		add_action( 'wp_ajax_ic_update_endorser', array( &$this, 'ic_update_endorser') );
 		add_action( 'wp_ajax_nopriv_ic_update_endorser', array( &$this, 'ic_update_endorser') );
@@ -55,6 +65,28 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_get_sites', array( &$this, 'ic_get_sites') );
 		add_action( 'wp_ajax_nopriv_ic_get_sites', array( &$this, 'ic_get_sites') );
+	}
+
+	function ic_site_pages() {
+
+		echo json_encode(array('data' => get_pages()));
+		die(0);
+	}
+
+	function ic_send_invitation() {
+		global $wpdb;
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		foreach ($_POST['mail_list'] as $mail){
+
+			$subject = $_POST['subject'];
+			$message = $_POST['message'];
+
+			NTM_mail_template::send_gift_mail($mail['mail'], $subject, $message, '', '');
+		}
+
+
+		die(0);
 	}
 
 	function ic_get_sites(){
@@ -256,10 +288,19 @@ class IC_agent_api{
 		die(0);
 	}
 
+	function ic_all_letter_list() {
+		global $wpdb;
+
+		$response = array('status' => 'Success', 'data' => $wpdb->get_results('select * from '.$wpdb->prefix . "mailtemplates")); 
+
+		echo json_encode($response);
+		die(0);
+	}
+
 	function ic_endorser_letter_list() {
 		global $wpdb;
 
-		$response = array('status' => 'Success', 'data' => $wpdb->get_results('select * from '.$wpdb->prefix . "mailtemplates where type = 'Endorser")); 
+		$response = array('status' => 'Success', 'data' => $wpdb->get_results('select * from '.$wpdb->prefix . "mailtemplates where type = 'Endorser'")); 
 
 		echo json_encode($response);
 		die(0);
@@ -268,7 +309,7 @@ class IC_agent_api{
 	function ic_endorsement_letter_list() {
 		global $wpdb;
 
-		$response = array('status' => 'Success', 'data' => $wpdb->get_results('select * from '.$wpdb->prefix . "mailtemplates where type = 'Endorsement")); 
+		$response = array('status' => 'Success', 'data' => $wpdb->get_results('select * from '.$wpdb->prefix . "mailtemplates where type = 'Endorsement'")); 
 
 		echo json_encode($response);
 		die(0);

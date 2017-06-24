@@ -291,9 +291,15 @@ class IC_agent_api{
 	function ic_all_letter_list() {
 		global $wpdb;
 
-		$response = array('status' => 'Success', 'data' => $wpdb->get_results('select * from '.$wpdb->prefix . "mailtemplates")); 
+		$response = $wpdb->get_results('select * from '.$wpdb->prefix . "mailtemplates");
+		$newres = [];
+		foreach($response as $res){
+			$res = (array)$res;
+			$res['pagename'] = get_the_title($res['page']);
+			$newres[] = $res;
+		}
 
-		echo json_encode($response);
+		echo json_encode(array('status' => 'Success', 'data' => $newres));
 		die(0);
 	}
 
@@ -320,7 +326,10 @@ class IC_agent_api{
 
 
 		$letter = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-		$res = $wpdb->update($wpdb->prefix . "mailtemplates", $letter, array('id' => $letter['id']));
+		$id = $letter['id'];
+		unset($letter['pagename']);
+		unset($letter['id']);
+		$res = $wpdb->update($wpdb->prefix . "mailtemplates", $letter, array('id' => $id));
 
 		if (  is_wp_error( $res ) ) {
 			$response = array('status' => 'Error', 'msg' => 'Something went wrong. Try Again!!!.');

@@ -418,6 +418,17 @@ class IC_agent_api{
 
 		$res = $wpdb->get_results("select * from ".$wpdb->prefix . "endorsements");
 
+		$newres = [];
+		foreach ($res as $key => $value) {
+			$value = (array)$value;
+			$value['track_link'] = base64_encode(base64_encode($value['id'].'#&$#'.$value['endorser_id'].'#&$#'.$value['tracker_id']));
+			$value['track_status'] = $value['track_status'] ? "Yes" : "No";
+			$value['gift_status'] = $value['gift_status'] ? "Yes" : "No";
+			$value['endorser_id'] = get_user_meta($value['endorser_id'], 'first_name', true).' '.get_user_meta($value['endorser_id'], 'last_name', true);
+			$value['created'] = date('Y/m/d', strtotime($value['created']));
+			$newres[] = $value;
+		}
+
 		$response = array('status' => 'Success', 'data' => $res);
 		echo json_encode($response);
 		die(0);

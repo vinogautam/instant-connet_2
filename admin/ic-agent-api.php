@@ -65,6 +65,39 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_get_sites', array( &$this, 'ic_get_sites') );
 		add_action( 'wp_ajax_nopriv_ic_get_sites', array( &$this, 'ic_get_sites') );
+
+		add_action( 'wp_ajax_ic_add_points', array( &$this, 'ic_add_points') );
+		add_action( 'wp_ajax_nopriv_ic_add_points', array( &$this, 'ic_add_points') );
+
+		add_action( 'wp_ajax_ic_get_points', array( &$this, 'ic_get_points') );
+		add_action( 'wp_ajax_nopriv_ic_get_points', array( &$this, 'ic_get_points') );
+	}
+
+	function ic_get_points(){
+		global $wpdb;
+
+		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$_GET['endorser_id']);
+		$response = array('status' => 'Success', 'total_points' => $response->points);
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_add_points(){
+		global $wpdb;
+
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		$data = array(
+						'endorser_id' =>$_POST['endorser_id'],
+						'points' => $_POST['points'],
+						'type' => $_POST['type'],
+						'notes' => $_POST['notes'],
+						'created'	=> date("Y-m-d H:i:s")
+						);
+		$wpdb->insert($wpdb->prefix . "points_transaction", $data);
+		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$_POST['endorser_id']);
+		$response = array('status' => 'Success', 'total_points' => $response->points);
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_site_pages() {

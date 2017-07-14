@@ -260,7 +260,8 @@ if (scope.$last === true) {
 		
 		if($scope.current_tab != -1 && ($scope.tabs[$scope.current_tab].type == 'presentation' || $scope.tabs[$scope.current_tab].type == 'whiteboard'))
 		{
-			$scope.broadcast();
+			if(notify === undefined)
+				$scope.broadcast();
 			$timeout(function(){
 				$scope.current_tab = id;
 				$scope.initiatescripts();
@@ -279,7 +280,8 @@ if (scope.$last === true) {
 	{
 		if($scope.current_tab != -1 && ($scope.tabs[$scope.current_tab].type == 'presentation' || $scope.tabs[$scope.current_tab].type == 'whiteboard') && notify === undefined)
 		{
-			$scope.broadcast();
+			if(notify === undefined)
+				$scope.broadcast();
 
 			$timeout(function(){
 				$scope.tabs.splice(id,1);
@@ -328,7 +330,6 @@ if (scope.$last === true) {
 	});
 
 	$rootScope.$on('Presentation_changed', function(event, data){
-		return;
 		if($scope.tabs[$scope.current_tab].type == 'presentation')
         {    
         	if(!$scope.$$phase) {
@@ -344,7 +345,6 @@ if (scope.$last === true) {
 	});
 
 	$rootScope.$on('Whiteboard_changed', function(event, data){
-		return;
 		if(data.tab.type == 'whiteboard')
         {
         	if(!$scope.$$phase) {
@@ -434,7 +434,7 @@ if (scope.$last === true) {
 
 	$scope.trigger_draw_image = function()
 	{
-		//if(!$scope.is_admin && !$scope.full_control)
+		if(!$scope.is_admin && !$scope.full_control)
 			return;
 
 		$timeout(function(){
@@ -444,7 +444,7 @@ if (scope.$last === true) {
 
 	$scope.trigger_draw_whiteboard_image = function()
 	{
-		//if(!$scope.is_admin && !$scope.full_control)
+		if(!$scope.is_admin && !$scope.full_control)
 			return;
 
 		$timeout(function(){
@@ -829,14 +829,12 @@ if (scope.$last === true) {
 		}
 		else if(event.data.type == 'lineWidth')
 		{
-			return;
 			$scope.$apply(function(){
 				$rootScope.$broadcast('lineWidthchange', event.data.val);
 			});
 		}
 		else if(event.data.type == 'color')
 		{
-			return;
 			$scope.$apply(function(){
 				$rootScope.$broadcast('colorchange', event.data.val);
 			});

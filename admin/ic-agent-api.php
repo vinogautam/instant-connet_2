@@ -71,6 +71,30 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_get_points', array( &$this, 'ic_get_points') );
 		add_action( 'wp_ajax_nopriv_ic_get_points', array( &$this, 'ic_get_points') );
+
+		add_action( 'wp_ajax_ic_update_fb_id', array( &$this, 'ic_update_fb_id') );
+		add_action( 'wp_ajax_nopriv_ic_update_fb_id', array( &$this, 'ic_update_fb_id') );
+
+		add_action( 'wp_ajax_ic_get_fb_id', array( &$this, 'ic_get_fb_id') );
+		add_action( 'wp_ajax_nopriv_ic_get_fb_id', array( &$this, 'ic_get_fb_id') );
+	}
+
+	function ic_update_fb_id(){
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		update_user_meta($_POST['user_id'], 'firebase_id', $_POST['firebase_id']);
+
+		$response = array('status' => 'Success');
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_get_fb_id(){
+		$firebase_id = get_user_meta($_GET['user_id'], 'firebase_id', true);
+
+		$response = array('status' => 'Success', 'firebase_id' => $firebase_id);
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_get_points(){

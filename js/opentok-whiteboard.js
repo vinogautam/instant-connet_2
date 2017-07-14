@@ -255,7 +255,7 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                     draw(update);
                     if(typeof st != "undefined" && st)
                     {
-                        sendUpdate('otWhiteboard_update', update);
+                        sendUpdate('otWhiteboard_update_new', update);
                     }
                 });
             };
@@ -426,9 +426,16 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                       requestHistory();
                     },
                     'signal:otWhiteboard_update': function (event) {
+                        console.log(event.data, event.from.connectionId, OTSession.session.connection.connectionId);
                         if (event.from.connectionId !== OTSession.session.connection.connectionId) {
                             drawUpdates(JSON.parse(event.data));
                             scope.$emit('otWhiteboardUpdate');
+                        }
+                    },
+                    'signal:otWhiteboard_update_new': function (event) {
+                        console.log($rootScope.user, '---------------------------------------------------------');
+                        if ($rootScope.user.name != 'Agent' && event.from.connectionId !== OTSession.session.connection.connectionId) {
+                            drawUpdates(JSON.parse(event.data));
                         }
                     },
                     'signal:otWhiteboard_undo': function (event) {
@@ -469,7 +476,11 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                     },
                     'signal:otWhiteboard_request_history': function (event) {
                         if (drawHistory.length > 0) {
-                            batchSignal('otWhiteboard_history', drawHistory, event.connection);
+                            angular.forEach(drawHistory, function(update, k){
+                                batchSignal('otWhiteboard_history', [update], event.connection);
+                                //console.log(update);
+                                //sendUpdate('otWhiteboard_update', update);
+                            });
                         }
                     }
                 });

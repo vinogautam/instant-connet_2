@@ -56,7 +56,8 @@
 <!-- PRESENTATION WINDOW -->
 <div ng-if="tab.type == 'presentation'" class="clearfix col-xs-12 no-pad meeting-pane presentation-room thumbs-active" ng-init="tab.currentpresentationindex=tab.currentpresentationindex===undefined ? '0' : tab.currentpresentationindex;tab.hidethumbs= tab.hidethumbs===undefined ? false : tab.hidethumbs;tab.slide_image = tab.slide_image === undefined ? {} : tab.slide_image;trigger_draw_image();">
     <div class="hide clear_whiteboard" ng-click="clear((is_admin || full_control));"></div>
-    <div ng-class="{'col-xs-12':tab.hidethumbs || (!is_admin && !full_control), 'col-xs-10': !tab.hidethumbs && ((is_admin && !user_have_admin_control()) || full_control)}" class="col-xs-10 presentation-room presentation-room-inner tab-inner-div no-pad h100">
+    <!-- ng-class="{'col-xs-12':tab.hidethumbs || (!is_admin && !full_control), 'col-xs-10': !tab.hidethumbs && ((is_admin && !user_have_admin_control()) || full_control)}" -->
+    <div class="col-xs-12 presentation-room presentation-room-inner tab-inner-div no-pad h100">
       <img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/file-page'+ (parseInt(tab.currentpresentationindex) + 1)+'.jpg'}}" class="img-responsive absolute_center wh100">
     </div>
 

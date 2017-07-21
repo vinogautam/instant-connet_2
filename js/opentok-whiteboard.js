@@ -255,7 +255,7 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                     draw(update);
                     if(typeof st != "undefined" && st)
                     {
-                        sendUpdate('otWhiteboard_update_new', update);
+                        //sendUpdate('otWhiteboard_update_new', update);
                     }
                 });
             };
@@ -426,14 +426,12 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                       requestHistory();
                     },
                     'signal:otWhiteboard_update': function (event) {
-                        console.log(event.data, event.from.connectionId, OTSession.session.connection.connectionId);
                         if (event.from.connectionId !== OTSession.session.connection.connectionId) {
                             drawUpdates(JSON.parse(event.data));
                             scope.$emit('otWhiteboardUpdate');
                         }
                     },
                     'signal:otWhiteboard_update_new': function (event) {
-                        console.log($rootScope.user, '---------------------------------------------------------');
                         if ($rootScope.user.name != 'Agent' && event.from.connectionId !== OTSession.session.connection.connectionId) {
                             drawUpdates(JSON.parse(event.data));
                         }
@@ -457,6 +455,9 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                     'signal:otWhiteboard_history': function (event) {
                         // We will receive these from everyone in the room, only listen to the first
                         // person. Also the data is chunked together so we need all of that person's
+                        
+                        if($rootScope.user.name == JSON.parse(event.data)[0].user.name) return;
+
                         if (!drawHistoryReceivedFrom || drawHistoryReceivedFrom === event.from.connectionId) {
                             var parseddata = JSON.parse(event.data);
 

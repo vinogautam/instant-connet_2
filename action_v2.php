@@ -16,6 +16,14 @@ player = new YT.Player( 'youtube-player', {
 console.log(player);
 }
 
+function imageOnLoad(){
+	$(".presentation_thumb_active").width($("#presentation_thumb").width());
+}
+
+$(window).resize(function(){
+	imageOnLoad();
+});
+
 function onPlayerStateChange(event) {
 	switch(event.data) {
 	  case 0:

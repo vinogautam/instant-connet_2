@@ -74,8 +74,9 @@ Instant Connect UI
     .client_view.whiteboard_control ot-whiteboard, .client_view.whiteboard_control ot-whiteboard {
         pointer-events: auto;
     }
-    ot-whiteboard{height: calc(100% - 80px);top: 0;bottom:0;margin:auto;}
-    ot-whiteboard.presentation_thumb_active{width: calc(100% - 17%);right: auto;}
+    ot-whiteboard{height: calc(100% - 80px);top: 0;bottom:0;margin:auto;cursor: pointer;}
+    ot-whiteboard.whiteboard_thumb_active{width:auto !important;}
+    /*ot-whiteboard.presentation_thumb_active{width: calc(100% - 17%);right: auto;}*/
     .client_view ot-whiteboard.presentation_thumb_active{width: 100%;}
     .tab-pane{position: relative;}
     .instant-connect .meeting-panel-container .meeting-panel .panel-header{z-index: 12;}
@@ -84,6 +85,8 @@ Instant Connect UI
         margin-top: 40px;
     }
     .client_view ot-whiteboard{height: calc(100% - 40px);top: 40px;}
+    .presentation-thumbs{position: absolute;right: 0;z-index: 12;}
+    .img_wh100{width: auto;height: auto;max-width: 100%;max-height: 100%;}
   </style>
 
 

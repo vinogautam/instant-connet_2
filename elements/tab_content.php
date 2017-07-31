@@ -1,4 +1,4 @@
-<ot-whiteboard ng-hide="tab.type == 'youtube'" ng-class="{presentation_thumb_active: tab.type == 'presentation' && !tab.hidethumbs}" width="700" height="420" ></ot-whiteboard> 
+<ot-whiteboard ng-hide="tab.type == 'youtube'" ng-class="{presentation_thumb_active: tab.type == 'presentation', whiteboard_thumb_active: tab.type == 'whiteboard'}" width="700" height="420" ></ot-whiteboard> 
 <!-- WHITEBOARD WINDOW -->
 <div ng-if="tab.type == 'whiteboard'" class="clearfix col-xs-12 no-pad meeting-pane whiteboardtab" ng-init="tab.slide_image = tab.slide_image === undefined ? [] : tab.slide_image;trigger_draw_whiteboard_image();">
   <div class="hide clear_whiteboard" ng-click="clear((is_admin || full_control));"></div>
@@ -58,7 +58,7 @@
     <div class="hide clear_whiteboard" ng-click="clear((is_admin || full_control));"></div>
     <!-- ng-class="{'col-xs-12':tab.hidethumbs || (!is_admin && !full_control), 'col-xs-10': !tab.hidethumbs && ((is_admin && !user_have_admin_control()) || full_control)}" -->
     <div class="col-xs-12 presentation-room presentation-room-inner tab-inner-div no-pad h100">
-      <img ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/file-page'+ (parseInt(tab.currentpresentationindex) + 1)+'.jpg'}}" class="img-responsive absolute_center wh100">
+      <img onload="imageOnLoad()" id="presentation_thumb" ng-src="{{'<?= IC_PLUGIN_URL; ?>/extract/'+tab.data.folder+'/file-page'+ (parseInt(tab.currentpresentationindex) + 1)+'.jpg'}}" class="img-responsive absolute_center img_wh100">
     </div>
 
     <div ng-hide="tab.hidethumbs || (!is_admin && !full_control) || (is_admin && user_have_admin_control())" class="col-xs-2 presentation-thumbs no-pad">

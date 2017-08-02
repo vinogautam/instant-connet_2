@@ -82,11 +82,13 @@ Instant Connect UI
     .instant-connect .meeting-panel-container .meeting-panel .panel-header{z-index: 12;}
     .client_view .tab-inner-div {
         height: calc(100vh - 222px) !important;
-        margin-top: 40px;
     }
-    .client_view ot-whiteboard{height: calc(100% - 40px);top: 40px;}
+    .client_view ot-whiteboard{height: 100%;}
+    .client_view.full_control ot-whiteboard{height: calc(100% - 80px);}
+    .client_view.full_control .tab-inner-div{margin-top:0;}
     .presentation-thumbs{position: absolute;right: 0;z-index: 12;}
     .img_wh100{width: auto;height: auto;max-width: 100%;max-height: 100%;}
+    .admin_view.user_have_control ot-whiteboard{height: calc(100% - 40px);bottom: auto;}
   </style>
 
 
@@ -148,7 +150,7 @@ Instant Connect UI
                         <i class="fa fa-video-camera" aria-hidden="true"></i>
                       </a>
 
-                      <!--<a ng-show="!user_have_admin_control() || user.presentation" class="btn user-control" ng-class="{active:user.presentation}" ng-click="userlist[user.id].presentation = !user.presentation;send_noti({type:'full_control', data:{id:user.id, val:userlist[user.id].presentation}})">
+                      <a ng-show="!user_have_admin_control() || user.presentation" class="btn user-control" ng-class="{active:user.presentation}" ng-click="userlist[user.id].presentation = !user.presentation;send_noti({type:'full_control', data:{id:user.id, val:userlist[user.id].presentation}})">
                         <i class="fa fa-line-chart" aria-hidden="true"></i>
                       </a>
 
@@ -158,7 +160,7 @@ Instant Connect UI
 
                       <a class="btn user-control" ng-class="{active:user.chair}" ng-click="userlist[user.id].chair = user.chair ? 0 : get_chair_value();">
                         <i class="fa fa-arrow-up" aria-hidden="true"></i>
-                      </a>-->
+                      </a>
 
                       <a class="btn user-control" ng-click="$parent.exit_user = user.id;" data-toggle="modal" data-target="#Exitmodal">
                         <i class="fa fa-times" aria-hidden="true"></i>

@@ -124,7 +124,7 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
 
             scope.draw_image = function(updates, st){
                 drawUpdates(updates, st);
-                scope.$emit('otWhiteboardUpdate');
+                //scope.$emit('otWhiteboardUpdate');
             };
 
             scope.capture = function () {
@@ -432,7 +432,8 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                         }
                     },
                     'signal:otWhiteboard_update_new': function (event) {
-                        if ($rootScope.user.name != 'Agent' && event.from.connectionId !== OTSession.session.connection.connectionId) {
+                        console.log(JSON.parse(event.data));
+                        if ($rootScope.user.name != JSON.parse(event.data)[0].user.name && event.from.connectionId !== OTSession.session.connection.connectionId) {
                             drawUpdates(JSON.parse(event.data));
                         }
                     },
@@ -456,9 +457,9 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                         // We will receive these from everyone in the room, only listen to the first
                         // person. Also the data is chunked together so we need all of that person's
                         
-                        if($rootScope.user.name == JSON.parse(event.data)[0].user.name) return;
+                        if((scope.is_admin && !scope.user_have_admin_control()) || (!scope.is_admin && scope.full_control)) return;
 
-                        if (!drawHistoryReceivedFrom || drawHistoryReceivedFrom === event.from.connectionId) {
+                        //if (!drawHistoryReceivedFrom || drawHistoryReceivedFrom === event.from.connectionId) {
                             var parseddata = JSON.parse(event.data);
 
                             if(parseddata[parseddata.length-1].event == 'end')
@@ -468,7 +469,7 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
 
                             drawUpdates(parseddata);
                             scope.$emit('otWhiteboardUpdate');
-                        }
+                        //}
                     },
                     'signal:otWhiteboard_clear': function (event) {
                         if (event.from.connectionId !== OTSession.session.connection.connectionId) {

@@ -1,4 +1,4 @@
-<ot-whiteboard ng-hide="tab.type == 'youtube'" ng-class="{presentation_thumb_active: tab.type == 'presentation', whiteboard_thumb_active: tab.type == 'whiteboard'}" width="700" height="420" ></ot-whiteboard> 
+ 
 <!-- WHITEBOARD WINDOW -->
 <div ng-if="tab.type == 'whiteboard'" class="clearfix col-xs-12 no-pad meeting-pane whiteboardtab" ng-init="tab.slide_image = tab.slide_image === undefined ? [] : tab.slide_image;trigger_draw_whiteboard_image();">
   <div class="hide clear_whiteboard" ng-click="clear((is_admin || full_control));"></div>
@@ -18,8 +18,8 @@
    <div class="col-sm-9 col-xs-12 tool pull-right" ng-show="whiteboard_control || full_control" ng-class="{'col-sm-offset-3':!((is_admin && !user_have_admin_control()) || full_control), 'no-pad':((is_admin && !user_have_admin_control()) || full_control)}">
    <ul>
       <div id="toolbar-options" class="hidden">
-            <a ng-click="$parent.erasing=false;" href="#" id="pencil-tool"><i class="fa fa-pencil"></i></a>
-            <a ng-click="$parent.erasing=true;" href="#" id="eraser-tool"><i class="fa fa-eraser"></i></a>   
+            <a ng-click="$parent.$parent.$parent.erasing=false;" href="#" id="pencil-tool"><i class="fa fa-pencil"></i></a>
+            <a ng-click="$parent.$parent.$parent.erasing=true;" href="#" id="eraser-tool"><i class="fa fa-eraser"></i></a>   
       </div>
       <li class="pencil"><div class="pen"><i class="pencil-tool-fa fa fa-pencil"></i></div>
        
@@ -36,11 +36,11 @@
      </li>
      <li class="color-picker">
        <ul>
-          <li ng-click="$parent.color='yellow';" ng-class="{active:color=='yellow'}" class="yellow wb-control"></li>
-          <li ng-click="$parent.color='black';" ng-class="{active:color=='black'}" class="block wb-control"></li>
-          <li ng-click="$parent.color='white';" ng-class="{active:color=='white'}" class="wight wb-control"></li>
-          <li ng-click="$parent.color='red';" ng-class="{active:color=='red'}" class="red wb-control"></li>
-          <li ng-click="$parent.color='blue';" ng-class="{active:color=='blue'}" class="blue wb-control"></li>
+          <li ng-click="$parent.$parent.$parent.color='yellow';" ng-class="{active:color=='yellow'}" class="yellow wb-control"></li>
+          <li ng-click="$parent.$parent.$parent.color='black';" ng-class="{active:color=='black'}" class="block wb-control"></li>
+          <li ng-click="$parent.$parent.$parent.color='white';" ng-class="{active:color=='white'}" class="wight wb-control"></li>
+          <li ng-click="$parent.$parent.$parent.color='red';" ng-class="{active:color=='red'}" class="red wb-control"></li>
+          <li ng-click="$parent.$parent.$parent.color='blue';" ng-class="{active:color=='blue'}" class="blue wb-control"></li>
       </ul>
      </li>
     
@@ -87,8 +87,8 @@
      <div class="tool">
      <ul>
       <div id="toolbar-options" class="hidden">
-            <a ng-click="$parent.erasing=false;" href="#" id="pencil-tool"><i class="fa fa-pencil"></i></a>
-            <a ng-click="$parent.erasing=true;" href="#" id="eraser-tool"><i class="fa fa-eraser"></i></a>   
+            <a ng-click="$parent.$parent.$parent.erasing=false;" href="#" id="pencil-tool"><i class="fa fa-pencil"></i></a>
+            <a ng-click="$parent.$parent.$parent.erasing=true;" href="#" id="eraser-tool"><i class="fa fa-eraser"></i></a>   
       </div>
       <li class="pencil"><div class="pen"><i class="pencil-tool-fa fa fa-pencil"></i></div>
        
@@ -106,11 +106,11 @@
      </li>
      <li class="color-picker">
        <ul>
-          <li ng-click="$parent.color='yellow';" ng-class="{active:color=='yellow'}" class="yellow wb-control"></li>
-          <li ng-click="$parent.color='black';" ng-class="{active:color=='black'}" class="block wb-control"></li>
-          <li ng-click="$parent.color='white';" ng-class="{active:color=='white'}" class="wight wb-control"></li>
-          <li ng-click="$parent.color='red';" ng-class="{active:color=='red'}" class="red wb-control"></li>
-          <li ng-click="$parent.color='blue';" ng-class="{active:color=='blue'}" class="blue wb-control"></li>
+          <li ng-click="$parent.$parent.$parent.color='yellow';" ng-class="{active:color=='yellow'}" class="yellow wb-control"></li>
+          <li ng-click="$parent.$parent.$parent.color='black';" ng-class="{active:color=='black'}" class="block wb-control"></li>
+          <li ng-click="$parent.$parent.$parent.color='white';" ng-class="{active:color=='white'}" class="wight wb-control"></li>
+          <li ng-click="$parent.$parent.$parent.color='red';" ng-class="{active:color=='red'}" class="red wb-control"></li>
+          <li ng-click="$parent.$parent.$parent.color='blue';" ng-class="{active:color=='blue'}" class="blue wb-control"></li>
       </ul>
      </li>
       <li ng-click="tab.hidethumbs=!tab.hidethumbs;" class="tip-option wb-control">

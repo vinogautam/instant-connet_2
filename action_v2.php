@@ -338,6 +338,7 @@ if (scope.$last === true) {
 	});
 
 	$rootScope.$on('Presentation_changed', function(event, data){
+		if($scope.current_tab === -1) return;
 		if($scope.tabs[$scope.current_tab].type == 'presentation')
         {    
         	if(!$scope.$$phase) {

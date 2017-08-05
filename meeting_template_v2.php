@@ -89,6 +89,7 @@ Instant Connect UI
     .presentation-thumbs{position: absolute;right: 0;z-index: 12;}
     .img_wh100{width: auto;height: auto;max-width: 100%;max-height: 100%;}
     .admin_view.user_have_control ot-whiteboard{height: calc(100% - 40px);bottom: auto;}
+    .pos-relative{position: relative;}
   </style>
 
 
@@ -369,7 +370,8 @@ Instant Connect UI
         </div>
  
 
-    <div class="tab-content clearfix">
+    <div class="tab-content clearfix pos-relative">
+      <ot-whiteboard ng-hide="current_tab == -1 || tabs[current_tab].type == 'youtube'" ng-class="{presentation_thumb_active: current_tab != -1 && tabs[current_tab].type == 'presentation', whiteboard_thumb_active: current_tab != -1 && tabs[current_tab].type == 'whiteboard'}" width="700" height="420" ></ot-whiteboard>
 
       <div class="tab-pane active clearfix" ng-if="current_tab == -1" ng-show="(is_admin && !user_have_admin_control()) || full_control">
         <div class="col-xs-12 no-pad meeting-pane">

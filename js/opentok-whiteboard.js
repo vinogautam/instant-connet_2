@@ -125,6 +125,7 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
             scope.draw_image = function(updates, st){
                 drawUpdates(updates, st);
                 //scope.$emit('otWhiteboardUpdate');
+                requestHistory();
             };
 
             scope.capture = function () {
@@ -467,6 +468,7 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                             else
                                 drawHistoryReceivedFrom = event.from.connectionId;
 
+                            console.log(parseddata[0]);
                             drawUpdates(parseddata);
                             scope.$emit('otWhiteboardUpdate');
                         //}

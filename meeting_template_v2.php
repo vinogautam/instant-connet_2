@@ -81,21 +81,26 @@ Instant Connect UI
     .tab-pane{position: relative;}
     .instant-connect .meeting-panel-container .meeting-panel .panel-header{z-index: 12;}
     .client_view .tab-inner-div {
-        height: calc(100vh - 222px) !important;
+        height: calc(100vh - 180px) !important;
+    }
+    .client_view.full_control .tab-inner-div, .client_view.whiteboard_control .tab-inner-div {
+        height: calc(100vh - 180px) !important;
     }
     .client_view ot-whiteboard{height: 100%;}
-    .client_view.full_control ot-whiteboard{height: calc(100% - 80px);}
+    .client_view.full_control ot-whiteboard{height: calc(100% - 80px);bottom:0;}
     .client_view.full_control .tab-inner-div{margin-top:0;}
+    .client_view.whiteboard_control ot-whiteboard{height: calc(100% - 40px);bottom:auto}
+    .client_view.whiteboard_control .tab-inner-div{margin-top:0;}
     .presentation-thumbs{position: absolute;right: 0;z-index: 12;}
     .img_wh100{width: auto;height: auto;max-width: 100%;max-height: 100%;}
-    .admin_view.user_have_control ot-whiteboard{height: calc(100% - 40px);bottom: auto;}
+    .admin_view.user_have_admin_control ot-whiteboard{height: calc(100% - 40px);bottom: auto;}
     .pos-relative{position: relative;}
   </style>
 
 
 </head>
 
-<body class="hold-transition skin-blue sidebar-collapse sidebar-mini instant-connect <?= isset($_GET['admin']) ? 'admin_view' : 'client_view'; ?>" ng-class="{whiteboard_control:whiteboard_control, video_control:video_control, full_control:full_control, user_have_control: user_have_control()}" ng-controller="MyCtrl">
+<body class="hold-transition skin-blue sidebar-collapse sidebar-mini instant-connect <?= isset($_GET['admin']) ? 'admin_view' : 'client_view'; ?>" ng-class="{whiteboard_control:whiteboard_control, video_control:video_control, full_control:full_control, user_have_control: user_have_control(), user_have_admin_control: user_have_admin_control()}" ng-controller="MyCtrl">
 <div class="preloader" ng-if="preloader">
   <span><i class="fa fa-spinner fa-pulse fa-3x fa-fw margin-bottom"></i></span>
 </div>

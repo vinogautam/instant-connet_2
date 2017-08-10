@@ -1,4 +1,5 @@
 <?php
+use OpenTok\OpenTok;
 class IC_agent_api{
 
 	function __construct() {
@@ -77,6 +78,102 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_get_fb_id', array( &$this, 'ic_get_fb_id') );
 		add_action( 'wp_ajax_nopriv_ic_get_fb_id', array( &$this, 'ic_get_fb_id') );
+
+		add_action( 'wp_ajax_ic_instant_meeting', array( &$this, 'ic_instant_meeting') );
+		add_action( 'wp_ajax_nopriv_ic_instant_meeting', array( &$this, 'ic_instant_meeting') );
+
+		add_action( 'wp_ajax_ic_appointment_meeting', array( &$this, 'ic_appointment_meeting') );
+		add_action( 'wp_ajax_nopriv_ic_appointment_meeting', array( &$this, 'ic_appointment_meeting') );
+
+		add_action( 'wp_ajax_ic_update_meeting_date', array( &$this, 'ic_update_meeting_date') );
+		add_action( 'wp_ajax_nopriv_ic_update_meeting_date', array( &$this, 'ic_update_meeting_date') );
+	}
+
+	function ic_update_meeting_date()
+	{
+		global $wpdb;
+		
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$wpdb->insert($wpdb->prefix . "meeting", array('meeting_date' => $_POST['meeting_date']), array('id' => $_POST['id']));
+
+		die(0);
+		exit;
+	}
+
+	function ic_appointment_meeting()
+	{
+		global $wpdb;
+		
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$meetingId = time();
+		
+		$opentok = opentok_token();
+		
+		$wpdb->insert($wpdb->prefix . "meeting", array('agent_id' => $_POST['agent_id'], 'created' => date("Y-m-d H:i:s"), 'session_id' => $opentok['sessionId'], 'token' => $opentok['token']));
+		$meeting_id = $wpdb->insert_id;
+		
+		$opentok['id'] = $meeting_id;
+		$status = $_GET['st'] ? 3 : 2;
+
+		$d = $_POST['participants'];
+		$wpdb->insert($wpdb->prefix . "meeting_participants", 
+			array(	'meeting_id' => $meeting_id, 
+					'meeting_date' => date("Y-m-d H:i:s"),
+					'status' => $status,
+					'name' => $d['name'],
+					'email' => $d['email'],
+					'is_mobile' => $d['is_mobile'],
+					'complete_device_name' => $d['complete_device_name'],
+					'form_factor' => $d['form_factor'],
+					'mode' => $d['mode'],
+				)
+		);
+		
+		echo json_encode(array('meeting_id' => $meeting_id));
+		
+		die(0);
+		exit;
+	}
+
+	function ic_instant_meeting()
+	{
+		global $wpdb;
+		
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$meetingId = time();
+		
+		$opentok = opentok_token();
+		
+		$wpdb->insert($wpdb->prefix . "meeting", array('agent_id' => $_POST['agent_id'], 'meeting_date' => date("Y-m-d H:i:s"), 'created' => date("Y-m-d H:i:s"), 'session_id' => $opentok['sessionId'], 'token' => $opentok['token']));
+		$meeting_id = $wpdb->insert_id;
+		
+		$opentok['id'] = $meeting_id;
+		$status = $_GET['st'] ? 3 : 2;
+
+		$d = $_POST['participants'];
+		$wpdb->insert($wpdb->prefix . "meeting_participants", 
+			array(	'meeting_id' => $meeting_id, 
+					'meeting_date' => date("Y-m-d H:i:s"),
+					'status' => $status,
+					'name' => $d['name'],
+					'email' => $d['email'],
+					'is_mobile' => $d['is_mobile'],
+					'complete_device_name' => $d['complete_device_name'],
+					'form_factor' => $d['form_factor'],
+					'mode' => $d['mode'],
+				)
+		);
+		
+		$finonce = time().random(11111,99999);
+		setcookie('finonce', $finonce);
+
+		echo json_encode(array('meeting_id' => $meeting_id, 'finonce' => $finonce));
+		
+		die(0);
+		exit;
 	}
 
 	function ic_update_fb_id(){

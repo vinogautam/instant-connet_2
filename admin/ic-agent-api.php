@@ -52,6 +52,12 @@ class IC_agent_api{
 		add_action( 'wp_ajax_ic_new_lead', array( &$this, 'ic_new_lead') );
 		add_action( 'wp_ajax_nopriv_ic_new_lead', array( &$this, 'ic_new_lead') );
 
+		add_action( 'wp_ajax_ic_new_lead_nomail', array( &$this, 'ic_new_lead_nomail') );
+		add_action( 'wp_ajax_nopriv_ic_new_lead_nomail', array( &$this, 'ic_new_lead_nomail') );
+
+		add_action( 'wp_ajax_ic_update_lead', array( &$this, 'ic_update_lead') );
+		add_action( 'wp_ajax_nopriv_ic_update_lead', array( &$this, 'ic_update_lead') );
+
 		add_action( 'wp_ajax_ic_noti_to_agent', array( &$this, 'ic_noti_to_agent') );
 		add_action( 'wp_ajax_nopriv_ic_noti_to_agent', array( &$this, 'ic_noti_to_agent') );
 
@@ -87,6 +93,48 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_update_meeting_date', array( &$this, 'ic_update_meeting_date') );
 		add_action( 'wp_ajax_nopriv_ic_update_meeting_date', array( &$this, 'ic_update_meeting_date') );
+
+		add_action( 'wp_ajax_ic_new_lead_nomail', array( &$this, 'ic_new_lead_nomail') );
+		add_action( 'wp_ajax_nopriv_ic_new_lead_nomail', array( &$this, 'ic_new_lead_nomail') );
+
+		add_action( 'wp_ajax_ic_update_lead', array( &$this, 'ic_update_lead') );
+		add_action( 'wp_ajax_nopriv_ic_update_lead', array( &$this, 'ic_update_lead') );
+	}
+
+	function ic_new_lead_nomail() {
+		global $wpdb;
+
+		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$wpdb->insert("wp_leads", $lead);
+		$lead_id = $wpdb->insert_id;
+
+		if($lead_id) {
+			$response = array('status' => 'Success', 'id' => $lead_id, 'msg' => 'Lead created successfully');
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+		}
+		
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_update_lead() {
+		global $wpdb;
+
+		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$wpdb->update("wp_leads", $lead, array('id' => $_GET['id']));
+		$lead_id = $wpdb->insert_id;
+
+		if($lead_id) {
+			$response = array('status' => 'Success', 'msg' => 'Lead updated successfully');
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+		}
+		
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_update_meeting_date()
@@ -550,7 +598,7 @@ class IC_agent_api{
 
 		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		$wpdb->insert("wp_leads", $lead_data);
+		$wpdb->insert("wp_leads", $lead);
 		$lead_id = $wpdb->insert_id;
 
 		if($lead_id) {

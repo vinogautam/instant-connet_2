@@ -94,11 +94,26 @@ class IC_agent_api{
 		add_action( 'wp_ajax_ic_update_meeting_date', array( &$this, 'ic_update_meeting_date') );
 		add_action( 'wp_ajax_nopriv_ic_update_meeting_date', array( &$this, 'ic_update_meeting_date') );
 
+		add_action( 'wp_ajax_ic_update_meeting_eventid', array( &$this, 'ic_update_meeting_eventid') );
+		add_action( 'wp_ajax_nopriv_ic_update_meeting_eventid', array( &$this, 'ic_update_meeting_eventid') );
+
 		add_action( 'wp_ajax_ic_new_lead_nomail', array( &$this, 'ic_new_lead_nomail') );
 		add_action( 'wp_ajax_nopriv_ic_new_lead_nomail', array( &$this, 'ic_new_lead_nomail') );
 
 		add_action( 'wp_ajax_ic_update_lead', array( &$this, 'ic_update_lead') );
 		add_action( 'wp_ajax_nopriv_ic_update_lead', array( &$this, 'ic_update_lead') );
+
+		add_action( 'wp_ajax_ic_get_active_meeting_list', array( &$this, 'ic_get_active_meeting_list') );
+		add_action( 'wp_ajax_nopriv_ic_get_active_meeting_list', array( &$this, 'ic_get_active_meeting_list') );
+	}
+
+	function ic_get_active_meeting_list() {
+		global $wpdb;
+
+		$response = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting a left join ".$wpdb->prefix . "meeting_participants b on a.id = b.meeting_id where a.meeting_date > '".date("Y-m-d H:i:s")."'");
+
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_new_lead_nomail() {
@@ -149,6 +164,18 @@ class IC_agent_api{
 		exit;
 	}
 
+	function ic_update_meeting_eventid()
+	{
+		global $wpdb;
+		
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$wpdb->insert($wpdb->prefix . "meeting", array('event_id' => $_POST['event_id']), array('id' => $_POST['id']));
+
+		die(0);
+		exit;
+	}
+
 	function ic_appointment_meeting()
 	{
 		global $wpdb;
@@ -165,7 +192,7 @@ class IC_agent_api{
 		$opentok['id'] = $meeting_id;
 		$status = $_GET['st'] ? 3 : 2;
 
-		$d = $_POST['participants'];
+		$d = (array)$_POST['participants'];
 		$wpdb->insert($wpdb->prefix . "meeting_participants", 
 			array(	'meeting_id' => $meeting_id, 
 					'meeting_date' => date("Y-m-d H:i:s"),
@@ -201,19 +228,21 @@ class IC_agent_api{
 		$opentok['id'] = $meeting_id;
 		$status = $_GET['st'] ? 3 : 2;
 
-		$d = $_POST['participants'];
-		$wpdb->insert($wpdb->prefix . "meeting_participants", 
-			array(	'meeting_id' => $meeting_id, 
-					'meeting_date' => date("Y-m-d H:i:s"),
-					'status' => $status,
-					'name' => $d['name'],
-					'email' => $d['email'],
-					'is_mobile' => $d['is_mobile'],
-					'complete_device_name' => $d['complete_device_name'],
-					'form_factor' => $d['form_factor'],
-					'mode' => $d['mode'],
-				)
-		);
+		foreach($_POST['participants'] as $d){
+			$d = (array)$d;
+			$wpdb->insert($wpdb->prefix . "meeting_participants", 
+				array(	'meeting_id' => $meeting_id, 
+						'meeting_date' => date("Y-m-d H:i:s"),
+						'status' => $status,
+						'name' => $d['name'],
+						'email' => $d['email'],
+						'is_mobile' => $d['is_mobile'],
+						'complete_device_name' => $d['complete_device_name'],
+						'form_factor' => $d['form_factor'],
+						'mode' => $d['mode'],
+					)
+			);
+		}
 		
 		$finonce = time().random(11111,99999);
 		setcookie('finonce', $finonce);

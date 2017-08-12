@@ -123,6 +123,7 @@
 			   description text NOT NULL,
 			   agent_id text NOT NULL,
 			   meeting_date datetime NOT NULL,
+			   event_id text NOT NULL,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

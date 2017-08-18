@@ -121,11 +121,19 @@ class IC_agent_api{
 
 		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		$wpdb->insert("wp_leads", $lead);
-		$lead_id = $wpdb->insert_id;
+		$resuts = $wpdb->get_results('select * from wp_leads where email = '. $lead['email']);
+		if(count($resuts)){
+			$wpdb->update("wp_leads", $lead, array('email' => $lead['email']));
+			$lead_id = $resuts[0]->id;
+			$msg = 'Lead already exist, data updated';
+		} else {
+			$wpdb->insert("wp_leads", $lead);
+			$lead_id = $wpdb->insert_id;
+			$msg = 'Lead created successfully';
+		}
 
 		if($lead_id) {
-			$response = array('status' => 'Success', 'id' => $lead_id, 'msg' => 'Lead created successfully');
+			$response = array('status' => 'Success', 'id' => $lead_id, 'msg' => $msg);
 		} else {
 			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
 		}
@@ -139,7 +147,7 @@ class IC_agent_api{
 
 		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		$wpdb->update("wp_leads", $lead, array('id' => $_GET['id']));
+		$wpdb->update("wp_leads", $lead, array('id' => $_GET['email']));
 		$lead_id = $wpdb->insert_id;
 
 		if($lead_id) {
@@ -193,18 +201,12 @@ class IC_agent_api{
 		$status = $_GET['st'] ? 3 : 2;
 
 		$d = (array)$_POST['participants'];
-		$wpdb->insert($wpdb->prefix . "meeting_participants", 
-			array(	'meeting_id' => $meeting_id, 
-					'meeting_date' => date("Y-m-d H:i:s"),
-					'status' => $status,
-					'name' => $d['name'],
-					'email' => $d['email'],
-					'is_mobile' => $d['is_mobile'],
-					'complete_device_name' => $d['complete_device_name'],
-					'form_factor' => $d['form_factor'],
-					'mode' => $d['mode'],
-				)
-		);
+
+		$d['meeting_id'] = $meeting_id;
+		$d['meeting_date'] = date("Y-m-d H:i:s");
+		$d['status'] = $status;
+
+		$wpdb->insert($wpdb->prefix . "meeting_participants", $d);
 		
 		echo json_encode(array('meeting_id' => $meeting_id));
 		
@@ -230,18 +232,11 @@ class IC_agent_api{
 
 		foreach($_POST['participants'] as $d){
 			$d = (array)$d;
-			$wpdb->insert($wpdb->prefix . "meeting_participants", 
-				array(	'meeting_id' => $meeting_id, 
-						'meeting_date' => date("Y-m-d H:i:s"),
-						'status' => $status,
-						'name' => $d['name'],
-						'email' => $d['email'],
-						'is_mobile' => $d['is_mobile'],
-						'complete_device_name' => $d['complete_device_name'],
-						'form_factor' => $d['form_factor'],
-						'mode' => $d['mode'],
-					)
-			);
+			$d['meeting_id'] = $meeting_id;
+			$d['meeting_date'] = date("Y-m-d H:i:s");
+			$d['status'] = $status;
+
+			$wpdb->insert($wpdb->prefix . "meeting_participants", $d);
 		}
 		
 		$finonce = time().random(11111,99999);

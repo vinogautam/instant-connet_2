@@ -120,8 +120,8 @@ class IC_agent_api{
 		global $wpdb;
 
 		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-
-		$resuts = $wpdb->get_results('select * from wp_leads where email = '. $lead['email']);
+		
+		$resuts = $wpdb->get_results('select * from wp_leads where email = "'. $lead['email'].'"');
 		if(count($resuts)){
 			$wpdb->update("wp_leads", $lead, array('email' => $lead['email']));
 			$lead_id = $resuts[0]->id;
@@ -239,7 +239,7 @@ class IC_agent_api{
 			$wpdb->insert($wpdb->prefix . "meeting_participants", $d);
 		}
 		
-		$finonce = time().random(11111,99999);
+		$finonce = time().rand(11111,99999);
 		setcookie('finonce', $finonce);
 
 		echo json_encode(array('meeting_id' => $meeting_id, 'finonce' => $finonce));

@@ -31,3 +31,18 @@ function opentok_token($sessionId = '')
 
 	return array('sessionId' => $sessionId, 'token' => $token);
 }
+
+function opentok_session_id() {
+	$apiObj = new OpenTok(API_KEY, API_SECRET);	
+	$session = $apiObj->createSession();
+	$sessionId = $session->getSessionId();
+	return $sessionId;
+}
+
+function opentok_generate_token($sessionID) {
+	$apiObj = new OpenTok(API_KEY, API_SECRET);
+	$token = $apiObj->generateToken($sessionID, array(
+    	'role'       => Role::MODERATOR,
+    	'expireTime' => time()+(7 * 24 * 60 * 60)));
+	return $token;
+}

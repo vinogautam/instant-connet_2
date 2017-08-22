@@ -226,7 +226,7 @@ class IC_agent_api{
 		die(0);
 		exit;
 	}
-
+	
 	function ic_instant_meeting()
 	{
 		global $wpdb;

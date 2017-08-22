@@ -219,7 +219,7 @@ class IC_agent_api{
 
 	function ic_generate_token() {
 		$opentok = opentok_token();
-		$token = array('session_id' => $opentok['sessionId'], 'token' => $opentok['token'])
+		$token = array('session_id' => $opentok['sessionId'], 'token' => $opentok['token']);
 		echo json_encode($token);	
 	}
 	

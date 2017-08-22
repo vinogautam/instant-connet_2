@@ -105,6 +105,9 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_get_active_meeting_list', array( &$this, 'ic_get_active_meeting_list') );
 		add_action( 'wp_ajax_nopriv_ic_get_active_meeting_list', array( &$this, 'ic_get_active_meeting_list') );
+		
+		add_action( 'wp_ajax_ic_generate_token', array( &$this, 'ic_generate_token') );
+		add_action( 'wp_ajax_nopriv_ic_generate_token', array( &$this, 'ic_generate_token') );
 	}
 
 	function ic_get_active_meeting_list() {
@@ -214,6 +217,12 @@ class IC_agent_api{
 		exit;
 	}
 
+	function ic_generate_token() {
+		$opentok = opentok_token();
+		$token = array('session_id' => $opentok['sessionId'], 'token' => $opentok['token'])
+		echo json_encode($token);	
+	}
+	
 	function ic_instant_meeting()
 	{
 		global $wpdb;

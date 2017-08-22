@@ -32,7 +32,7 @@ function opentok_session_id() {
 	return $sessionId;
 }
 
-function opentok_token(sessionID) {
-	$token = $apiObj->generateToken($sessionId);
+function opentok_token($sessionID) {
+	$token = $apiObj->generateToken($sessionID);
 	return $token;
 }

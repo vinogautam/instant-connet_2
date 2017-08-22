@@ -223,7 +223,7 @@ class IC_agent_api{
 	function ic_generate_token() {
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		
-		$token = opentok_token($_POST['session_id']);
+		$token = opentok_generate_token($_POST['session_id']);
 		
 		echo json_encode($token);
 		die(0);

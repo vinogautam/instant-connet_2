@@ -105,6 +105,19 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_get_active_meeting_list', array( &$this, 'ic_get_active_meeting_list') );
 		add_action( 'wp_ajax_nopriv_ic_get_active_meeting_list', array( &$this, 'ic_get_active_meeting_list') );
+
+		add_action( 'wp_ajax_ic_generate_token', array( &$this, 'ic_generate_token') );
+		add_action( 'wp_ajax_nopriv_ic_generate_token', array( &$this, 'ic_generate_token') );
+	}
+
+	function ic_generate_token() {
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$token = opentok_token(isset($_POST['session_id'])?$_POST['session_id']:'');
+		
+		echo json_encode($token);
+		die(0);
+		exit;
 	}
 
 	function ic_get_active_meeting_list() {

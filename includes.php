@@ -14,13 +14,20 @@ $autoloader = 'vendor/autoload.php';
 require($autoloader);
 
 use OpenTok\OpenTok;
+use OpenTok\Role;
 
-function opentok_token()
+function opentok_token($sessionId = '')
 {
 	$apiObj = new OpenTok(API_KEY, API_SECRET);
-	$session = $apiObj->createSession();
-	$sessionId = $session->getSessionId(); 
-	$token = $apiObj->generateToken($sessionId);
 	
+	if(!$sessionId) {
+		$session = $apiObj->createSession();
+		$sessionId = $session->getSessionId();
+	}
+	 
+	$token = $apiObj->generateToken($sessionId, array(
+    'role'       => Role::MODERATOR,
+    'expireTime' => time()+(7 * 24 * 60 * 60)));
+
 	return array('sessionId' => $sessionId, 'token' => $token);
 }

@@ -33,6 +33,7 @@ function opentok_session_id() {
 }
 
 function opentok_generate_token($sessionID) {
+	$apiObj = new OpenTok(API_KEY, API_SECRET);
 	$token = $apiObj->generateToken($sessionID, array(
     	'role'       => Role::MODERATOR,
     	'expireTime' => time()+(7 * 24 * 60 * 60));

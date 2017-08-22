@@ -29,7 +29,7 @@ function opentok_session_id() {
 	$apiObj = new OpenTok(API_KEY, API_SECRET);	
 	$session = $apiObj->createSession();
 	$sessionId = $session->getSessionId();
-	return $sessionId
+	return $sessionId;
 }
 
 function opentok_token(sessionID) {

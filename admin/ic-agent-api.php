@@ -233,7 +233,7 @@ class IC_agent_api{
 	function ic_generate_session() {
 		
 		
-		$session = opentok_session();
+		$session = opentok_session_id();
 		
 		echo json_encode($session);
 		die(0);

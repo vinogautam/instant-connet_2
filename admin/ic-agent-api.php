@@ -108,6 +108,21 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_generate_token', array( &$this, 'ic_generate_token') );
 		add_action( 'wp_ajax_nopriv_ic_generate_token', array( &$this, 'ic_generate_token') );
+
+		add_action( 'wp_ajax_ic_update_active_time', array( &$this, 'ic_update_active_time') );
+		add_action( 'wp_ajax_nopriv_ic_update_active_time', array( &$this, 'ic_update_active_time') );
+	}
+
+	function ic_update_active_time() {
+		global $wpdb;
+
+		$wpdb->update($wpdb->prefix . "meeting", 
+						array('active_time' => strtotime("now")),
+						array("id" => $_GET['id'])
+			);
+
+		die(0);
+		exit;
 	}
 
 	function ic_generate_token() {
@@ -235,10 +250,18 @@ class IC_agent_api{
 
 		$meetingId = time();
 		
-		$opentok = opentok_token();
-		
-		$wpdb->insert($wpdb->prefix . "meeting", array('agent_id' => $_POST['agent_id'], 'meeting_date' => date("Y-m-d H:i:s"), 'created' => date("Y-m-d H:i:s"), 'session_id' => $opentok['sessionId'], 'token' => $opentok['token']));
-		$meeting_id = $wpdb->insert_id;
+		$meeting = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting where (".strtotime("now")." - active_time) < 15 ");
+
+		if(count($meeting)){
+			$nm = 'existing';
+			$meeting_id = $meeting[0]->id;
+		}
+		else {
+			$opentok = opentok_token();
+			$wpdb->insert($wpdb->prefix . "meeting", array('agent_id' => $_POST['agent_id'], 'meeting_date' => date("Y-m-d H:i:s"), 'created' => date("Y-m-d H:i:s"), 'session_id' => $opentok['sessionId'], 'token' => $opentok['token']));
+			$nm = 'new';
+			$meeting_id = $wpdb->insert_id;
+		}
 		
 		$opentok['id'] = $meeting_id;
 		$status = $_GET['st'] ? 3 : 2;
@@ -255,7 +278,7 @@ class IC_agent_api{
 		$finonce = time().rand(11111,99999);
 		setcookie('finonce', $finonce);
 
-		echo json_encode(array('meeting_id' => $meeting_id, 'finonce' => $finonce));
+		echo json_encode(array('meeting_id' => $meeting_id, 'finonce' => $finonce, 'pid' => $wpdb->insert_id, 'status' => $nm));
 		
 		die(0);
 		exit;

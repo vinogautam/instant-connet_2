@@ -113,6 +113,12 @@ if (scope.$last === true) {
 		});
 	});
 
+	$interval(function(){
+		$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=ic_update_active_time&id=<?php echo $_GET['id'];?>').then(function(){
+
+			});
+	}, 10000);
+
 	window.addEventListener("beforeunload", function (e) {
 	 	//var confirmationMessage = "\o/";
 

@@ -570,8 +570,15 @@ if (scope.$last === true) {
 			$scope.chat.push({id: msg.id, time: msg.time, msg:[msg]});
 		}
 	};
-	$id = Math.round(Math.random()*100000)+''+new Date().getTime();
-	$scope.data2 = {id:$id, name: $scope.is_admin ? 'Agent' : 'user'+$id, email: 'user'+$id+'@gmail.com', msg:'', streamid:'', whiteboard:0,presentation:0,chair:0,video:0};
+	
+	<?php if(isset($participants) && $_GET['pid']) {?>
+		$id = <?php echo $_GET['pid'];?>;
+		$scope.data2 = {id:$id, name: $scope.is_admin ? 'Agent' : '<?= $participants->name ?>', email: '<?= $participants->email ?>', msg:'', streamid:'', whiteboard:0,presentation:0,chair:0,video:0};
+	<?php } else {?>
+		$id = Math.round(Math.random()*100000)+''+new Date().getTime();
+		$scope.data2 = {id:$id, name: $scope.is_admin ? 'Agent' : 'user'+$id, email: 'user'+$id+'@gmail.com', msg:'', streamid:'', whiteboard:0,presentation:0,chair:0,video:0};
+	<?php }?>
+	
 
 	$rootScope.user = {id:$scope.data2.id, name:$scope.data2.name};
 

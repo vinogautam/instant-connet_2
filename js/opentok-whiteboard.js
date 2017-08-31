@@ -112,6 +112,9 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                         });
                     }
                 }
+
+                if(st === 'presentation')
+                $rootScope.$broadcast('Presentation_changed', scope.get_image());
             };
 
             scope.erase = function () {

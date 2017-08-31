@@ -24,6 +24,11 @@ else
   global $wpdb; $results = $meeting = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting where id=".$meeting_id);
   $sessionId = $meeting->session_id; 
   $token = $meeting->token;
+
+  if(isset($_GET['pid'])){
+    $participants = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$_GET['pid']);
+  }
+
   /*if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GET['finonce'], 'finonce'))) {
     die("Invalid meeting url");
   }*/

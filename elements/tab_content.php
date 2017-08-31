@@ -96,13 +96,13 @@
    
       <li class="position-change">
         <ul>
-           <li><a ng-click="clear();" href="#" id="eraser-tool"><i class="fa fa-trash"></i></a></li>
+           <li><a ng-click="clear('presentation');" href="#" id="eraser-tool"><i class="fa fa-trash"></i></a></li>
            <li class="wb-control" ng-click="undo()"><img src="<?= IC_PLUGIN_URL; ?>dist/v2/img/tarn-left.png"></li>
            <li class="wb-control" ng-click="redo()"><img src="<?= IC_PLUGIN_URL; ?>dist/v2/img/tarn--right.png"></li>
         </ul>
       </li>
       <li class="range-slider"><img src="<?= IC_PLUGIN_URL; ?>dist/v2/img/bar.png">
-      <div class="range"><input ng-model="lineWidth" type="range" min="0" max="10" orient="vertical" /></div>
+      <div class="range"><input ng-model="$parent.$parent.$parent.lineWidth" type="range" min="0" max="10" orient="vertical" /></div>
      </li>
      <li class="color-picker">
        <ul>

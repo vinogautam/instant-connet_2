@@ -111,6 +111,37 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_update_active_time', array( &$this, 'ic_update_active_time') );
 		add_action( 'wp_ajax_nopriv_ic_update_active_time', array( &$this, 'ic_update_active_time') );
+
+		add_action( 'wp_ajax_ic_update_meeting_data', array( &$this, 'ic_update_meeting_data') );
+		add_action( 'wp_ajax_nopriv_ic_update_meeting_data', array( &$this, 'ic_update_meeting_data') );
+	}
+
+	function ic_update_meeting_data() {
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$event = (array) $_POST['event'];
+		$meeting_id = $event['what'];
+
+		$wpdb->update($wpdb->prefix . "meeting", 
+			array(
+				'event_id' => $event['id'],
+				'meeting_date' => explode('+', $event['start'])[0]
+			), 
+			array('id' => $meeting_id));
+
+		if($_POST['state'] == 'cancelled') {
+			$wpdb->update($wpdb->prefix . "meeting_participants", 
+			array(
+				'status' => 4
+			), 
+			array(
+				'id' => $meeting_id,
+				'email' => $_POST['customers']['email']
+			));
+		}
+
+		die(0);
+		exit;
 	}
 
 	function ic_update_active_time() {
@@ -194,7 +225,7 @@ class IC_agent_api{
 		
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		$wpdb->insert($wpdb->prefix . "meeting", array('meeting_date' => $_POST['meeting_date']), array('id' => $_POST['id']));
+		$wpdb->update($wpdb->prefix . "meeting", array('meeting_date' => $_POST['meeting_date']), array('id' => $_POST['id']));
 
 		die(0);
 		exit;
@@ -206,7 +237,7 @@ class IC_agent_api{
 		
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		$wpdb->insert($wpdb->prefix . "meeting", array('event_id' => $_POST['event_id']), array('id' => $_POST['id']));
+		$wpdb->update($wpdb->prefix . "meeting", array('event_id' => $_POST['event_id']), array('id' => $_POST['id']));
 
 		die(0);
 		exit;

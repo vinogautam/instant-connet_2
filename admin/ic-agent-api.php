@@ -116,6 +116,27 @@ class IC_agent_api{
 		add_action( 'wp_ajax_nopriv_ic_update_meeting_data', array( &$this, 'ic_update_meeting_data') );
 	}
 
+	function get_endorser_info(){
+		global $wpdb;
+
+		$endorser_id = $_GET['id'];
+		$blog_id = get_active_blog_for_user( $endorser_id )->blog_id;
+		$endorser = get_userdata($endorser_id);
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+
+		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$endorser_id);
+
+		$res = array(
+			'name' => $endorser->user_login,
+			'email' => $endorser->user_email,
+			'points' => $response->points,
+			'site_id' => $blog_id,
+			'agent_id' => $agent_id
+		);
+		die(0);
+		exit;
+	}
+
 	function ic_update_meeting_data() {
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
@@ -267,7 +288,7 @@ class IC_agent_api{
 
 		$wpdb->insert($wpdb->prefix . "meeting_participants", $d);
 		
-		echo json_encode(array('meeting_id' => $meeting_id));
+		echo json_encode(array('meeting_id' => $meeting_id, 'pid' => $wpdb->insert_id));
 		
 		die(0);
 		exit;
@@ -286,8 +307,7 @@ class IC_agent_api{
 		if(count($meeting)){
 			$nm = 'existing';
 			$meeting_id = $meeting[0]->id;
-		}
-		else {
+		} else {
 			$opentok = opentok_token();
 			$wpdb->insert($wpdb->prefix . "meeting", array('agent_id' => $_POST['agent_id'], 'meeting_date' => date("Y-m-d H:i:s"), 'created' => date("Y-m-d H:i:s"), 'session_id' => $opentok['sessionId'], 'token' => $opentok['token']));
 			$nm = 'new';

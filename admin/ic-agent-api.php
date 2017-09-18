@@ -114,9 +114,12 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_update_meeting_data', array( &$this, 'ic_update_meeting_data') );
 		add_action( 'wp_ajax_nopriv_ic_update_meeting_data', array( &$this, 'ic_update_meeting_data') );
+
+		add_action( 'wp_ajax_ic_get_endorser_info', array( &$this, 'ic_get_endorser_info') );
+		add_action( 'wp_ajax_nopriv_ic_get_endorser_info', array( &$this, 'ic_get_endorser_info') );
 	}
 
-	function get_endorser_info(){
+	function ic_get_endorser_info(){
 		global $wpdb;
 
 		$endorser_id = $_GET['id'];

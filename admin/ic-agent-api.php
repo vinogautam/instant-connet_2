@@ -130,7 +130,7 @@ class IC_agent_api{
 		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$endorser_id);
 
 		$res = array(
-			'name' => $endorser->user_login,
+			'name' => get_user_meta($user_id, 'first_name', true). ' '. get_user_meta($user_id, 'last_name', true),
 			'email' => $endorser->user_email,
 			'points' => $response->points,
 			'site_id' => $blog_id,
@@ -511,6 +511,8 @@ class IC_agent_api{
 			}
 			else
 			{
+				update_user_meta($user_id, 'first_name', $user['first_name']);
+				update_user_meta($user_id, 'last_name', $user['last_name']);
 				update_user_meta($user_id, 'endorser_letter', $user['endorser_letter']);
 				update_user_meta($user_id, 'endorsement_letter', $user['endorsement_letter']);
 				//$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);

@@ -2,7 +2,21 @@
 class IC_front{
 	
 	function __construct() {
-		add_action( 'wp_footer', array( &$this, 'instant_connect_chat_icon'), 100 );
+		add_action( 'wp_footer', array( &$this, 'instant_connect_embed_chat'), 100 );
+	}
+
+	function instant_connect_embed_chat()
+	{
+		?>
+		<script type="text/javascript">
+            var $fiApp = $fiApp || {};
+            $fiApp.instanceId = "singara";
+            var d = document, s = d.createElement('script'); 
+            s.type = "text/javascript";
+            s.src = "https://financialinsiders.github.io/fi-app-frontend/launch.script.js";
+            d.body.appendChild(s);
+        </script>
+		<?php
 	}
 	
 	function instant_connect_chat_icon()

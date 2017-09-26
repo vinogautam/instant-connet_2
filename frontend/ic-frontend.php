@@ -33,10 +33,14 @@ class IC_front{
 			$fiApp.siteId = localStorage.getItem('firstVisitId');
 			$fiApp.blogUrl = localStorage.getItem('firstVisitUrl');
 			$fiApp.visited_page = "<?php echo $_COOKIE['fa_surfing_page'];?>";
-            var d = document, s = d.createElement('script'); 
-            s.type = "text/javascript";
-            s.src = "//chat.app.financialinsiders.ca/fichat.script.js";
-            d.body.appendChild(s);
+
+			if($fiApp.endorserId || $fiApp.siteId){
+				var d = document, s = d.createElement('script'); 
+	            s.type = "text/javascript";
+	            s.src = "//chat.app.financialinsiders.ca/fichat.script.js";
+	            d.body.appendChild(s);
+			}
+            
 
             
         </script>

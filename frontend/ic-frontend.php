@@ -9,12 +9,36 @@ class IC_front{
 	{
 		?>
 		<script type="text/javascript">
+
+			firstVisit = localStorage.getItem('firstVisitId');
+            if(!firstVisit){
+            	localStorage.setItem('firstVisitId', '<?= get_current_blog_id(); ?>');
+            	localStorage.setItem('firstVisitUrl', '<?php echo get_site_url(); ?>');
+        	}
+
             var $fiApp = $fiApp || {};
-            $fiApp.instanceId = "singara";
+            $fiApp.instanceId = "<?php echo get_blog_option(get_current_blog_id(), 'agent_id')?>";
+            $fiApp.welcomeMsg = "<?php echo stripslashes(get_post_meta( get_the_id(), 'chat_welcome_message', true ));?>";
+
+            <?php
+            if(isset($_COOKIE['endorsement_track_link']) && isset($_COOKIE['endorsement_tracked']))
+			{
+				$track_link = explode("#&$#", base64_decode(base64_decode($_COOKIE['endorsement_track_link'])));
+				$endorser_id = $track_link[1];
+			}
+            ?>
+
+			$fiApp.endorserId = "<?php $endorser_id;?>";
+			$fiApp.page = window.location.href;
+			$fiApp.siteId = localStorage.getItem('firstVisitId');
+			$fiApp.blogUrl = localStorage.getItem('firstVisitUrl');
+			$fiApp.visited_page = "<?php echo $_COOKIE['fa_surfing_page'];?>";
             var d = document, s = d.createElement('script'); 
             s.type = "text/javascript";
-            s.src = "https://financialinsiders.github.io/fi-app-frontend/launch.script.js";
+            s.src = "//chat.app.financialinsiders.ca/fichat.script.js";
             d.body.appendChild(s);
+
+            
         </script>
 		<?php
 	}

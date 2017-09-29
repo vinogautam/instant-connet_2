@@ -136,6 +136,7 @@ class IC_agent_api{
 			'site_id' => $blog_id,
 			'agent_id' => $agent_id
 		);
+		echo json_encode($res);
 		die(0);
 		exit;
 	}

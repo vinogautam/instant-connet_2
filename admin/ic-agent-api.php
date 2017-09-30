@@ -485,12 +485,13 @@ class IC_agent_api{
 	function ic_agent_login(){
 		$creds = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		$user = wp_signon( $creds, false );
-
+		$userBlogs = get_blogs_of_user((int)$user->data->ID);
+		$siteUrl = reset($userBlogs);
 		if ( is_wp_error($user) ) {
 			$response = array('status' => 'Error', 'msg' => 'Invalid Credentials');
 		}
 		else{
-			$response = array('status' => 'Success', 'data' => $user->data, 'msg' => 'Logged in successfully');
+			$response = array('status' => 'Success', 'data' => $user->data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl->siteurl);
 		}
 		echo json_encode($response);
 		die(0);

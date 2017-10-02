@@ -117,6 +117,32 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_get_endorser_info', array( &$this, 'ic_get_endorser_info') );
 		add_action( 'wp_ajax_nopriv_ic_get_endorser_info', array( &$this, 'ic_get_endorser_info') );
+
+		add_action( 'wp_ajax_ic_auto_login', array( &$this, 'ic_endorser_auto_login') );
+		add_action( 'wp_ajax_nopriv_ic_auto_login', array( &$this, 'ic_endorser_auto_login') );
+	}
+
+	function ic_endorser_auto_login(){
+		$autologin = explode("#", base64_decode(base64_decode($_GET['autologin'])));
+		$creds = array();
+		$creds['user_login'] = $autologin[0];
+		$creds['user_password'] = $autologin[1];
+		$creds['remember'] = true;
+		$current_user = wp_signon( $creds, false );
+
+		if(!is_wp_error($current_user)) {
+			$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
+			$agent_id = get_blog_option($blog_id, 'agent_id');
+			$data = array(
+					'endorser' => $current_user,
+					'blog_id' => $blog_id,
+					'agent_id' => $agent_id,
+					'agent_avatar' => get_avatar_url($agent_id)
+				);
+			$response = array('status' => 'Success', 'data' => $data);
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+		}
 	}
 
 	function ic_get_endorser_info(){

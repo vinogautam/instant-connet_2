@@ -130,7 +130,7 @@ class IC_agent_api{
 		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$endorser_id);
 
 		$res = array(
-			'name' => get_user_meta($user_id, 'first_name', true). ' '. get_user_meta($user_id, 'last_name', true),
+			'name' => get_user_meta($endorser_id, 'first_name', true). ' '. get_user_meta($endorser_id, 'last_name', true),
 			'email' => $endorser->user_email,
 			'points' => $response->points,
 			'site_id' => $blog_id,

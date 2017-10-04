@@ -7,17 +7,16 @@ class IC_front{
 
 	function instant_connect_embed_chat()
 	{
+		
+		$siteidd = isset($_COOKIE['fi_agent_site']) ? $_COOKIE['fi_agent_site']:  get_current_blog_id();
+
+		$agent_id = get_blog_option($_COOKIE['fi_agent_site'], 'agent_id');
+		if($agent_id){
 		?>
 		<script type="text/javascript">
 
-			firstVisit = localStorage.getItem('firstVisitId');
-            if(!firstVisit){
-            	localStorage.setItem('firstVisitId', '<?= get_current_blog_id(); ?>');
-            	localStorage.setItem('firstVisitUrl', '<?php echo get_site_url(); ?>');
-        	}
-
             var $fiApp = $fiApp || {};
-            $fiApp.instanceId = "<?php echo get_blog_option(get_current_blog_id(), 'agent_id')?>";
+            $fiApp.instanceId = "<?php echo $agent_id ?>";
             $fiApp.welcomeMsg = "<?php echo stripslashes(get_post_meta( get_the_id(), 'chat_welcome_message', true ));?>";
 
             <?php
@@ -30,8 +29,8 @@ class IC_front{
 
 			$fiApp.endorserId = "<?php $endorser_id;?>";
 			$fiApp.page = window.location.href;
-			$fiApp.siteId = localStorage.getItem('firstVisitId');
-			$fiApp.blogUrl = localStorage.getItem('firstVisitUrl');
+			$fiApp.siteId = "<?php echo $siteidd;?>";
+			$fiApp.blogUrl = "<?php echo get_site_url($siteidd);?>";
 			$fiApp.visited_page = "<?php echo $_COOKIE['fa_surfing_page'];?>";
 
 			if($fiApp.endorserId || $fiApp.siteId){
@@ -45,6 +44,7 @@ class IC_front{
             
         </script>
 		<?php
+		}
 	}
 	
 	function instant_connect_chat_icon()

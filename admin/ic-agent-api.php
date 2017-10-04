@@ -387,7 +387,7 @@ class IC_agent_api{
 		global $wpdb;
 
 		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$_GET['endorser_id']);
-		$response = array('status' => 'Success', 'total_points' => $response->points);
+		$response = array('status' => 'Success', 'total_points' => $response->points ? $response->points : 0);
 		echo json_encode($response);
 		die(0);
 	}
@@ -405,7 +405,7 @@ class IC_agent_api{
 						);
 		$wpdb->insert($wpdb->prefix . "points_transaction", $data);
 		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$_POST['endorser_id']);
-		$response = array('status' => 'Success', 'total_points' => $response->points);
+		$response = array('status' => 'Success', 'total_points' => $response->points ? $response->points : 0);
 		echo json_encode($response);
 		die(0);
 	}

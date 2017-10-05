@@ -123,6 +123,8 @@ class IC_agent_api{
 	}
 
 	function ic_endorser_auto_login(){
+		global $wpdb, $ntm_mail;
+
 		$autologin = explode("#", base64_decode(base64_decode($_GET['autologin'])));
 		$creds = array();
 		$creds['user_login'] = $autologin[0];
@@ -130,11 +132,27 @@ class IC_agent_api{
 		$creds['remember'] = true;
 		$current_user = wp_signon( $creds, false );
 
+		$points = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$current_user->ID);
+
+		$endorser_letter = get_user_meta($current_user->ID, 'endorsement_letter', true);
+		if($endorser_letter)
+		{
+			$res = $wpdb->get_row("select * from ".$wpdb->prefix . "mailtemplates where id=".$endorser_letter);
+			$mailtemplate = $res->content;
+		}
+		else
+		{
+			$mailtemplate 	 	= 	$ntm_mail->get_invitation_mail ();
+			$mailtemplate = $mailtemplate['content'];
+		}
+
 		if(!is_wp_error($current_user)) {
 			$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
 			$agent_id = get_blog_option($blog_id, 'agent_id');
 			$data = array(
 					'endorser' => $current_user,
+					'points' => $points->points ? $points->points : 0,
+					'mailtemplate' => strip_tags($mailtemplate),
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
 					'agent_avatar' => get_avatar_url($agent_id)
@@ -143,6 +161,10 @@ class IC_agent_api{
 		} else {
 			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
 		}
+
+		echo json_encode($response);
+		die(0);
+		exit;
 	}
 
 	function ic_get_endorser_info(){

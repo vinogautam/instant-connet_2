@@ -6,7 +6,7 @@ class IC_agent_api{
 
 
 	    header('Access-Control-Allow-Origin: *');
-	    header('Access-Control-Allow-Methods: GET, POST');
+	    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 	    header("Access-Control-Allow-Headers: X-Requested-With");
 
 	    
@@ -152,6 +152,9 @@ class IC_agent_api{
 			$data = array(
 					'endorser' => $current_user,
 					'points' => $points->points ? $points->points : 0,
+					'fb_ref_link' => site_url().'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')),
+					'li_ref_link' => site_url().'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')),
+					'tw_ref_link' => site_url().'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')),
 					'mailtemplate' => strip_tags($mailtemplate),
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
@@ -417,7 +420,7 @@ class IC_agent_api{
 	function ic_add_points(){
 		global $wpdb;
 
-		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		$_POST = (array) json_decode(file_get_contents('php://input'));
 		$data = array(
 						'endorser_id' =>$_POST['endorser_id'],
 						'points' => $_POST['points'],

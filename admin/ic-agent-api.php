@@ -158,6 +158,7 @@ class IC_agent_api{
 					'mailtemplate' => strip_tags($mailtemplate),
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
+					'twitter_text' => get_option('twitter_text'),
 					'agent_avatar' => get_avatar_url($agent_id)
 				);
 			$response = array('status' => 'Success', 'data' => $data);

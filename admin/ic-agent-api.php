@@ -550,7 +550,7 @@ class IC_agent_api{
 	}
 
 	function ic_add_endorser(){
-		//global $ntm_mail;
+		global $ntm_mail;
 
 		$user = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		$user['role'] = 'endorser';
@@ -569,8 +569,8 @@ class IC_agent_api{
 				update_user_meta($user_id, 'last_name', $user['last_name']);
 				update_user_meta($user_id, 'endorser_letter', $user['endorser_letter']);
 				update_user_meta($user_id, 'endorsement_letter', $user['endorsement_letter']);
-				//$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);
-				//$ntm_mail->send_notification_mail($user_id);
+				$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);
+				$ntm_mail->send_notification_mail($user_id);
 
 				$response = array('status' => 'Success', 'data' => $user_id, 'msg' => 'Endorser created successfully');
 			}

@@ -25,6 +25,9 @@ class IC_agent_api{
 		add_action( 'wp_ajax_ic_send_invitation', array( &$this, 'ic_send_invitation') );
 		add_action( 'wp_ajax_nopriv_ic_send_invitation', array( &$this, 'ic_send_invitation') );
 
+		add_action( 'wp_ajax_ic_send_endorsement_invitation', array( &$this, 'ic_send_endorsement_invitation') );
+		add_action( 'wp_ajax_nopriv_ic_send_endorsement_invitation', array( &$this, 'ic_send_endorsement_invitation') );
+
 		add_action( 'wp_ajax_ic_update_endorser', array( &$this, 'ic_update_endorser') );
 		add_action( 'wp_ajax_nopriv_ic_update_endorser', array( &$this, 'ic_update_endorser') );
 
@@ -163,7 +166,7 @@ class IC_agent_api{
 				);
 			$response = array('status' => 'Success', 'data' => $data);
 		} else {
-			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+			$response = array('status' => 'Error', 'msg' => 'Invalid link!!');
 		}
 
 		echo json_encode($response);
@@ -439,6 +442,35 @@ class IC_agent_api{
 	function ic_site_pages() {
 
 		echo json_encode(array('data' => get_pages()));
+		die(0);
+	}
+
+	function ic_send_endorsement_invitation() {
+		global $wpdb;
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+
+		
+		$contact_list = $_POST['contacts'];
+		$endorse_letter = $_POST['template'];
+		foreach($contact_list as $res)
+		{
+
+			$res = (array)$res;
+			
+			$info = array(
+				"name" => $res['name'], 
+				"created" => date("Y-m-d H:i:s"), 
+				"email" => $res['email'],
+				"endorser_id" => $_POST['id'],
+				"tracker_id" => wp_generate_password( $length=12, $include_standard_special_chars=false )
+			);
+			$wpdb->insert($wpdb->prefix . "endorsements", $info);
+			$ntm_mail->send_invitation_mail($info, $_POST['id'], $wpdb->insert_id, $endorse_letter);
+		}
+		
+		update_user_meta($current_user->ID, "invitation_sent", (get_user_meta($_POST['id'], "invitation_sent", true) + count($contact_list)));
+
+
 		die(0);
 	}
 

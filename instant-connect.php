@@ -19,7 +19,7 @@
  
  global $endorsements, $ntmadmin, $ntm_mail;
  $endorsements = new Instant_Connect();
- $ntm_mail = new IC_mail_template();
+ //$ntm_mail = new IC_mail_template();
  
  Class Instant_Connect
  {

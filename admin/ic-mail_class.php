@@ -48,7 +48,7 @@ class IC_mail_template{
 		$default	=	__("<p>Hello [ENDORSER],</p><p> Invitation to join &nbsp;&nbsp;[SITE], cick auto link and join as endorser.<br> [AUTO_LOGIN_LINK]</p>
 							<p>Thank you and welcome to [SITE].</p>
 							<p>Referred Agent [AGENT]<p>
-							<p>[AGENT_EMAIL]<p>", ET_DOMAIN);
+							<p>[AGENT_EMAIL]<p>", '');
 		
 		$content = get_option('endorser_invitation_mail');
 		
@@ -71,7 +71,7 @@ class IC_mail_template{
 			$new_value	=	__("<p>Hello [ENDORSER],</p><p> Invitation to join &nbsp;&nbsp;[SITE], cick auto link and join as endorser.<br> [AUTO_LOGIN_LINK]</p>
 							<p>Thank you and welcome to [SITE].</p>
 							<p>Referred Agent [AGENT]<p>
-							<p>[AGENT_EMAIL]<p>", ET_DOMAIN);
+							<p>[AGENT_EMAIL]<p>", '');
 							
 			$subject = 'Welcome Email';
 
@@ -90,7 +90,7 @@ class IC_mail_template{
 		$default	=	__("<p>Hello [ENDORSER],</p><p>You have successfully joined with&nbsp;&nbsp;[SITE]. [AUTO_LOGIN_LINK]</p>
 							<p>Thank you and welcome to [SITE].</p>
 							<p>Referred Agent [AGENT]<p>
-							<p>[AGENT_EMAIL]<p>", ET_DOMAIN);
+							<p>[AGENT_EMAIL]<p>", '');
 		
 		$content = get_option('welcome_mail');
 		
@@ -113,7 +113,7 @@ class IC_mail_template{
 			$new_value	=	__("<p>Hello [ENDORSER],</p><p>You have successfully joined with&nbsp;&nbsp;[SITE]. [AUTO_LOGIN_LINK]</p>
 							<p>Thank you and welcome to [SITE].</p>
 							<p>Referred Agent [AGENT]<p>
-							<p>[AGENT_EMAIL]<p>", ET_DOMAIN);
+							<p>[AGENT_EMAIL]<p>", '');
 							
 			$subject = 'Welcome Email';
 
@@ -132,7 +132,7 @@ class IC_mail_template{
 		$default	=	__("<p>Hello admin,</p><p>New endorser joined in our website.
 		Referred Agent: [AGENT]<br>
 		Referred Email: [AGENT_EMAIL]</p>
-<p>Thank you and welcome to [blogname].</p>", ET_DOMAIN);
+<p>Thank you and welcome to [blogname].</p>", '');
 		
 		$content = get_option('notification_mail');
 		
@@ -155,7 +155,7 @@ class IC_mail_template{
 			$new_value	=	__("<p>Hello admin,</p><p>New endorser joined in our website.
 		Referred Agent: [AGENT]<br>
 		Referred Email: [AGENT_EMAIL]</p>
-<p>Thank you and welcome to [blogname].</p>", ET_DOMAIN);
+<p>Thank you and welcome to [blogname].</p>", '');
 			
 			$subject = 'New Endorser Joined';
 		}
@@ -183,7 +183,7 @@ and mentoring people for 20+ years, but most of all Terry enjoys helping people 
 financial planning needs. He is the real deal.
 To learn more about Terry, or register for a free consultation, click here ___________ [TRACK_LINK]. His number is 604-288-1420. I recommend you register, or give him a call right away,
 because his schedule fills up fast.
-Let me know if you have any questions,", ET_DOMAIN);
+Let me know if you have any questions,", '');
 
 		$content = get_option('invitation_mail');
 		
@@ -216,7 +216,7 @@ and mentoring people for 20+ years, but most of all Terry enjoys helping people 
 financial planning needs. He is the real deal.
 To learn more about Terry, or register for a free consultation, click here ___________ [TRACK_LINK]. His number is 604-288-1420. I recommend you register, or give him a call right away,
 because his schedule fills up fast.
-Let me know if you have any questions,", ET_DOMAIN);
+Let me know if you have any questions,", '');
 		
 			$subject = 'You are invited as Endorsement';
 		}
@@ -233,7 +233,7 @@ Let me know if you have any questions,", ET_DOMAIN);
 
 
 		$default	=	__("Hi [ENDORSER], Your covertion process is intiated. Please click below link and select your vendor. 
-		Then you will get your gift voucher. [SELECT_VENDOR_LINK].", ET_DOMAIN);
+		Then you will get your gift voucher. [SELECT_VENDOR_LINK].", '');
 
 		$content = get_option('gift_mail');
 		
@@ -255,7 +255,7 @@ Let me know if you have any questions,", ET_DOMAIN);
 		if($default) {
 
 			$new_value	=	__("Hi [ENDORSER], Your covertion process is intiated. Please click below link and select your vendor. 
-			Then you will get your gift voucher. [SELECT_VENDOR_LINK].", ET_DOMAIN);
+			Then you will get your gift voucher. [SELECT_VENDOR_LINK].", '');
 		
 			$subject = 'Gift coversion Initiated';
 		}
@@ -272,7 +272,7 @@ Let me know if you have any questions,", ET_DOMAIN);
 
 
 		$default	=	__("Hi [ENDORSER], Your agent resend gift for your converted endorsement. Please click below link and select your vendor. 
-			Then you will get your gift voucher. [SELECT_VENDOR_LINK].", ET_DOMAIN);
+			Then you will get your gift voucher. [SELECT_VENDOR_LINK].", '');
 
 		$content = get_option('regift_mail');
 		
@@ -294,7 +294,7 @@ Let me know if you have any questions,", ET_DOMAIN);
 		if($default) {
 
 			$new_value	=	__("Hi [ENDORSER], Your agent resend gift for your converted endorsement. Please click below link and select your vendor. 
-			Then you will get your gift voucher. [SELECT_VENDOR_LINK].", ET_DOMAIN);
+			Then you will get your gift voucher. [SELECT_VENDOR_LINK].", '');
 		
 			$subject = 'Get Bonus Gift';
 		}
@@ -311,7 +311,7 @@ Let me know if you have any questions,", ET_DOMAIN);
 
 
 		$default	=	__("Hi [ENDORSER], Your agent resend gift for your converted endorsement. Please click below link and select your vendor. 
-			Then you will get your gift voucher. [SELECT_VENDOR_LINK].", ET_DOMAIN);
+			Then you will get your gift voucher. [SELECT_VENDOR_LINK].", '');
 
 		$content = get_option('manualgift_mail');
 		
@@ -333,7 +333,7 @@ Let me know if you have any questions,", ET_DOMAIN);
 		if($default) {
 
 			$new_value	=	__("Hi [ENDORSER], Your agent resend gift for your converted endorsement. Please click below link and select your vendor. 
-			Then you will get your gift voucher. [SELECT_VENDOR_LINK].", ET_DOMAIN);
+			Then you will get your gift voucher. [SELECT_VENDOR_LINK].", '');
 		
 			$subject = 'Get Bonus Gift';
 		}
@@ -514,43 +514,49 @@ Let me know if you have any questions,", ET_DOMAIN);
 	function mandrip_mail($to, $subject , $message, $headers, $arr=array())
 	{
 		
-		return NTM_mail_template::send_mail($to, $subject , $message, '', '', $arr);
+		//global $ntm_mail;
+		//return $ntm_mail::send_mail($to, $subject , $message, '', '', $arr);
 
-		$option = get_option('mandrill');
+		$option = get_option('sendgrid');
 		
-		$mail = new PHPMailer;
+		$sendgrid = new SendGrid($option['api']);
+		$email = new SendGrid\Email();
 
-		$mail->IsSMTP();                                      // Set mailer to use SMTP
-		$mail->Host = 'smtp.mandrillapp.com';                 // Specify main and backup server
-		$mail->Port = 587;                                    // Set the SMTP port
-		$mail->SMTPAuth = true;                               // Enable SMTP authentication
-		$mail->Username = $option['email'];        // SMTP username
-		$mail->Password = $option['api'];           // SMTP password
-		$mail->SMTPSecure = 'tls';                            // Enable encryption, 'ssl' also accepted
 
 		if(count($arr))
 		{
-			$mail->From = $arr['email'];
-			$mail->FromName = $arr['name'];
+			$email->setFrom($arr['email']);
+			$email->setFromName($arr['name']);
 		}
 		else
 		{
-			$mail->From = 'neil@financialinsiders.ca';
-			$mail->FromName = 'FinancialInsiders.ca';
+			$email->setFrom('neil@financialinsiders.ca');
+			$email->setFromName('FinancialInsiders.ca');
 		}
-		$mail->AddAddress($to);
+		
+		$email->addTo($to);
+		$email->setHtml($message);
 
-		$mail->IsHTML(true);                                  // Set email format to HTML
+		                             
 
-		$mail->Subject = $subject;
-		$mail->Body    = $message;
+		$email->setSubject($subject);
+		//$email->Body    = $message;
 
-		if(!$mail->Send()) {
+		try {
+			//$sendgrid->send($email);
+		} catch(\SendGrid\Exception $e) {
+			echo $e->getCode();
+			foreach($e->getErrors() as $er) {
+				echo $er;
+			}
+		}
+
+		//if(!$mail->Send()) {
 		   /* echo 'Message could not be sent.';
 		   echo 'Mailer Error: ' . $mail->ErrorInfo;
 		   exit; */
-		   return false;
-		}
+		  // return false;
+		//}
 
 		//echo 'Message has been sent';
 		return true;

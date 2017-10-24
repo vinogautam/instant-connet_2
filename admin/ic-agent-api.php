@@ -123,6 +123,133 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_auto_login', array( &$this, 'ic_endorser_auto_login') );
 		add_action( 'wp_ajax_nopriv_ic_auto_login', array( &$this, 'ic_endorser_auto_login') );
+
+		add_action( 'wp_ajax_ic_new_campaign', array( &$this, 'ic_new_campaign') );
+		add_action( 'wp_ajax_nopriv_new_campaign', array( &$this, 'ic_new_campaign') );
+
+		add_action( 'wp_ajax_ic_update_campaign', array( &$this, 'ic_update_campaign') );
+		add_action( 'wp_ajax_nopriv_ic_update_campaign', array( &$this, 'ic_update_campaign') );
+
+		add_action( 'wp_ajax_ic_delete_campaign', array( &$this, 'ic_delete_campaign') );
+		add_action( 'wp_ajax_nopriv_ic_delete_campaign', array( &$this, 'ic_delete_campaign') );
+
+		add_action( 'wp_ajax_ic_campaigns', array( &$this, 'ic_campaigns') );
+		add_action( 'wp_ajax_nopriv_ic_campaigns', array( &$this, 'ic_campaigns') );
+	}
+
+	function ic_new_campaign(){
+		global $wpdb;
+
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+
+		$res = $wpdb->insert($wpdb->prefix . "campaigns", array(
+					'title' => $_POST['title'],
+					'is_default' => $_POST['is_default'],
+					'is_main_site' => is_main_site()
+				));
+		
+		if($res) {
+			$id = $wpdb->insert_id;
+			foreach ($_POST['templates'] as $key => $value) {
+				$value = (array) $value;
+				$wpdb->insert($wpdb->prefix . "campaign_templates", array(
+					'campaign_id' => $id,
+					'name' => addslashes($value['name']),
+					'template' => addslashes(nl2br($value['template'])),
+					'media' => $value['media']
+				));
+			}
+
+			$response = array('status' => 'Success', 'id' => $lead_id, 'msg' => $msg);
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+		}
+		
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_update_campaign(){
+		global $wpdb;
+
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+
+		$res = $wpdb->update($wpdb->prefix . "campaigns", array(
+					'title' => $_POST['title'],
+					'is_default' => $_POST['is_default'],
+					'is_main_site' => is_main_site()
+				), array('id' => $_POST['id']));
+		
+		if($res) {
+			$id = $wpdb->insert_id;
+			foreach ($_POST['templates'] as $key => $value) {
+				$value = (array) $value;
+				if(isset($value['id'])){
+					$wpdb->update($wpdb->prefix . "campaign_templates", array(
+						'campaign_id' => $id,
+						'name' => addslashes($value['name']),
+						'template' => addslashes(nl2br($value['template'])),
+						'media' => $value['media']
+					), array('id' => $value['id']));
+				} else {
+					$wpdb->insert($wpdb->prefix . "campaign_templates", array(
+						'campaign_id' => $id,
+						'name' => addslashes($value['name']),
+						'template' => addslashes(nl2br($value['template'])),
+						'media' => $value['media']
+					));
+				}
+			}
+
+			$response = array('status' => 'Success', 'id' => $lead_id, 'msg' => $msg);
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+		}
+		
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_delete_campaign(){
+		global $wpdb;
+
+		$wpdb->delete($wpdb->prefix . "campaigns", array( 'id' => $_GET['id'] ) );
+		$wpdb->delete($wpdb->prefix . "campaign_templates", array( 'campaign_id' => $_GET['id'] ) );
+
+		$response = array('status' => 'Success', 'msg' => 'Mail Letter template deleted successfully');
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_campaigns(){
+		global $wpdb;
+
+		$campaigns = [];
+		
+		if(!is_main_site()){
+			$results = $wpdb->get_results("select * from wp_campaigns");
+			foreach ($results as $key => $value) {
+				$value = (array) $value;
+
+				$value['templates'] = $wpdb->get_results("select * from wp_campaign_templates where campaign_id=".$value['id']);
+
+				$campaigns[] = $value;
+			}
+		}
+
+		$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns");
+		foreach ($results as $key => $value) {
+			$value = (array) $value;
+
+			$value['templates'] = $wpdb->get_results("select * from ".$wpdb->prefix . "campaign_templates where campaign_id=".$value['id']);
+
+			$campaigns[] = $value;
+		}
+
+
+		$response = array('status' => 'Success', 'data' => $campaigns);
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_endorser_auto_login(){

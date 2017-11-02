@@ -195,6 +195,7 @@
 			$sql_one = "CREATE TABLE " . $mailtemplates . "(
 			  id int(11) NOT NULL AUTO_INCREMENT,
 			   title int(11),
+			   type tinytext NOT NULL,
 			   is_default int(1),
 			   is_main_site boolean,
 			   created datetime,
@@ -213,6 +214,23 @@
 			   template text,
 			   name tinytext NOT NULL,
 			   media tinytext NOT NULL,
+			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
+
+			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+			dbDelta($sql_one);
+		}
+
+		$mailtemplates = $wpdb->prefix . "video_library";
+		
+		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){
+			$sql_one = "CREATE TABLE " . $mailtemplates . "(
+			  id int(11) NOT NULL AUTO_INCREMENT,
+			   agent_id int(11),
+			   agent_status int(1),
+			   file_name tinytext NOT NULL,
+			   file_url tinytext NOT NULL,
+			   template_type tinytext NOT NULL,
+			   created datetime,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

@@ -135,6 +135,33 @@ class IC_agent_api{
 
 		add_action( 'wp_ajax_ic_campaigns', array( &$this, 'ic_campaigns') );
 		add_action( 'wp_ajax_nopriv_ic_campaigns', array( &$this, 'ic_campaigns') );
+
+		add_action( 'wp_ajax_ic_campaigns', array( &$this, 'ic_campaigns') );
+		add_action( 'wp_ajax_nopriv_ic_campaigns', array( &$this, 'ic_campaigns') );
+	}
+
+
+	function ic_new_video(){
+		global $wpdb;
+
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+
+		$res = $wpdb->insert($wpdb->prefix . "video_library", $_POST);
+		if($res){
+		$response = array('status' => 'Success', 'id' => $wpdb->insert_id);
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+		}
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_video_list(){
+		global $wpdb;
+
+		$results = $wpdb->get_results("select * from ". $wpdb->prefix . "video_library");
+
+		$response = array('status' => 'Success', 'data' => $results);
 	}
 
 	function ic_new_campaign(){
@@ -160,7 +187,7 @@ class IC_agent_api{
 				));
 			}
 
-			$response = array('status' => 'Success', 'id' => $lead_id, 'msg' => $msg);
+			$response = array('status' => 'Success', 'id' => $id);
 		} else {
 			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
 		}
@@ -201,7 +228,7 @@ class IC_agent_api{
 				}
 			}
 
-			$response = array('status' => 'Success', 'id' => $lead_id, 'msg' => $msg);
+			$response = array('status' => 'Success', 'msg' => 'Campaign updated successfully');
 		} else {
 			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
 		}
@@ -216,7 +243,7 @@ class IC_agent_api{
 		$wpdb->delete($wpdb->prefix . "campaigns", array( 'id' => $_GET['id'] ) );
 		$wpdb->delete($wpdb->prefix . "campaign_templates", array( 'campaign_id' => $_GET['id'] ) );
 
-		$response = array('status' => 'Success', 'msg' => 'Mail Letter template deleted successfully');
+		$response = array('status' => 'Success', 'msg' => 'Campaign Letter template deleted successfully');
 		echo json_encode($response);
 		die(0);
 	}

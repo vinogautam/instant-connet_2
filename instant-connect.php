@@ -194,7 +194,7 @@
 		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){
 			$sql_one = "CREATE TABLE " . $mailtemplates . "(
 			  id int(11) NOT NULL AUTO_INCREMENT,
-			   title int(11),
+			   title tinytext NOT NULL,
 			   type tinytext NOT NULL,
 			   is_default int(1),
 			   is_main_site boolean,

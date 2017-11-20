@@ -10,141 +10,67 @@ class IC_agent_api{
 	    header("Access-Control-Allow-Headers: X-Requested-With");
 
 	    
-	    add_action( 'wp_ajax_ic_all_letter_list', array( &$this, 'ic_all_letter_list') );
-		add_action( 'wp_ajax_nopriv_ic_all_letter_list', array( &$this, 'ic_all_letter_list') );
-
-		add_action( 'wp_ajax_ic_agent_login', array( &$this, 'ic_agent_login') );
-		add_action( 'wp_ajax_nopriv_ic_agent_login', array( &$this, 'ic_agent_login') );
-
-		add_action( 'wp_ajax_ic_site_pages', array( &$this, 'ic_site_pages') );
-		add_action( 'wp_ajax_nopriv_ic_site_pages', array( &$this, 'ic_site_pages') );
-
-		add_action( 'wp_ajax_ic_add_endorser', array( &$this, 'ic_add_endorser') );
-		add_action( 'wp_ajax_nopriv_ic_add_endorser', array( &$this, 'ic_add_endorser') );
-
-		add_action( 'wp_ajax_ic_send_invitation', array( &$this, 'ic_send_invitation') );
-		add_action( 'wp_ajax_nopriv_ic_send_invitation', array( &$this, 'ic_send_invitation') );
-
-		add_action( 'wp_ajax_ic_send_endorsement_invitation', array( &$this, 'ic_send_endorsement_invitation') );
-		add_action( 'wp_ajax_nopriv_ic_send_endorsement_invitation', array( &$this, 'ic_send_endorsement_invitation') );
-
-		add_action( 'wp_ajax_ic_update_endorser', array( &$this, 'ic_update_endorser') );
-		add_action( 'wp_ajax_nopriv_ic_update_endorser', array( &$this, 'ic_update_endorser') );
-
-		add_action( 'wp_ajax_ic_endorser_list', array( &$this, 'ic_endorser_list') );
-		add_action( 'wp_ajax_nopriv_ic_endorser_list', array( &$this, 'ic_endorser_list') );
-
-		add_action( 'wp_ajax_ic_add_create_email_template', array( &$this, 'ic_add_create_email_template') );
-		add_action( 'wp_ajax_nopriv_ic_add_create_email_template', array( &$this, 'ic_add_create_email_template') );
-
-		add_action( 'wp_ajax_ic_update_email_template', array( &$this, 'ic_update_email_template') );
-		add_action( 'wp_ajax_nopriv_ic_update_email_template', array( &$this, 'ic_update_email_template') );
-
-		add_action( 'wp_ajax_ic_endorser_letter_list', array( &$this, 'ic_endorser_letter_list') );
-		add_action( 'wp_ajax_nopriv_ic_endorser_letter_list', array( &$this, 'ic_endorser_letter_list') );
-
-		add_action( 'wp_ajax_ic_endorsement_letter_list', array( &$this, 'ic_endorsement_letter_list') );
-		add_action( 'wp_ajax_nopriv_ic_endorsement_letter_list', array( &$this, 'ic_endorsement_letter_list') );
-
-		add_action( 'wp_ajax_ic_delete_endorser', array( &$this, 'ic_delete_endorser') );
-		add_action( 'wp_ajax_nopriv_ic_delete_endorser', array( &$this, 'ic_delete_endorser') );
-
-		add_action( 'wp_ajax_ic_delete_letter', array( &$this, 'ic_delete_letter') );
-		add_action( 'wp_ajax_nopriv_ic_delete_letter', array( &$this, 'ic_delete_letter') );
-
-		add_action( 'wp_ajax_ic_new_lead', array( &$this, 'ic_new_lead') );
-		add_action( 'wp_ajax_nopriv_ic_new_lead', array( &$this, 'ic_new_lead') );
-
-		add_action( 'wp_ajax_ic_new_lead_nomail', array( &$this, 'ic_new_lead_nomail') );
-		add_action( 'wp_ajax_nopriv_ic_new_lead_nomail', array( &$this, 'ic_new_lead_nomail') );
-
-		add_action( 'wp_ajax_ic_update_lead', array( &$this, 'ic_update_lead') );
-		add_action( 'wp_ajax_nopriv_ic_update_lead', array( &$this, 'ic_update_lead') );
-
-		add_action( 'wp_ajax_ic_noti_to_agent', array( &$this, 'ic_noti_to_agent') );
-		add_action( 'wp_ajax_nopriv_ic_noti_to_agent', array( &$this, 'ic_noti_to_agent') );
-
-		add_action( 'wp_ajax_ic_noti_to_user', array( &$this, 'ic_noti_to_user') );
-		add_action( 'wp_ajax_nopriv_ic_noti_to_user', array( &$this, 'ic_noti_to_user') );
-
-		add_action( 'wp_ajax_ic_resend_gift', array( &$this, 'ic_resend_gift') );
-		add_action( 'wp_ajax_nopriv_ic_resend_gift', array( &$this, 'ic_resend_gift') );
-
-		add_action( 'wp_ajax_ic_send_gift', array( &$this, 'ic_send_gift') );
-		add_action( 'wp_ajax_nopriv_ic_send_gift', array( &$this, 'ic_send_gift') );
-
-		add_action( 'wp_ajax_ic_get_sites', array( &$this, 'ic_get_sites') );
-		add_action( 'wp_ajax_nopriv_ic_get_sites', array( &$this, 'ic_get_sites') );
-
-		add_action( 'wp_ajax_ic_add_points', array( &$this, 'ic_add_points') );
-		add_action( 'wp_ajax_nopriv_ic_add_points', array( &$this, 'ic_add_points') );
-
-		add_action( 'wp_ajax_ic_get_points', array( &$this, 'ic_get_points') );
-		add_action( 'wp_ajax_nopriv_ic_get_points', array( &$this, 'ic_get_points') );
-
-		add_action( 'wp_ajax_ic_update_fb_id', array( &$this, 'ic_update_fb_id') );
-		add_action( 'wp_ajax_nopriv_ic_update_fb_id', array( &$this, 'ic_update_fb_id') );
-
-		add_action( 'wp_ajax_ic_get_fb_id', array( &$this, 'ic_get_fb_id') );
-		add_action( 'wp_ajax_nopriv_ic_get_fb_id', array( &$this, 'ic_get_fb_id') );
-
-		add_action( 'wp_ajax_ic_instant_meeting', array( &$this, 'ic_instant_meeting') );
-		add_action( 'wp_ajax_nopriv_ic_instant_meeting', array( &$this, 'ic_instant_meeting') );
-
-		add_action( 'wp_ajax_ic_appointment_meeting', array( &$this, 'ic_appointment_meeting') );
-		add_action( 'wp_ajax_nopriv_ic_appointment_meeting', array( &$this, 'ic_appointment_meeting') );
-
-		add_action( 'wp_ajax_ic_update_meeting_date', array( &$this, 'ic_update_meeting_date') );
-		add_action( 'wp_ajax_nopriv_ic_update_meeting_date', array( &$this, 'ic_update_meeting_date') );
-
-		add_action( 'wp_ajax_ic_update_meeting_eventid', array( &$this, 'ic_update_meeting_eventid') );
-		add_action( 'wp_ajax_nopriv_ic_update_meeting_eventid', array( &$this, 'ic_update_meeting_eventid') );
-
-		add_action( 'wp_ajax_ic_new_lead_nomail', array( &$this, 'ic_new_lead_nomail') );
-		add_action( 'wp_ajax_nopriv_ic_new_lead_nomail', array( &$this, 'ic_new_lead_nomail') );
-
-		add_action( 'wp_ajax_ic_update_lead', array( &$this, 'ic_update_lead') );
-		add_action( 'wp_ajax_nopriv_ic_update_lead', array( &$this, 'ic_update_lead') );
-
-		add_action( 'wp_ajax_ic_get_active_meeting_list', array( &$this, 'ic_get_active_meeting_list') );
-		add_action( 'wp_ajax_nopriv_ic_get_active_meeting_list', array( &$this, 'ic_get_active_meeting_list') );
-
-		add_action( 'wp_ajax_ic_generate_token', array( &$this, 'ic_generate_token') );
-		add_action( 'wp_ajax_nopriv_ic_generate_token', array( &$this, 'ic_generate_token') );
-
-		add_action( 'wp_ajax_ic_update_active_time', array( &$this, 'ic_update_active_time') );
-		add_action( 'wp_ajax_nopriv_ic_update_active_time', array( &$this, 'ic_update_active_time') );
-
-		add_action( 'wp_ajax_ic_update_meeting_data', array( &$this, 'ic_update_meeting_data') );
-		add_action( 'wp_ajax_nopriv_ic_update_meeting_data', array( &$this, 'ic_update_meeting_data') );
-
-		add_action( 'wp_ajax_ic_get_endorser_info', array( &$this, 'ic_get_endorser_info') );
-		add_action( 'wp_ajax_nopriv_ic_get_endorser_info', array( &$this, 'ic_get_endorser_info') );
-
-		add_action( 'wp_ajax_ic_auto_login', array( &$this, 'ic_endorser_auto_login') );
-		add_action( 'wp_ajax_nopriv_ic_auto_login', array( &$this, 'ic_endorser_auto_login') );
-
-		add_action( 'wp_ajax_ic_new_campaign', array( &$this, 'ic_new_campaign') );
-		add_action( 'wp_ajax_nopriv_new_campaign', array( &$this, 'ic_new_campaign') );
-
-		add_action( 'wp_ajax_ic_update_campaign', array( &$this, 'ic_update_campaign') );
-		add_action( 'wp_ajax_nopriv_ic_update_campaign', array( &$this, 'ic_update_campaign') );
-
-		add_action( 'wp_ajax_ic_delete_campaign', array( &$this, 'ic_delete_campaign') );
-		add_action( 'wp_ajax_nopriv_ic_delete_campaign', array( &$this, 'ic_delete_campaign') );
-
-		add_action( 'wp_ajax_ic_campaigns', array( &$this, 'ic_campaigns') );
-		add_action( 'wp_ajax_nopriv_ic_campaigns', array( &$this, 'ic_campaigns') );
-
-		add_action( 'wp_ajax_ic_campaigns', array( &$this, 'ic_campaigns') );
-		add_action( 'wp_ajax_nopriv_ic_campaigns', array( &$this, 'ic_campaigns') );
+	    $functions = array('ic_all_letter_list', 'ic_agent_login', 'ic_site_pages', 'ic_add_endorser', 'ic_send_invitation',
+	    	'ic_send_endorsement_invitation', 'ic_update_endorser', 'ic_endorser_list', 'ic_add_create_email_template',
+	    	'ic_update_email_template', 'ic_endorser_letter_list', 'ic_endorsement_letter_list',
+	    	'ic_delete_endorser', 'ic_delete_letter', 'ic_new_lead', 'ic_new_lead_nomail', 'ic_update_lead', 
+	    	'ic_noti_to_agent', 'ic_noti_to_user', 'ic_resend_gift', 'ic_send_gift', 'ic_get_sites', 
+	    	'ic_add_points', 'ic_get_points', 'ic_update_fb_id', 'ic_get_fb_id', 'ic_instant_meeting', 
+	    	'ic_appointment_meeting', 'ic_update_meeting_date', 'ic_update_meeting_eventid', 'ic_new_lead_nomail',
+	    	'ic_update_lead', 'ic_get_active_meeting_list', 'ic_generate_token', 'ic_update_active_time', 
+	    	'ic_update_meeting_data', 'ic_get_endorser_info', 'ic_endorser_auto_login', 'ic_new_campaign', 
+	    	'ic_update_campaign', 'ic_delete_campaign', 'ic_delete_campaign_letter', 'ic_campaigns', 
+	    	'ic_new_video', 'ic_video_list', 'ic_delete_video', 'ic_test_template', 'ic_get_default_campaign',
+	    	'ic_set_default_campaign'
+	    );
+		
+		foreach ($functions as $key => $value) {
+			add_action( 'wp_ajax_'.$value, array( &$this, $value) );
+			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
+		}
+	    
 	}
 
+	function ic_get_default_campaign(){
+		$response = array('status' => 'Success', 'res' => get_user_meta($_GET['user_id'], 'default_campaign', true));
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_set_default_campaign(){
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$camps = get_user_meta($_POST['user_id'], 'default_campaign', true);
+
+		$camps = $camps ? $camps : [];
+
+		$camps[$_POST['template']] = $_POST['temp_id'];
+
+		update_user_meta($_POST['user_id'], 'default_campaign', $camps);
+
+		$response = array('status' => 'Success', 'res' => get_user_meta($_POST['user_id'], 'default_campaign', true));
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_test_template(){
+		global $ntm_mail;
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$res = $ntm_mail->send_mail('neil.personalconsult@gmail.com', $_POST['name'], $_POST['template'], '', '');
+		$res = $ntm_mail->send_mail('Neil@financialinsiders.ca', $_POST['name'], $_POST['template'], '', '');
+
+		$response = array('status' => 'Success', 'res' => $res);
+		echo json_encode($response);
+		die(0);
+	}
 
 	function ic_new_video(){
 		global $wpdb;
 
-		$_POST = (array) json_decode(file_get_contents('php://input'));
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$_POST['created'] = date("Y-m-d H:i:s");
 
 		$res = $wpdb->insert($wpdb->prefix . "video_library", $_POST);
 		if($res){
@@ -156,22 +82,35 @@ class IC_agent_api{
 		die(0);
 	}
 
+	function ic_delete_video(){
+		global $wpdb;
+
+		$results = $wpdb->get_results("delete from ". $wpdb->prefix . "video_library where id=".$_GET['id']);
+
+		$response = array('status' => 'Success');
+		echo json_encode($response);
+		die(0);
+	}
+
 	function ic_video_list(){
 		global $wpdb;
 
-		$results = $wpdb->get_results("select * from ". $wpdb->prefix . "video_library");
+		$results = $wpdb->get_results("select * from ". $wpdb->prefix . "video_library where agent_id=".$_GET['agent_id']);
 
 		$response = array('status' => 'Success', 'data' => $results);
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_new_campaign(){
 		global $wpdb;
 
-		$_POST = (array) json_decode(file_get_contents('php://input'));
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
 		$res = $wpdb->insert($wpdb->prefix . "campaigns", array(
 					'title' => $_POST['title'],
-					'is_default' => $_POST['is_default'],
+					'type' => $_POST['type'],
+					//'is_default' => $_POST['is_default'],
 					'is_main_site' => is_main_site()
 				));
 		
@@ -183,7 +122,7 @@ class IC_agent_api{
 					'campaign_id' => $id,
 					'name' => addslashes($value['name']),
 					'template' => addslashes(nl2br($value['template'])),
-					'media' => $value['media']
+					'media' => $value['media'] ? $value['media'] : ''
 				));
 			}
 
@@ -199,39 +138,37 @@ class IC_agent_api{
 	function ic_update_campaign(){
 		global $wpdb;
 
-		$_POST = (array) json_decode(file_get_contents('php://input'));
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
 		$res = $wpdb->update($wpdb->prefix . "campaigns", array(
 					'title' => $_POST['title'],
-					'is_default' => $_POST['is_default'],
-					'is_main_site' => is_main_site()
+					'type' => $_POST['type']
 				), array('id' => $_POST['id']));
 		
-		if($res) {
-			$id = $wpdb->insert_id;
+		///if($res) {
+			$id = $_POST['id'];
 			foreach ($_POST['templates'] as $key => $value) {
 				$value = (array) $value;
 				if(isset($value['id'])){
 					$wpdb->update($wpdb->prefix . "campaign_templates", array(
-						'campaign_id' => $id,
 						'name' => addslashes($value['name']),
 						'template' => addslashes(nl2br($value['template'])),
-						'media' => $value['media']
+						'media' => $value['media'] ? $value['media'] : ''
 					), array('id' => $value['id']));
 				} else {
 					$wpdb->insert($wpdb->prefix . "campaign_templates", array(
 						'campaign_id' => $id,
 						'name' => addslashes($value['name']),
 						'template' => addslashes(nl2br($value['template'])),
-						'media' => $value['media']
+						'media' => $value['media'] ? $value['media'] : ''
 					));
 				}
 			}
 
 			$response = array('status' => 'Success', 'msg' => 'Campaign updated successfully');
-		} else {
+		/*} else {
 			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
-		}
+		}*/
 		
 		echo json_encode($response);
 		die(0);
@@ -248,6 +185,16 @@ class IC_agent_api{
 		die(0);
 	}
 
+	function ic_delete_campaign_letter(){
+		global $wpdb;
+
+		$wpdb->delete($wpdb->prefix . "campaign_templates", array( 'id' => $_GET['id'] ) );
+
+		$response = array('status' => 'Success', 'msg' => 'Campaign Letter template deleted successfully');
+		echo json_encode($response);
+		die(0);
+	}
+
 	function ic_campaigns(){
 		global $wpdb;
 
@@ -258,8 +205,11 @@ class IC_agent_api{
 			foreach ($results as $key => $value) {
 				$value = (array) $value;
 
-				$value['templates'] = $wpdb->get_results("select * from wp_campaign_templates where campaign_id=".$value['id']);
-
+				$templates = $wpdb->get_results("select * from wp_campaign_templates where campaign_id=".$value['id']);
+				$value['templates'] = [];
+				foreach ($templates as $key => $value2) {
+					$value['templates'][$value2->name] = $value2;
+				}
 				$campaigns[] = $value;
 			}
 		}
@@ -268,7 +218,11 @@ class IC_agent_api{
 		foreach ($results as $key => $value) {
 			$value = (array) $value;
 
-			$value['templates'] = $wpdb->get_results("select * from ".$wpdb->prefix . "campaign_templates where campaign_id=".$value['id']);
+			$templates = $wpdb->get_results("select * from ".$wpdb->prefix . "campaign_templates where campaign_id=".$value['id']);
+			$value['templates'] = [];
+			foreach ($templates as $key => $value2) {
+				$value['templates'][$value2->name] = $value2;
+			}
 
 			$campaigns[] = $value;
 		}
@@ -753,8 +707,10 @@ class IC_agent_api{
 			{
 				update_user_meta($user_id, 'first_name', $user['first_name']);
 				update_user_meta($user_id, 'last_name', $user['last_name']);
+				update_user_meta($user_id, 'phone', $user['phone']);
 				update_user_meta($user_id, 'endorser_letter', $user['endorser_letter']);
 				update_user_meta($user_id, 'endorsement_letter', $user['endorsement_letter']);
+				update_user_meta($user_id, 'campaign', $user['campaign']);
 				$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);
 				$ntm_mail->send_notification_mail($user_id);
 
@@ -773,8 +729,10 @@ class IC_agent_api{
 
 		update_user_meta($user['id'], 'endorser_letter', $user['endorser_letter']);
 		update_user_meta($user['id'], 'endorsement_letter', $user['endorsement_letter']);
+		update_user_meta($user['id'], 'phone', $user['phone']);
 		update_user_meta($user['id'], 'first_name', $user['first_name']);
 		update_user_meta($user['id'], 'last_name', $user['last_name']);
+		update_user_meta($user['id'], 'campaign', $user['campaign']);
 
 		$response = array('status' => 'Success', 'msg' => 'Endorser updated successfully');
 		echo json_encode($response);
@@ -802,6 +760,7 @@ class IC_agent_api{
 		foreach($data as $v){
 			$v = (array)$v;
 			$item = (array)$v['data'];
+			$item['id'] = $item['ID'];
 			if(!get_user_meta($item['ID'], 'imcomplete_profile', true)){
 				$item['invitation'] = get_user_meta($item['ID'], 'invitation_sent', true) 
 				? get_user_meta($item['ID'], 'invitation_sent', true) 
@@ -814,9 +773,17 @@ class IC_agent_api{
 				$result = $wpdb->get_row("select name from ". $wpdb->prefix . "mailtemplates where id=".$re);
 				$re = get_user_meta($item['ID'], 'endorsement_letter', true);
 				$result2 = $wpdb->get_row("select name from ". $wpdb->prefix . "mailtemplates where id=".$re);
+				$campaign = get_user_meta($item['ID'], 'campaign', true);
+				$result3 = $wpdb->get_row("select title from ". $wpdb->prefix . "campaigns where id=".$campaign);
 
-				$item['endorser_letter'] = ($result->name ? $result->name : 'Default') ;
-				$item['endorsement_letter'] = ($result2->name ? $result2->name : 'Default') ;
+				$item['first_name'] = get_user_meta($item['ID'], 'first_name', true);
+				$item['last_name'] = get_user_meta($item['ID'], 'last_name', true);
+				$item['phone'] = get_user_meta($item['ID'], 'phone', true);
+				$item['campaign'] = $campaign;
+
+				$item['endorser_letter_name'] = ($result->name ? $result->name : 'Default') ;
+				$item['endorsement_letter_name'] = ($result2->name ? $result2->name : 'Default') ;
+				$item['campaign_name'] = ($result3->title ? $result3->title : 'Default') ;
 
 				$newdat[] = $item;
 			}

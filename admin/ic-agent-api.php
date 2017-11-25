@@ -21,7 +21,7 @@ class IC_agent_api{
 	    	'ic_update_meeting_data', 'ic_get_endorser_info', 'ic_endorser_auto_login', 'ic_new_campaign', 
 	    	'ic_update_campaign', 'ic_delete_campaign', 'ic_delete_campaign_letter', 'ic_campaigns', 
 	    	'ic_new_video', 'ic_video_list', 'ic_delete_video', 'ic_test_template', 'ic_get_default_campaign',
-	    	'ic_set_default_campaign'
+	    	'ic_set_default_campaign', 'ic_get_template_style'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -29,6 +29,57 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_get_template_style(){
+		$mail_template_css = get_option('mail_template_css');
+
+		echo json_encode(array('css' => stripslashes(strip_tags($mail_template_css))));
+		die(0);
+	}
+
+	function ic_test_template(){
+		global $ntm_mail;
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$template = '<!DOCTYPE html>
+			<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+			<head>
+			    <meta charset="utf-8"> <!-- utf-8 works for most cases -->
+			    <meta name="viewport" content="width=device-width"> <!-- Forcing initial-scale shouldn\'t be necessary -->
+			    <meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- Use the latest (edge) version of IE rendering engine -->
+			    <meta name="x-apple-disable-message-reformatting">  <!-- Disable auto-scale in iOS 10 Mail entirely -->
+			    <title></title> <!-- The title tag shows in email notifications, like Android 4.4. --><style>';
+
+		$template .= stripslashes(strip_tags(get_option('mail_template_css')));
+
+		$template .= '</style>
+			    <!-- Progressive Enhancements : END -->
+
+			    <!-- What it does: Makes background images in 72ppi Outlook render at correct size. -->
+			    <!--[if gte mso 9]>
+			    <xml>
+			        <o:OfficeDocumentSettings>
+			            <o:AllowPNG/>
+			            <o:PixelsPerInch>96</o:PixelsPerInch>
+			        </o:OfficeDocumentSettings>
+			    </xml>
+			    <![endif]-->
+
+			</head>
+			<body width="100%" style="margin: 0; mso-line-height-rule: exactly;">';
+
+		$template .= $_POST['template'];
+
+		$template .= '</body></html>';
+
+		$res = $ntm_mail->send_mail('neil.personalconsult@gmail.com', $_POST['name'], $template, '', '');
+		$res = $ntm_mail->send_mail('Neil@financialinsiders.ca', $_POST['name'], $template, '', '');
+		$res = $ntm_mail->send_mail('dhanvel237vino@gmail.com', $_POST['name'], $template, '', '');
+
+		$response = array('status' => 'Success', 'res' => $res);
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_get_default_campaign(){
@@ -49,18 +100,6 @@ class IC_agent_api{
 		update_user_meta($_POST['user_id'], 'default_campaign', $camps);
 
 		$response = array('status' => 'Success', 'res' => get_user_meta($_POST['user_id'], 'default_campaign', true));
-		echo json_encode($response);
-		die(0);
-	}
-
-	function ic_test_template(){
-		global $ntm_mail;
-		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-
-		$res = $ntm_mail->send_mail('neil.personalconsult@gmail.com', $_POST['name'], $_POST['template'], '', '');
-		$res = $ntm_mail->send_mail('Neil@financialinsiders.ca', $_POST['name'], $_POST['template'], '', '');
-
-		$response = array('status' => 'Success', 'res' => $res);
 		echo json_encode($response);
 		die(0);
 	}
@@ -208,6 +247,7 @@ class IC_agent_api{
 				$templates = $wpdb->get_results("select * from wp_campaign_templates where campaign_id=".$value['id']);
 				$value['templates'] = [];
 				foreach ($templates as $key => $value2) {
+					$value2->template = stripslashes($value2->template);
 					$value['templates'][$value2->name] = $value2;
 				}
 				$campaigns[] = $value;
@@ -221,6 +261,7 @@ class IC_agent_api{
 			$templates = $wpdb->get_results("select * from ".$wpdb->prefix . "campaign_templates where campaign_id=".$value['id']);
 			$value['templates'] = [];
 			foreach ($templates as $key => $value2) {
+				$value2->template = stripslashes($value2->template);
 				$value['templates'][$value2->name] = $value2;
 			}
 

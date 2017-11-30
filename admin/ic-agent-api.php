@@ -21,7 +21,7 @@ class IC_agent_api{
 	    	'ic_update_meeting_data', 'ic_get_endorser_info', 'ic_endorser_auto_login', 'ic_new_campaign', 
 	    	'ic_update_campaign', 'ic_delete_campaign', 'ic_delete_campaign_letter', 'ic_campaigns', 
 	    	'ic_new_video', 'ic_video_list', 'ic_delete_video', 'ic_test_template', 'ic_get_default_campaign',
-	    	'ic_set_default_campaign', 'ic_get_template_style'
+	    	'ic_set_default_campaign', 'ic_get_template_style', 'ic_strategy'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -29,6 +29,17 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_strategy(){
+		$args = array(
+			'posts_per_page'   => -1,
+			'post_type' => 'strategy'
+		);
+		$strategy = get_posts($args);
+
+		echo json_encode($strategy);
+		die(0);
 	}
 
 	function ic_get_template_style(){
@@ -75,7 +86,7 @@ class IC_agent_api{
 
 		$res = $ntm_mail->send_mail('neil.personalconsult@gmail.com', $_POST['name'], $template, '', '');
 		$res = $ntm_mail->send_mail('Neil@financialinsiders.ca', $_POST['name'], $template, '', '');
-		$res = $ntm_mail->send_mail('dhanvel237vino@gmail.com', $_POST['name'], $template, '', '');
+		$res = $ntm_mail->send_mail('dhanavel237vino@gmail.com', $_POST['name'], $template, '', '');
 
 		$response = array('status' => 'Success', 'res' => $res);
 		echo json_encode($response);

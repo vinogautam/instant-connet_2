@@ -37,6 +37,7 @@
 		}
 		
 		add_action( 'init', 'codex_custom_init' );
+		add_action( 'init', array( &$this, 'strategy_posttype' ));
 		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_date_picker' ));
 		add_filter( 'page_template', array( &$this, 'wpa3396_page_template' ));
 		//add_action('wp_login', array( &$this, 'after_login' ), 10, 2); // We will use firebase fo this purpose
@@ -51,6 +52,43 @@
 		new IC_agent_api();
 	}
 	
+	function strategy_posttype() {
+	$labels = array(
+		'name'               => _x( 'Strategy', 'post type general name', 'your-plugin-textdomain' ),
+		'singular_name'      => _x( 'Strategy', 'post type singular name', 'your-plugin-textdomain' ),
+		'menu_name'          => _x( 'Strategies', 'admin menu', 'your-plugin-textdomain' ),
+		'name_admin_bar'     => _x( 'Strategy', 'add new on admin bar', 'your-plugin-textdomain' ),
+		'add_new'            => _x( 'Add New', 'strategy', 'your-plugin-textdomain' ),
+		'add_new_item'       => __( 'Add New Strategy', 'your-plugin-textdomain' ),
+		'new_item'           => __( 'New Strategy', 'your-plugin-textdomain' ),
+		'edit_item'          => __( 'Edit Strategy', 'your-plugin-textdomain' ),
+		'view_item'          => __( 'View Strategy', 'your-plugin-textdomain' ),
+		'all_items'          => __( 'All Strategies', 'your-plugin-textdomain' ),
+		'search_items'       => __( 'Search Strategies', 'your-plugin-textdomain' ),
+		'parent_item_colon'  => __( 'Parent Strategies:', 'your-plugin-textdomain' ),
+		'not_found'          => __( 'No Strategies found.', 'your-plugin-textdomain' ),
+		'not_found_in_trash' => __( 'No Strategies found in Trash.', 'your-plugin-textdomain' )
+	);
+
+	$args = array(
+		'labels'             => $labels,
+        'description'        => __( 'Description.', 'your-plugin-textdomain' ),
+		'public'             => true,
+		'publicly_queryable' => true,
+		'show_ui'            => true,
+		'show_in_menu'       => true,
+		'query_var'          => true,
+		'rewrite'            => array( 'slug' => 'strategy' ),
+		'capability_type'    => 'post',
+		'has_archive'        => true,
+		'hierarchical'       => false,
+		'menu_position'      => null,
+		'supports'           => array( 'title', 'editor' )
+	);
+
+	register_post_type( 'strategy', $args );
+}
+
 	function ic_meta_boxes() {
 	    add_meta_box( 'ic_meta_boxes', __( 'Instant Connect Settings', 'textdomain' ), array( &$this, 'ic_meta_boxes_callback'), 'page' );
 	}
@@ -198,6 +236,7 @@
 			   type tinytext NOT NULL,
 			   is_default int(1),
 			   is_main_site boolean,
+			   strategy int(11),
 			   created datetime,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 

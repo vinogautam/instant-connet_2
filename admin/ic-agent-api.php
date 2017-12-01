@@ -36,7 +36,10 @@ class IC_agent_api{
 			'posts_per_page'   => -1,
 			'post_type' => 'strategy'
 		);
-		$strategy = get_posts($args);
+		function strategy_format($a){
+		return array('id' => $a->ID, 'title' => $a->post_title, 'link' => stripslashes($a->post_content));
+		}
+		$strategy = array_map("strategy_format", get_posts($args));
 
 		echo json_encode($strategy);
 		die(0);
@@ -161,7 +164,8 @@ class IC_agent_api{
 					'title' => $_POST['title'],
 					'type' => $_POST['type'],
 					//'is_default' => $_POST['is_default'],
-					'is_main_site' => is_main_site()
+					'is_main_site' => is_main_site(),
+					'strategy' => $_POST['strategy']
 				));
 		
 		if($res) {
@@ -192,7 +196,8 @@ class IC_agent_api{
 
 		$res = $wpdb->update($wpdb->prefix . "campaigns", array(
 					'title' => $_POST['title'],
-					'type' => $_POST['type']
+					'type' => $_POST['type'],
+					'strategy' => $_POST['strategy']
 				), array('id' => $_POST['id']));
 		
 		///if($res) {

@@ -269,6 +269,7 @@
 			   file_name tinytext NOT NULL,
 			   file_url tinytext NOT NULL,
 			   template_type tinytext NOT NULL,
+			   status_message text,
 			   created datetime,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 

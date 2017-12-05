@@ -21,7 +21,8 @@ class IC_agent_api{
 	    	'ic_update_meeting_data', 'ic_get_endorser_info', 'ic_endorser_auto_login', 'ic_new_campaign', 
 	    	'ic_update_campaign', 'ic_delete_campaign', 'ic_delete_campaign_letter', 'ic_campaigns', 
 	    	'ic_new_video', 'ic_video_list', 'ic_delete_video', 'ic_test_template', 'ic_get_default_campaign',
-	    	'ic_set_default_campaign', 'ic_get_template_style', 'ic_strategy'
+	    	'ic_set_default_campaign', 'ic_get_template_style', 'ic_strategy', 'ic_update_video', 'ic_video_by_id',
+	    	'ic_video_message', 'ic_video_message_delete', 'ic_video_message_update'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -118,6 +119,48 @@ class IC_agent_api{
 		die(0);
 	}
 
+	function ic_video_message(){
+		global $wpdb;
+
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$_POST['created'] = date("Y-m-d H:i:s");
+
+		$res = $wpdb->insert($wpdb->prefix . "video_message", $_POST);
+		if($res){
+		$response = array('status' => 'Success', 'id' => $wpdb->insert_id);
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+		}
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_video_message_delete(){
+		global $wpdb;
+
+		$results = $wpdb->get_results("delete from ". $wpdb->prefix . "video_message where id=".$_GET['id']);
+
+		$response = array('status' => 'Success');
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_video_message_update(){
+		global $wpdb;
+
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$res = $wpdb->insert($wpdb->prefix . "video_message", $_POST, $_GET['id']);
+		if($res){
+		$response = array('status' => 'Success');
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+		}
+		echo json_encode($response);
+		die(0);
+	}
+
 	function ic_new_video(){
 		global $wpdb;
 
@@ -135,6 +178,21 @@ class IC_agent_api{
 		die(0);
 	}
 
+	function ic_update_video(){
+		global $wpdb;
+
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$res = $wpdb->update($wpdb->prefix . "video_library", $_POST, $_GET['id']);
+		if($res){
+		$response = array('status' => 'Success');
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+		}
+		echo json_encode($response);
+		die(0);
+	}
+
 	function ic_delete_video(){
 		global $wpdb;
 
@@ -145,12 +203,32 @@ class IC_agent_api{
 		die(0);
 	}
 
+	function ic_video_by_id(){
+		global $wpdb;
+
+		$results = $wpdb->get_row("select * from ". $wpdb->prefix . "video_library where id=".$_GET['id']);
+
+		$data = (array) $results;
+		$data['messages'] = $wpdb->get_row("select * from ". $wpdb->prefix . "video_message where video_id=".$data['id']);
+
+		$response = array('status' => 'Success', 'data' => $data);
+		echo json_encode($response);
+		die(0);
+	}
+
 	function ic_video_list(){
 		global $wpdb;
 
 		$results = $wpdb->get_results("select * from ". $wpdb->prefix . "video_library where agent_id=".$_GET['agent_id']);
 
-		$response = array('status' => 'Success', 'data' => $results);
+		$data = [];
+
+		foreach ($results as $key => $value) {
+			$val = (array) $value;
+			$val['messages'] = $wpdb->get_row("select * from ". $wpdb->prefix . "video_message where video_id=".$val['id']);
+		}
+
+		$response = array('status' => 'Success', 'data' => $data);
 		echo json_encode($response);
 		die(0);
 	}

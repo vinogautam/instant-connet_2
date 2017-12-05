@@ -269,6 +269,19 @@
 			   file_name tinytext NOT NULL,
 			   file_url tinytext NOT NULL,
 			   template_type tinytext NOT NULL,
+			   created datetime,
+			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
+
+			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+			dbDelta($sql_one);
+		}
+
+		$mailtemplates = $wpdb->prefix . "video_message";
+		
+		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){
+			$sql_one = "CREATE TABLE " . $mailtemplates . "(
+			  id int(11) NOT NULL AUTO_INCREMENT,
+			   video_id int(11),
 			   status_message text,
 			   created datetime,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";

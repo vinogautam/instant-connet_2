@@ -283,6 +283,7 @@
 			  id int(11) NOT NULL AUTO_INCREMENT,
 			   video_id int(11),
 			   status_message text,
+			   message_type tinytext NOT NULL,
 			   created datetime,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 

@@ -22,7 +22,7 @@ class IC_agent_api{
 	    	'ic_update_campaign', 'ic_delete_campaign', 'ic_delete_campaign_letter', 'ic_campaigns', 
 	    	'ic_new_video', 'ic_video_list', 'ic_delete_video', 'ic_test_template', 'ic_get_default_campaign',
 	    	'ic_set_default_campaign', 'ic_get_template_style', 'ic_strategy', 'ic_update_video', 'ic_video_by_id',
-	    	'ic_video_message', 'ic_video_message_delete', 'ic_video_message_update'
+	    	'ic_video_message', 'ic_video_message_delete', 'ic_video_message_update', 'ic_message_by_type'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -139,7 +139,17 @@ class IC_agent_api{
 	function ic_video_message_delete(){
 		global $wpdb;
 
-		$results = $wpdb->get_results("delete from ". $wpdb->prefix . "video_message where id=".$_GET['id']);
+		$results = $wpdb->delete($wpdb->prefix . "video_message", array('id' => $_GET['id']));
+
+		$response = array('status' => 'Success');
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_message_by_type(){
+		global $wpdb;
+
+		$results = $wpdb->get_results("select * from ". $wpdb->prefix . "video_message where message_type='".$_GET['type']."'");
 
 		$response = array('status' => 'Success');
 		echo json_encode($response);
@@ -196,7 +206,7 @@ class IC_agent_api{
 	function ic_delete_video(){
 		global $wpdb;
 
-		$results = $wpdb->get_results("delete from ". $wpdb->prefix . "video_library where id=".$_GET['id']);
+		$results = $wpdb->delete($wpdb->prefix . "video_library", array("id" => $_GET['id']));
 
 		$response = array('status' => 'Success');
 		echo json_encode($response);
@@ -209,7 +219,7 @@ class IC_agent_api{
 		$results = $wpdb->get_row("select * from ". $wpdb->prefix . "video_library where id=".$_GET['id']);
 
 		$data = (array) $results;
-		$data['messages'] = $wpdb->get_row("select * from ". $wpdb->prefix . "video_message where video_id=".$data['id']);
+		$data['messages'] = $wpdb->get_results("select * from ". $wpdb->prefix . "video_message where video_id=".$data['id']);
 
 		$response = array('status' => 'Success', 'data' => $data);
 		echo json_encode($response);
@@ -225,7 +235,7 @@ class IC_agent_api{
 
 		foreach ($results as $key => $value) {
 			$val = (array) $value;
-			$val['messages'] = $wpdb->get_row("select * from ". $wpdb->prefix . "video_message where video_id=".$val['id']);
+			$val['messages'] = $wpdb->get_results("select * from ". $wpdb->prefix . "video_message where video_id=".$val['id']);
 		}
 
 		$response = array('status' => 'Success', 'data' => $data);

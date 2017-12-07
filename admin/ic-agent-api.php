@@ -236,6 +236,7 @@ class IC_agent_api{
 		foreach ($results as $key => $value) {
 			$val = (array) $value;
 			$val['messages'] = $wpdb->get_results("select * from ". $wpdb->prefix . "video_message where video_id=".$val['id']);
+			$data[] = $val;
 		}
 
 		$response = array('status' => 'Success', 'data' => $data);

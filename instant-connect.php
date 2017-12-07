@@ -38,6 +38,7 @@
 		
 		add_action( 'init', 'codex_custom_init' );
 		add_action( 'init', array( &$this, 'strategy_posttype' ));
+		add_action( 'add_meta_boxes', array( &$this, 'ic_strategy_link' ));
 		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_date_picker' ));
 		add_filter( 'page_template', array( &$this, 'wpa3396_page_template' ));
 		//add_action('wp_login', array( &$this, 'after_login' ), 10, 2); // We will use firebase fo this purpose
@@ -83,7 +84,7 @@
 		'has_archive'        => true,
 		'hierarchical'       => false,
 		'menu_position'      => null,
-		'supports'           => array( 'title', 'editor' )
+		'supports'           => array( 'title' )
 	);
 
 	register_post_type( 'strategy', $args );
@@ -126,8 +127,23 @@
 	    <?php
 	}
 
+	function ic_strategy_link(){
+		add_meta_box( 'ic_meta_boxes', __( 'Strategy link', 'textdomain' ), array( &$this, 'ic_strategy_link_callback'), 'strategy' );
+	}
+
+	function ic_strategy_link_callback( $post ) {
+	    
+	    $strategy_link = get_post_meta($post->ID, 'strategy_link', true);
+	    ?>
+	    <div id="titlediv">
+	    	<input type="text" id="title" name="strategy_link" value="<?= isset($strategy_link) ? $strategy_link : '';?>">
+	    </div>
+	    <?php
+	}
+
 	function ic_save_meta_box( $post_id ) {
 	    update_post_meta($post_id, 'instant_connect_settings', $_POST['instant_connect_settings']);
+	    update_post_meta($post_id, 'strategy_link', $_POST['strategy_link']);
 	}
 
 	function after_login($user_login, $user)
@@ -289,6 +305,15 @@
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 			dbDelta($sql_one);
+		}
+
+		$check_already_exist = !get_blog_option(get_current_blog_id(), 'strategy_link_created');
+
+		if($check_already_exist){
+			$strategy = array('post_title' => 'Online Consultation', 'post_content' => '', 'post_type' => 'strategy', 'post_status' => 'publish');
+			$sid = wp_insert_post( $strategy);
+			update_post_meta($sid, 'strategy_link', site_url());
+			add_blog_option(get_current_blog_id(), 'strategy_link_created', 1 );
 		}
 	}
 	

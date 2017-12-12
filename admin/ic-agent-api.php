@@ -254,7 +254,11 @@ class IC_agent_api{
 					'type' => $_POST['type'],
 					//'is_default' => $_POST['is_default'],
 					'is_main_site' => is_main_site(),
-					'strategy' => $_POST['strategy']
+					'strategy' => $_POST['strategy'],
+					'facebook' => $_POST['facebook'],
+					'twitter' => $_POST['twitter'],
+					'linkedin' => $_POST['linkedin'],
+					'gplus' => $_POST['gplus']
 				));
 		
 		if($res) {
@@ -857,6 +861,7 @@ class IC_agent_api{
 				update_user_meta($user_id, 'endorser_letter', $user['endorser_letter']);
 				update_user_meta($user_id, 'endorsement_letter', $user['endorsement_letter']);
 				update_user_meta($user_id, 'campaign', $user['campaign']);
+				update_user_meta($user_id, 'social_campaign', $user['social_campaign']);
 				$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);
 				$ntm_mail->send_notification_mail($user_id);
 
@@ -879,7 +884,7 @@ class IC_agent_api{
 		update_user_meta($user['id'], 'first_name', $user['first_name']);
 		update_user_meta($user['id'], 'last_name', $user['last_name']);
 		update_user_meta($user['id'], 'campaign', $user['campaign']);
-
+		update_user_meta($user['id'], 'social_campaign', $user['social_campaign']);
 		$response = array('status' => 'Success', 'msg' => 'Endorser updated successfully');
 		echo json_encode($response);
 		die(0);
@@ -921,15 +926,19 @@ class IC_agent_api{
 				$result2 = $wpdb->get_row("select name from ". $wpdb->prefix . "mailtemplates where id=".$re);
 				$campaign = get_user_meta($item['ID'], 'campaign', true);
 				$result3 = $wpdb->get_row("select title from ". $wpdb->prefix . "campaigns where id=".$campaign);
+				$social_campaign = get_user_meta($item['ID'], 'social_campaign', true);
+				$result4 = $wpdb->get_row("select title from ". $wpdb->prefix . "campaigns where id=".$social_campaign);
 
 				$item['first_name'] = get_user_meta($item['ID'], 'first_name', true);
 				$item['last_name'] = get_user_meta($item['ID'], 'last_name', true);
 				$item['phone'] = get_user_meta($item['ID'], 'phone', true);
 				$item['campaign'] = $campaign;
+				$item['social_campaign'] = $social_campaign;
 
 				$item['endorser_letter_name'] = ($result->name ? $result->name : 'Default') ;
 				$item['endorsement_letter_name'] = ($result2->name ? $result2->name : 'Default') ;
 				$item['campaign_name'] = ($result3->title ? $result3->title : 'Default') ;
+				$item['social_ampaign_name'] = ($result4->title ? $result4->title : 'Default') ;
 
 				$newdat[] = $item;
 			}

@@ -22,7 +22,8 @@ class IC_agent_api{
 	    	'ic_update_campaign', 'ic_delete_campaign', 'ic_delete_campaign_letter', 'ic_campaigns', 
 	    	'ic_new_video', 'ic_video_list', 'ic_delete_video', 'ic_test_template', 'ic_get_default_campaign',
 	    	'ic_set_default_campaign', 'ic_get_template_style', 'ic_strategy', 'ic_update_video', 'ic_video_by_id',
-	    	'ic_video_message', 'ic_video_message_delete', 'ic_video_message_update', 'ic_message_by_type'
+	    	'ic_video_message', 'ic_video_message_delete', 'ic_video_message_update', 'ic_message_by_type',
+	    	'test_email'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -30,6 +31,12 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function test_email(){
+		global $ntm_mail;
+		$ntm_mail->send_welcome_mail('dhanavel237vino@gmail.com', $_GET['id'], 'sdfsf#dfsdf');
+		die(0);
 	}
 
 	function ic_strategy(){
@@ -56,6 +63,8 @@ class IC_agent_api{
 	function ic_test_template(){
 		global $ntm_mail;
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$_POST['name'] = isset($_POST['name']) ? $_POST['name'] : 'Test Campaign Template';
 
 		$template = '<!DOCTYPE html>
 			<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -84,7 +93,7 @@ class IC_agent_api{
 			</head>
 			<body width="100%" style="margin: 0; mso-line-height-rule: exactly;">';
 
-		$template .= $_POST['template'];
+		$template .= stripslashes($_POST['template']);
 
 		$template .= '</body></html>';
 
@@ -356,7 +365,7 @@ class IC_agent_api{
 				$templates = $wpdb->get_results("select * from wp_campaign_templates where campaign_id=".$value['id']);
 				$value['templates'] = [];
 				foreach ($templates as $key => $value2) {
-					$value2->template = stripslashes($value2->template);
+					$value2->template = str_replace("<br />", "", stripslashes(stripslashes($value2->template)));
 					$value['templates'][$value2->name] = $value2;
 				}
 				$campaigns[] = $value;
@@ -370,7 +379,7 @@ class IC_agent_api{
 			$templates = $wpdb->get_results("select * from ".$wpdb->prefix . "campaign_templates where campaign_id=".$value['id']);
 			$value['templates'] = [];
 			foreach ($templates as $key => $value2) {
-				$value2->template = stripslashes($value2->template);
+				$value2->template = str_replace("<br />", "", stripslashes(stripslashes($value2->template)));
 				$value['templates'][$value2->name] = $value2;
 			}
 

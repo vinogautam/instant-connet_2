@@ -18,7 +18,7 @@ class IC_agent_api{
 	    	'ic_add_points', 'ic_get_points', 'ic_update_fb_id', 'ic_get_fb_id', 'ic_instant_meeting', 
 	    	'ic_appointment_meeting', 'ic_update_meeting_date', 'ic_update_meeting_eventid', 'ic_new_lead_nomail',
 	    	'ic_update_lead', 'ic_get_active_meeting_list', 'ic_generate_token', 'ic_update_active_time', 
-	    	'ic_update_meeting_data', 'ic_get_endorser_info', 'ic_endorser_auto_login', 'ic_new_campaign', 
+	    	'ic_update_meeting_data', 'ic_get_endorser_info', 'ic_auto_login', 'ic_new_campaign', 
 	    	'ic_update_campaign', 'ic_delete_campaign', 'ic_delete_campaign_letter', 'ic_campaigns', 
 	    	'ic_new_video', 'ic_video_list', 'ic_delete_video', 'ic_test_template', 'ic_get_default_campaign',
 	    	'ic_set_default_campaign', 'ic_get_template_style', 'ic_strategy', 'ic_update_video', 'ic_video_by_id',
@@ -45,7 +45,7 @@ class IC_agent_api{
 			'post_type' => 'strategy'
 		);
 		function strategy_format($a){
-		return array('id' => $a->ID, 'title' => $a->post_title, 'link' => stripslashes($a->post_content));
+		return array('id' => $a->ID, 'title' => $a->post_title, 'link' => stripslashes(get_post_meta($a->ID, 'strategy_link', true)));
 		}
 		$strategy = array_map("strategy_format", get_posts($args));
 
@@ -392,7 +392,7 @@ class IC_agent_api{
 		die(0);
 	}
 
-	function ic_endorser_auto_login(){
+	function ic_auto_login(){
 		global $wpdb, $ntm_mail;
 
 		$autologin = explode("#", base64_decode(base64_decode($_GET['autologin'])));
@@ -404,7 +404,7 @@ class IC_agent_api{
 
 		$points = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$current_user->ID);
 
-		$endorser_letter = get_user_meta($current_user->ID, 'endorsement_letter', true);
+		/*$endorser_letter = get_user_meta($current_user->ID, 'endorsement_letter', true);
 		if($endorser_letter)
 		{
 			$res = $wpdb->get_row("select * from ".$wpdb->prefix . "mailtemplates where id=".$endorser_letter);
@@ -414,7 +414,15 @@ class IC_agent_api{
 		{
 			$mailtemplate 	 	= 	$ntm_mail->get_invitation_mail ();
 			$mailtemplate = $mailtemplate['content'];
-		}
+		}*/
+
+		$campaign = get_user_meta($current_user->ID, 'campaign', true);
+		$templates = $wpdb->get_row("select * from wp_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
+
+		$subject = 'Endorser Invitation';
+		$content = str_replace("<br />", "", stripslashes(stripslashes($templates->template)));
+
+		$mailtemplate = '<html><head><style>'.stripslashes(strip_tags(get_option('mail_template_css'))).'</style></head><body>'.$content.'</body></html>';
 
 		if(!is_wp_error($current_user)) {
 			$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
@@ -425,7 +433,7 @@ class IC_agent_api{
 					'fb_ref_link' => site_url().'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')),
 					'li_ref_link' => site_url().'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')),
 					'tw_ref_link' => site_url().'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')),
-					'mailtemplate' => strip_tags($mailtemplate),
+					'mailtemplate' => $mailtemplate,
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
 					'twitter_text' => get_option('twitter_text'),
@@ -713,12 +721,21 @@ class IC_agent_api{
 	}
 
 	function ic_send_endorsement_invitation() {
-		global $wpdb;
+		global $wpdb, $ntm_mail;
 		$_POST = (array) json_decode(file_get_contents('php://input'));
 
 		
 		$contact_list = $_POST['contacts'];
-		$endorse_letter = $_POST['template'];
+		$notes = $_POST['template'];
+
+		$campaign = get_user_meta($_POST['id'], 'campaign', true);
+		$templates = $wpdb->get_row("select * from wp_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
+
+		$subject = 'Endorser Invitation';
+		$content = str_ireplace("<br />", "", stripslashes(stripslashes($templates->template)));
+		$content = str_ireplace("[NOTES]", $notes, $content);
+		$endorse_letter = $content;
+
 		foreach($contact_list as $res)
 		{
 
@@ -735,7 +752,7 @@ class IC_agent_api{
 			$ntm_mail->send_invitation_mail($info, $_POST['id'], $wpdb->insert_id, $endorse_letter);
 		}
 		
-		update_user_meta($current_user->ID, "invitation_sent", (get_user_meta($_POST['id'], "invitation_sent", true) + count($contact_list)));
+		update_user_meta($_POST['id'], "invitation_sent", (get_user_meta($_POST['id'], "invitation_sent", true) + count($contact_list)));
 
 
 		die(0);

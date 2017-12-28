@@ -427,16 +427,24 @@ class IC_agent_api{
 		if(!is_wp_error($current_user)) {
 			$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
 			$agent_id = get_blog_option($blog_id, 'agent_id');
+
+			$campaign = get_user_meta($current_user->ID, 'campaign', true);
+			$dcampaign = $wpdb->get_row("select * from campaigns where id=".$campaign);
+			$pagelink = get_post_meta($dcampaign->strategy, 'strategy_link', true);
+
 			$data = array(
 					'endorser' => $current_user,
 					'points' => $points->points ? $points->points : 0,
-					'fb_ref_link' => site_url().'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')),
-					'li_ref_link' => site_url().'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')),
-					'tw_ref_link' => site_url().'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')),
+					'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')),
+					'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')),
+					'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')),
 					'mailtemplate' => $mailtemplate,
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
 					'twitter_text' => get_option('twitter_text'),
+					'fb_text' => $dcampaign->facebook,
+					'tw_text' => $dcampaign->twitter,
+					'li_text' => $dcampaign->linkedin,
 					'agent_avatar' => get_avatar_url($agent_id)
 				);
 			$response = array('status' => 'Success', 'data' => $data);

@@ -18,7 +18,8 @@ class IC_front{
             var $fiApp = $fiApp || {};
             $fiApp.instanceId = "<?php echo $agent_id ?>";
             $fiApp.welcomeMsg = "<?php echo stripslashes(get_post_meta( get_the_id(), 'chat_welcome_message', true ));?>";
-
+	    $fiApp.video = "<?php echo $_GET['video']; ?>";
+			
             <?php
             if(isset($_COOKIE['endorsement_track_link']) && isset($_COOKIE['endorsement_tracked']))
 			{

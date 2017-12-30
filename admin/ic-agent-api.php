@@ -429,7 +429,7 @@ class IC_agent_api{
 			$agent_id = get_blog_option($blog_id, 'agent_id');
 
 			$campaign = get_user_meta($current_user->ID, 'campaign', true);
-			$dcampaign = $wpdb->get_row("select * from campaigns where id=".$campaign);
+			$dcampaign = $wpdb->get_row("select * from wp_campaigns where id=".$campaign);
 			$pagelink = get_post_meta($dcampaign->strategy, 'strategy_link', true);
 
 			$templates = $wpdb->get_row("select * from wp_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);

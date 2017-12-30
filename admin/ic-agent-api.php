@@ -432,12 +432,16 @@ class IC_agent_api{
 			$dcampaign = $wpdb->get_row("select * from campaigns where id=".$campaign);
 			$pagelink = get_post_meta($dcampaign->strategy, 'strategy_link', true);
 
+			$templates = $wpdb->get_row("select * from wp_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
+
+			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
+
 			$data = array(
 					'endorser' => $current_user,
 					'points' => $points->points ? $points->points : 0,
-					'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')),
-					'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')),
-					'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')),
+					'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')).'&video='.$video,
+					'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')).'&video='.$video,
+					'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')).'&video='.$video,
 					'mailtemplate' => $mailtemplate,
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
@@ -892,6 +896,7 @@ class IC_agent_api{
 				update_user_meta($user_id, 'first_name', $user['first_name']);
 				update_user_meta($user_id, 'last_name', $user['last_name']);
 				update_user_meta($user_id, 'phone', $user['phone']);
+				update_user_meta($user_id, 'video', $user['video']);
 				update_user_meta($user_id, 'endorser_letter', $user['endorser_letter']);
 				update_user_meta($user_id, 'endorsement_letter', $user['endorsement_letter']);
 				update_user_meta($user_id, 'campaign', $user['campaign']);
@@ -918,6 +923,7 @@ class IC_agent_api{
 		update_user_meta($user['id'], 'first_name', $user['first_name']);
 		update_user_meta($user['id'], 'last_name', $user['last_name']);
 		update_user_meta($user['id'], 'campaign', $user['campaign']);
+		update_user_meta($user['id'], 'video', $user['video']);
 		update_user_meta($user['id'], 'social_campaign', $user['social_campaign']);
 		$response = array('status' => 'Success', 'msg' => 'Endorser updated successfully');
 		echo json_encode($response);
@@ -966,6 +972,7 @@ class IC_agent_api{
 				$item['first_name'] = get_user_meta($item['ID'], 'first_name', true);
 				$item['last_name'] = get_user_meta($item['ID'], 'last_name', true);
 				$item['phone'] = get_user_meta($item['ID'], 'phone', true);
+				$item['video'] = get_user_meta($item['ID'], 'video', true);
 				$item['campaign'] = $campaign;
 				$item['social_campaign'] = $social_campaign;
 

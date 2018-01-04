@@ -273,6 +273,8 @@
 			   template text,
 			   name tinytext NOT NULL,
 			   media tinytext NOT NULL,
+			   subject tinytext NOT NULL,
+			   preheader_text text,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

@@ -278,7 +278,9 @@ class IC_agent_api{
 					'campaign_id' => $id,
 					'name' => addslashes($value['name']),
 					'template' => addslashes(nl2br($value['template'])),
-					'media' => $value['media'] ? $value['media'] : ''
+					'media' => $value['media'] ? $value['media'] : '',
+					'subject' => addslashes($value['subject']),
+					'preheader_text' => addslashes($value['preheader_text'])
 				));
 			}
 
@@ -310,14 +312,18 @@ class IC_agent_api{
 					$wpdb->update($wpdb->prefix . "campaign_templates", array(
 						'name' => addslashes($value['name']),
 						'template' => addslashes(nl2br($value['template'])),
-						'media' => $value['media'] ? $value['media'] : ''
+						'media' => $value['media'] ? $value['media'] : '',
+						'subject' => addslashes($value['subject']),
+						'preheader_text' => addslashes($value['preheader_text'])
 					), array('id' => $value['id']));
 				} else {
 					$wpdb->insert($wpdb->prefix . "campaign_templates", array(
 						'campaign_id' => $id,
 						'name' => addslashes($value['name']),
 						'template' => addslashes(nl2br($value['template'])),
-						'media' => $value['media'] ? $value['media'] : ''
+						'media' => $value['media'] ? $value['media'] : '',
+						'subject' => addslashes($value['subject']),
+						'preheader_text' => addslashes($value['preheader_text'])
 					));
 				}
 			}
@@ -365,6 +371,8 @@ class IC_agent_api{
 				$templates = $wpdb->get_results("select * from wp_campaign_templates where campaign_id=".$value['id']);
 				$value['templates'] = [];
 				foreach ($templates as $key => $value2) {
+					$value2->preheader_text = stripslashes(stripslashes($value2->preheader_text));
+					$value2->subject = stripslashes(stripslashes($value2->subject));
 					$value2->template = str_replace("<br />", "", stripslashes(stripslashes($value2->template)));
 					$value['templates'][$value2->name] = $value2;
 				}
@@ -379,6 +387,8 @@ class IC_agent_api{
 			$templates = $wpdb->get_results("select * from ".$wpdb->prefix . "campaign_templates where campaign_id=".$value['id']);
 			$value['templates'] = [];
 			foreach ($templates as $key => $value2) {
+				$value2->preheader_text = stripslashes(stripslashes($value2->preheader_text));
+				$value2->subject = stripslashes(stripslashes($value2->subject));
 				$value2->template = str_replace("<br />", "", stripslashes(stripslashes($value2->template)));
 				$value['templates'][$value2->name] = $value2;
 			}

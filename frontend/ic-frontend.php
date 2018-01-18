@@ -18,7 +18,7 @@ class IC_front{
             var $fiApp = $fiApp || {};
             $fiApp.instanceId = "<?php echo $agent_id ?>";
             $fiApp.welcomeMsg = "<?php echo stripslashes(get_post_meta( get_the_id(), 'chat_welcome_message', true ));?>";
-	    $fiApp.video = "<?php echo $_GET['video']; ?>";
+	    	
 			
             <?php
             if(isset($_COOKIE['endorsement_track_link']) && isset($_COOKIE['endorsement_tracked']))
@@ -33,7 +33,8 @@ class IC_front{
 			$fiApp.siteId = "<?php echo $siteidd;?>";
 			$fiApp.blogUrl = "<?php echo get_site_url($siteidd);?>";
 			$fiApp.visited_page = "<?php echo $_COOKIE['fa_surfing_page'];?>";
-
+			$fiApp.introVideo = "<?php echo $_GET['video']; ?>";
+			
 			if($fiApp.endorserId || $fiApp.siteId){
 				var d = document, s = d.createElement('script'); 
 	            s.type = "text/javascript";

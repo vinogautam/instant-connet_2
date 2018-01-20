@@ -23,7 +23,8 @@ class IC_agent_api{
 	    	'ic_new_video', 'ic_video_list', 'ic_delete_video', 'ic_test_template', 'ic_get_default_campaign',
 	    	'ic_set_default_campaign', 'ic_get_template_style', 'ic_strategy', 'ic_update_video', 'ic_video_by_id',
 	    	'ic_video_message', 'ic_video_message_delete', 'ic_video_message_update', 'ic_message_by_type',
-	    	'test_email'
+	    	'test_email', 'ic_agent_endorsement_settings', 'ic_agent_save_endorsement_settings',
+	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -31,6 +32,55 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_agent_billing_transaction(){
+		global $wpdb;
+
+		$results = $wpdb->get_results("select * from agent_billing where user_id='".$_GET['user_id']."'");
+
+		$response = array('status' => 'Success');
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_cron_agent_billing(){
+		global $wpdb;
+
+		$users = get_users(array('userrole' => 'agent'));
+		foreach ($users as $key => $value) {
+			$results = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where created like '".date("Y-m-")."%' and user_id='".$value->ID."'");
+
+			$amount = $results->points;
+			$res = $wpdb->insert("agent_billing", array(
+				'particulars' => 'Bill for the month of '.date("F"),
+				'amount' => $amount,
+				'credit' => 1,
+				'agent_id' => $value->ID,
+				'created' => date('Y-m-d H:i:s')
+			));
+
+			/* Debit the billing amount from agent cc will add here*/
+
+		}
+		
+		die(0);
+	}
+
+	function ic_agent_save_endorsement_settings(){
+
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		update_user_meta($_GET['user_id'], 'endorsement_settings', $_POST['settings']);
+
+		die(0);
+	}
+
+	function ic_agent_endorsement_settings(){
+
+		$res = get_user_meta($_GET['user_id'], 'endorsement_settings', true);
+		echo json_encode($res);
+		die(0);
 	}
 
 	function test_email(){
@@ -263,11 +313,7 @@ class IC_agent_api{
 					'type' => $_POST['type'],
 					//'is_default' => $_POST['is_default'],
 					'is_main_site' => is_main_site(),
-					'strategy' => $_POST['strategy'],
-					'facebook' => $_POST['facebook'],
-					'twitter' => $_POST['twitter'],
-					'linkedin' => $_POST['linkedin'],
-					'gplus' => $_POST['gplus']
+					'strategy' => $_POST['strategy']
 				));
 		
 		if($res) {

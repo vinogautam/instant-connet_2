@@ -233,6 +233,7 @@
 			$sql_one = "CREATE TABLE " . $mailtemplates . "(
 			  id int(11) NOT NULL AUTO_INCREMENT,
 			   endorser_id int(11),
+			   agent_id int(11),
 			   points int(11),
 			   notes text,
 			   type tinytext NOT NULL,
@@ -306,6 +307,22 @@
 			   video_id int(11),
 			   status_message text,
 			   message_type tinytext NOT NULL,
+			   created datetime,
+			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
+
+			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+			dbDelta($sql_one);
+		}
+
+		$mailtemplates = "agent_billing";
+
+		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){
+			$sql_one = "CREATE TABLE " . $mailtemplates . "(
+			  id int(11) NOT NULL AUTO_INCREMENT,
+			  agent_id int(11),
+			   particulars tinytext NOT NULL,
+			   amount float,
+			   credit int(1),
 			   created datetime,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 

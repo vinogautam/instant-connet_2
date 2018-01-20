@@ -957,7 +957,11 @@ class IC_agent_api{
 				update_user_meta($user_id, 'endorsement_letter', $user['endorsement_letter']);
 				update_user_meta($user_id, 'campaign', $user['campaign']);
 				update_user_meta($user_id, 'social_campaign', $user['social_campaign']);
-				$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);
+				if( isset($user['video']) ){
+					$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass'], $user['video']);
+				} else {
+					$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);
+				}
 				$ntm_mail->send_notification_mail($user_id);
 
 				$response = array('status' => 'Success', 'data' => $user_id, 'msg' => 'Endorser created successfully');

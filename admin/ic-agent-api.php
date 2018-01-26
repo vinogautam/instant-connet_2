@@ -24,7 +24,7 @@ class IC_agent_api{
 	    	'ic_set_default_campaign', 'ic_get_template_style', 'ic_strategy', 'ic_update_video', 'ic_video_by_id',
 	    	'ic_video_message', 'ic_video_message_delete', 'ic_video_message_update', 'ic_message_by_type',
 	    	'test_email', 'ic_agent_endorsement_settings', 'ic_agent_save_endorsement_settings',
-	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing'
+	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -32,6 +32,25 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_agent_update(){
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		update_user_meta($_GET['user_id'], 'timekit_resource_id', $_POST['timekit_resource_id']);
+		update_user_meta($_GET['user_id'], 'timekit_calendar_id', $_POST['timekit_calendar_id']);
+
+		die(0);
+	}
+
+	function ic_get_agent_details(){
+		$res =  array();
+		$res['timekit_resource_id'] = get_user_meta($_GET['user_id'], 'timekit_resource_id', true);
+		$res['timekit_calendar_id'] = get_user_meta($_GET['user_id'], 'timekit_calendar_id', true);
+
+		echo json_encode($res);
+
+		die(0);
 	}
 
 	function ic_agent_billing_transaction(){

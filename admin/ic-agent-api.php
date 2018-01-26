@@ -349,6 +349,31 @@ class IC_agent_api{
 				));
 			}
 
+
+			if(is_main_site()){
+				foreach ($_POST['sites'] as $key1 => $value1) {
+					$res = $wpdb->insert("wp_".$value1."_campaigns", array(
+						'title' => $_POST['title'],
+						'type' => $_POST['type'],
+						'strategy' => $_POST['strategy']
+					));
+
+					$id1 = $wpdb->insert_id;
+					foreach ($_POST['templates'] as $key => $value) {
+						$value = (array) $value;
+						$wpdb->insert("wp_".$value1."_campaign_templates", array(
+							'campaign_id' => $id1,
+							'name' => addslashes($value['name']),
+							'template' => addslashes(nl2br($value['template'])),
+							'media' => $value['media'] ? $value['media'] : '',
+							'subject' => addslashes($value['subject']),
+							'preheader_text' => addslashes($value['preheader_text'])
+						));
+					}
+				}
+			}
+
+
 			$response = array('status' => 'Success', 'id' => $id);
 		} else {
 			$response = array('status' => 'Error', 'msg' => 'Try again later!!');

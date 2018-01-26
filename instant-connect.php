@@ -337,6 +337,21 @@
 			$sid = wp_insert_post( $strategy);
 			update_post_meta($sid, 'strategy_link', site_url());
 			add_blog_option(get_current_blog_id(), 'strategy_link_created', 1 );
+
+			$results = $wpdb->get_results("select * from wp_campaigns");
+			foreach ($results as $key => $value) {
+				$value = (array) $value;
+
+				$templates = $wpdb->get_results("select * from wp_campaign_templates where campaign_id=".$value['id']);
+				foreach ($templates as $key => $value2) {
+					$value2 = (array) $value2;
+
+					delete $value['id'];
+					$wpdb->insert("wp_campaigns", $value);
+					$value2['campaign_id'] = $wpdb->insert_id;
+					$wpdb->insert("wp_campaign_templates", $value2);
+				}
+			}
 		}
 	}
 	

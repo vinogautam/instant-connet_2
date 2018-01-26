@@ -428,7 +428,7 @@ class IC_agent_api{
 
 		$campaigns = [];
 		
-		if(!is_main_site()){
+		/*if(!is_main_site()){
 			$results = $wpdb->get_results("select * from wp_campaigns");
 			foreach ($results as $key => $value) {
 				$value = (array) $value;
@@ -443,7 +443,7 @@ class IC_agent_api{
 				}
 				$campaigns[] = $value;
 			}
-		}
+		}*/
 
 		$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns");
 		foreach ($results as $key => $value) {

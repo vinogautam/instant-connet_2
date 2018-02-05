@@ -346,7 +346,7 @@
 				foreach ($templates as $key => $value2) {
 					$value2 = (array) $value2;
 
-					delete $value['id'];
+					unset($value['id']);
 					$wpdb->insert("wp_campaigns", $value);
 					$value2['campaign_id'] = $wpdb->insert_id;
 					$wpdb->insert("wp_campaign_templates", $value2);

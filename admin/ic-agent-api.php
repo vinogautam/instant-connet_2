@@ -24,7 +24,8 @@ class IC_agent_api{
 	    	'ic_set_default_campaign', 'ic_get_template_style', 'ic_strategy', 'ic_update_video', 'ic_video_by_id',
 	    	'ic_video_message', 'ic_video_message_delete', 'ic_video_message_update', 'ic_message_by_type',
 	    	'test_email', 'ic_agent_endorsement_settings', 'ic_agent_save_endorsement_settings',
-	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details'
+	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details',
+	    	'ic_upgrade_membership'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -351,6 +352,7 @@ class IC_agent_api{
 
 
 			if(is_main_site()){
+				print_r($_POST['sites']);
 				foreach ($_POST['sites'] as $key1 => $value1) {
 					$res = $wpdb->insert("wp_".$value1."_campaigns", array(
 						'title' => $_POST['title'],
@@ -962,7 +964,24 @@ class IC_agent_api{
 		die(0);
 	}
 
+	function ic_upgrade_membership(){
+		global $wpdb;
+		$membership = (array) $wpdb->get_row("select * from wp_pmpro_memberships_orders where user_id=".$_GET['id']);
+		$membership['user_id'] = $_POST['id'];
+		$membership['membership_id'] = 2;
+		$membership['timestamp'] = date("Y-m-d H:i:s");
+		
+		//Stripe Integration here
+		$wpdb->insert("wp_pmpro_membership_orders", $membership);
+		$wpdb->update("wp_pmpro_memberships_users", array('user_id' => $_GET['id']));
+		
+		$response = array('status' => 'Success');
+		echo json_encode($response);
+		die(0);
+	}
+
 	function ic_agent_login(){
+		global $wpdb;
 		$creds = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		$user = wp_signon( $creds, false );
 		$userBlogs = get_blogs_of_user((int)$user->data->ID);
@@ -971,7 +990,11 @@ class IC_agent_api{
 			$response = array('status' => 'Error', 'msg' => 'Invalid Credentials');
 		}
 		else{
-			$response = array('status' => 'Success', 'data' => $user->data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl->siteurl);
+			$data = (array) $user->data;
+			$membership = $wpdb->get_row("select * from wp_pmpro_memberships_users where user_id=".$user->data->ID);
+			$data['membership'] = isset($membership->membership_id) ? $membership->membership_id : 0;
+			
+			$response = array('status' => 'Success', 'data' => $data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl->siteurl);
 		}
 		echo json_encode($response);
 		die(0);

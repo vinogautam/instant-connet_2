@@ -25,7 +25,7 @@ class IC_agent_api{
 	    	'ic_video_message', 'ic_video_message_delete', 'ic_video_message_update', 'ic_message_by_type',
 	    	'test_email', 'ic_agent_endorsement_settings', 'ic_agent_save_endorsement_settings',
 	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details',
-	    	'ic_upgrade_membership'
+	    	'ic_upgrade_membership', 'ic_endorsement_settings'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -91,14 +91,15 @@ class IC_agent_api{
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		update_user_meta($_GET['user_id'], 'endorsement_settings', $_POST['settings']);
-
+		update_user_meta($_GET['agent_id'], 'endorsement_settings', $_POST);
+		$res = get_user_meta($_GET['agent_id'], 'endorsement_settings', true);
+		echo json_encode($res);
 		die(0);
 	}
 
 	function ic_agent_endorsement_settings(){
 
-		$res = get_user_meta($_GET['user_id'], 'endorsement_settings', true);
+		$res = get_user_meta($_GET['agent_id'], 'endorsement_settings', true);
 		echo json_encode($res);
 		die(0);
 	}
@@ -814,14 +815,23 @@ class IC_agent_api{
 		global $wpdb;
 
 		$_POST = (array) json_decode(file_get_contents('php://input'));
-		$data = array(
-						'endorser_id' =>$_POST['endorser_id'],
-						'points' => $_POST['points'],
-						'type' => $_POST['type'],
-						'notes' => $_POST['notes'],
-						'created'	=> date("Y-m-d H:i:s")
-						);
-		$wpdb->insert($wpdb->prefix . "points_transaction", $data);
+
+		if($_POST['type'] == 'fbShare' || $_POST['type'] == 'liShare'){
+			$blog_id = get_active_blog_for_user( $_POST['endorser_id'] )->blog_id;
+			$agent_id = get_blog_option($blog_id, 'agent_id');
+			$settings = get_user_meta($agent_id, 'endorsement_settings', true);
+			$points = $_POST['type'] == 'fbShare' ? $settings['fb_point_value'] : $settings['linked_point_value'] ;
+
+			$data = array(
+							'endorser_id' =>$_POST['endorser_id'],
+							'points' => $points,
+							'type' => $_POST['type'],
+							'notes' => $_POST['notes'],
+							'created'	=> date("Y-m-d H:i:s")
+							);
+			$wpdb->insert($wpdb->prefix . "points_transaction", $data);
+		}
+		
 		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$_POST['endorser_id']);
 		$response = array('status' => 'Success', 'total_points' => $response->points ? $response->points : 0);
 		echo json_encode($response);
@@ -865,6 +875,18 @@ class IC_agent_api{
 			$wpdb->insert($wpdb->prefix . "endorsements", $info);
 			$ntm_mail->send_invitation_mail($info, $_POST['id'], $wpdb->insert_id, $endorse_letter);
 		}
+
+		$blog_id = get_active_blog_for_user( $_POST['id'] )->blog_id;
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+		$points = get_user_meta($agent_id, 'endorsement_settings', true)['email_point_value'];
+
+		$data = array(
+						'endorser_id' => $_POST['id'],
+						'points' => $points,
+						'type' => 'email_invitation',
+						'created'	=> date("Y-m-d H:i:s")
+						);
+		$wpdb->insert($wpdb->prefix . "points_transaction", $data);
 		
 		update_user_meta($_POST['id'], "invitation_sent", (get_user_meta($_POST['id'], "invitation_sent", true) + count($contact_list)));
 
@@ -971,6 +993,22 @@ class IC_agent_api{
 		$membership['membership_id'] = 2;
 		$membership['timestamp'] = date("Y-m-d H:i:s");
 		
+		$membership_level = $wpdb->get_row("select * from wp_pmpro_memberships_levels where user_id=2");
+
+		$fa_lead_options = get_option('fa_lead_settings');
+		Stripe::setApiKey($fa_lead_options['api_key']);
+		Stripe::setAPIVersion("2015-07-13");
+		$invoice_item = Stripe_InvoiceItem::create( array(
+			'customer'    => $_POST['id'], // the customer to apply the fee to
+			'amount'      => $membership_level->billing_amount * 100,
+			'currency'    => 'usd',
+			'description' => 'One-time setup fee' // our fee description
+		) );
+	 
+		$invoice = Stripe_Invoice::create( array(
+			'customer'    => $_POST['id'], // the customer to apply the fee to
+		) );
+
 		//Stripe Integration here
 		$wpdb->insert("wp_pmpro_membership_orders", $membership);
 		$wpdb->update("wp_pmpro_memberships_users", array('user_id' => $_GET['id']));

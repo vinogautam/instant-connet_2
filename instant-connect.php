@@ -14,6 +14,15 @@
  define("API_KEY", "45426652");
  define("API_SECRET", "ff71053e07be2f36ec4c1a6f1351fdc340285b81");
  
+if(!class_exists('Stripe'))
+ {
+	 
+ 	 require_once( ABSPATH . '/wp-content/plugins/paid-memberships-pro/includes/lib/Stripe/lib/Stripe.php');
+	 
+ }
+
+
+ 
  include 'includes.php';
  include 'pusher/pusher.php';
  

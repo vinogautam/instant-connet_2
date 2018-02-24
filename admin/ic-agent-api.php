@@ -4,7 +4,6 @@ class IC_agent_api{
 
 	function __construct() {
 
-
 	    header('Access-Control-Allow-Origin: *');
 	    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 	    header("Access-Control-Allow-Headers: X-Requested-With");
@@ -25,7 +24,7 @@ class IC_agent_api{
 	    	'ic_video_message', 'ic_video_message_delete', 'ic_video_message_update', 'ic_message_by_type',
 	    	'test_email', 'ic_agent_endorsement_settings', 'ic_agent_save_endorsement_settings',
 	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details',
-	    	'ic_upgrade_membership', 'ic_endorsement_settings'
+	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_timekit_add_gmail'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -34,6 +33,18 @@ class IC_agent_api{
 		}
 	    
 	}
+
+	function ic_timekit_add_gmail() {
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		if(add_user_meta($_POST['agent_id'], 'timekit_gmail_email', $_POST['timekit_gmail_email'])) {
+			$response = array('status' => 'Success');
+			
+		} else {
+			$response = array('status' => 'Failed to update');
+		}
+		echo json_encode($response);
+	}
+
 
 	function ic_agent_update(){
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
@@ -1031,7 +1042,7 @@ class IC_agent_api{
 			$data = (array) $user->data;
 			$membership = $wpdb->get_row("select * from wp_pmpro_memberships_users where user_id=".$user->data->ID);
 			$data['membership'] = isset($membership->membership_id) ? $membership->membership_id : 0;
-			
+		//	$timekit_email = get_user_meta($user->ID, 'first_name', true)
 			$response = array('status' => 'Success', 'data' => $data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl->siteurl);
 		}
 		echo json_encode($response);

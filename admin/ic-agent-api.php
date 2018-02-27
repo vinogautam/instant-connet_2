@@ -36,7 +36,7 @@ class IC_agent_api{
 
 	function ic_timekit_add_gmail() {
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-		if(add_user_meta($_POST['agent_id'], 'timekit_gmail_email', $_POST['timekit_gmail_email'])) {
+		if(update_user_meta($_POST['agent_id'], 'timekit_gmail_email', $_POST['timekit_gmail_email'])) {
 			$response = array('status' => 'Success');
 			
 		} else {

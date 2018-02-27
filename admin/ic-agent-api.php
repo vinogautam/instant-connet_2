@@ -1034,6 +1034,7 @@ class IC_agent_api{
 		$creds = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		$user = wp_signon( $creds, false );
 		$userBlogs = get_blogs_of_user((int)$user->data->ID);
+		$timekitGmail = get_user_meta((int)$user->data->ID, 'timekit_gmail_email', true);
 		$siteUrl = reset($userBlogs);
 		if ( is_wp_error($user) ) {
 			$response = array('status' => 'Error', 'msg' => 'Invalid Credentials');
@@ -1042,7 +1043,7 @@ class IC_agent_api{
 			$data = (array) $user->data;
 			$membership = $wpdb->get_row("select * from wp_pmpro_memberships_users where user_id=".$user->data->ID);
 			$data['membership'] = isset($membership->membership_id) ? $membership->membership_id : 0;
-		//	$timekit_email = get_user_meta($user->ID, 'first_name', true)
+			$data['timekit_gmail'] = $timekitGmail;
 			$response = array('status' => 'Success', 'data' => $data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl->siteurl);
 		}
 		echo json_encode($response);

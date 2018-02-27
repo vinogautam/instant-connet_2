@@ -25,7 +25,7 @@ class IC_agent_api{
 	    	'ic_video_message', 'ic_video_message_delete', 'ic_video_message_update', 'ic_message_by_type',
 	    	'test_email', 'ic_agent_endorsement_settings', 'ic_agent_save_endorsement_settings',
 	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details',
-	    	'ic_upgrade_membership', 'ic_endorsement_settings'
+	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -495,6 +495,74 @@ class IC_agent_api{
 		die(0);
 	}
 
+	function ic_endorser_reset_password(){
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		wp_set_password( $_POST['password'], $_GET['id'] );
+
+		$response = array('status' => 'Success');
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_endorser_login(){
+		global $wpdb, $ntm_mail;
+
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$creds = array();
+		$creds['user_login'] = $_POST['email'];
+		$creds['user_password'] = $_POST['password'];
+		$creds['remember'] = true;
+		$current_user = wp_signon( $creds, false );
+
+		$points = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$current_user->ID);
+
+		$campaign = get_user_meta($current_user->ID, 'campaign', true);
+		$templates = $wpdb->get_row("select * from wp_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
+
+		$subject = 'Endorser Invitation';
+		$content = str_replace("<br />", "", stripslashes(stripslashes($templates->template)));
+
+		$mailtemplate = '<html><head><style>'.stripslashes(strip_tags(get_option('mail_template_css'))).'</style></head><body>'.$content.'</body></html>';
+
+		if(!is_wp_error($current_user)) {
+			$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
+			$agent_id = get_blog_option($blog_id, 'agent_id');
+
+			$campaign = get_user_meta($current_user->ID, 'campaign', true);
+			$dcampaign = $wpdb->get_row("select * from wp_campaigns where id=".$campaign);
+			$pagelink = get_post_meta($dcampaign->strategy, 'strategy_link', true);
+
+			$templates = $wpdb->get_row("select * from wp_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
+
+			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
+
+			$data = array(
+					'endorser' => $current_user,
+					'points' => $points->points ? $points->points : 0,
+					'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')).'&video='.$video,
+					'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')).'&video='.$video,
+					'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')).'&video='.$video,
+					'mailtemplate' => $mailtemplate,
+					'blog_id' => $blog_id,
+					'agent_id' => $agent_id,
+					'twitter_text' => get_option('twitter_text'),
+					'fb_text' => $dcampaign->facebook,
+					'tw_text' => $dcampaign->twitter,
+					'li_text' => $dcampaign->linkedin,
+					'agent_avatar' => get_avatar_url($agent_id)
+				);
+			$response = array('status' => 'Success', 'data' => $data);
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'Invalid link!!');
+		}
+
+		echo json_encode($response);
+		die(0);
+		exit;
+	}
+
 	function ic_auto_login(){
 		global $wpdb, $ntm_mail;
 
@@ -879,6 +947,11 @@ class IC_agent_api{
 		$blog_id = get_active_blog_for_user( $_POST['id'] )->blog_id;
 		$agent_id = get_blog_option($blog_id, 'agent_id');
 		$points = get_user_meta($agent_id, 'endorsement_settings', true)['email_point_value'];
+		$note_points = get_user_meta($agent_id, 'endorsement_settings', true)['note_point_value'];
+
+		if(strlen($notes) > 100){
+			$points += $note_points;
+		}
 
 		$data = array(
 						'endorser_id' => $_POST['id'],

@@ -290,12 +290,14 @@ class IC_agent_api{
 
 		$_POST['created'] = date("Y-m-d H:i:s");
 
-		$video_message = $_POST['video_message'];
+		$video_message = isset($_POST['video_message']) ? (array)$_POST['video_message'] : array();
 		unset($_POST['video_message']);
 		$res = $wpdb->insert($wpdb->prefix . "video_library", $_POST);
 		if($res){
 			$video_message['video_id'] = $wpdb->insert_id;
-			$this->ic_video_message_update('add', $video_message);
+			if(isset($video_message['status_message'])){
+				$this->ic_video_message_update('add', $video_message);
+			}
 			$response = array('status' => 'Success', 'id' => $video_message['video_id']);
 		} else {
 			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
@@ -308,11 +310,13 @@ class IC_agent_api{
 		global $wpdb;
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-		$video_message = $_POST['video_message'];
+		$video_message = isset($_POST['video_message']) ? (array)$_POST['video_message'] : array();
 		unset($_POST['video_message']);
-		$res = $wpdb->update($wpdb->prefix . "video_library", $_POST, $_GET['id']);
+		$res = $wpdb->update($wpdb->prefix . "video_library", $_POST, array('id'=>$_GET['id']));
 		if($res){
-			$this->ic_video_message_update('edit', $video_message);
+			if(isset($video_message['status_message'])){
+				$this->ic_video_message_update('edit', $video_message);
+			}
 			$response = array('status' => 'Success');
 		} else {
 			$response = array('status' => 'Error', 'msg' => 'Try again later!!');

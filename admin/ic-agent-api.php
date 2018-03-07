@@ -254,7 +254,17 @@ class IC_agent_api{
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		$res = $wpdb->insert($wpdb->prefix . "video_message", $_POST, $_GET['id']);
+		if($_GET['perform'] == 'add'){
+			$res = $wpdb->insert($wpdb->prefix . "video_message", $_POST);
+		} elseif($_GET['perform'] == 'edit') {
+			$video_id = $_POST['video_id'];
+			unset($_POST['video_id']);
+			$res = $wpdb->update($wpdb->prefix . "video_message", $_POST, array('video_id' => $video_id));
+		} elseif($_GET['perform'] == 'delete') {
+			$video_id = $_POST['video_id'];
+			$res = $wpdb->delete($wpdb->prefix . "video_message", array("video_id" => $video_id));
+		}
+		
 		if($res){
 		$response = array('status' => 'Success');
 		} else {

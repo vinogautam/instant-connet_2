@@ -36,13 +36,15 @@ class IC_agent_api{
 
 	function ic_timekit_add_gmail() {
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-		if(update_user_meta($_POST['agent_id'], 'timekit_gmail_email', $_POST['timekit_gmail_email'])) {
-			$response = array('status' => 'Success');
+		if(update_user_meta($_POST['agent_id'], 'timekits_gmail_email', $_POST['timekit_gmail_email'])) {
+                   update_user_meta($_POST['agent_id'], 'timekits_time_zone', $_POST['timekit_time_zone']);			
+                   $response = array('status' => 'Success');
 			
-		} else {
-			$response = array('status' => 'Failed to update');
-		}
-		echo json_encode($response);
+		   } else {
+			 $response = array('status' => 'Failed to update');
+		   }
+		   echo json_encode($response);
+                   die(0);
 	}
 
 
@@ -1107,7 +1109,8 @@ class IC_agent_api{
 		$creds = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		$user = wp_signon( $creds, false );
 		$userBlogs = get_blogs_of_user((int)$user->data->ID);
-		$timekitGmail = get_user_meta((int)$user->data->ID, 'timekit_gmail_email', true);
+		$timekitGmail = get_user_meta((int)$user->data->ID, 'timekits_gmail_email', true);
+$timekitTimeZone = get_user_meta((int)$user->data->ID, 'timekits_time_zone', true);
 		$siteUrl = reset($userBlogs);
 		if ( is_wp_error($user) ) {
 			$response = array('status' => 'Error', 'msg' => 'Invalid Credentials');
@@ -1117,6 +1120,7 @@ class IC_agent_api{
 			$membership = $wpdb->get_row("select * from wp_pmpro_memberships_users where user_id=".$user->data->ID);
 			$data['membership'] = isset($membership->membership_id) ? $membership->membership_id : 0;
 			$data['timekit_gmail'] = $timekitGmail;
+                        $data['timekit_time_zone'] = $timekitTimeZone;
 			$response = array('status' => 'Success', 'data' => $data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl->siteurl);
 		}
 		echo json_encode($response);

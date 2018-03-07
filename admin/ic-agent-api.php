@@ -249,29 +249,38 @@ class IC_agent_api{
 		die(0);
 	}
 
-	function ic_video_message_update(){
+	function ic_video_message_update($perform = '', $data = array()){
 		global $wpdb;
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		if($_GET['perform'] == 'add'){
-			$res = $wpdb->insert($wpdb->prefix . "video_message", $_POST);
-		} elseif($_GET['perform'] == 'edit') {
-			$video_id = $_POST['video_id'];
-			unset($_POST['video_id']);
-			$res = $wpdb->update($wpdb->prefix . "video_message", $_POST, array('video_id' => $video_id));
-		} elseif($_GET['perform'] == 'delete') {
-			$video_id = $_POST['video_id'];
+		if($perform){
+			$vmsg = $data;
+		} else {
+			$perform = $_GET['perform'];
+			$vmsg = $_POST;
+		}
+
+		if($perform == 'add'){
+			$res = $wpdb->insert($wpdb->prefix . "video_message", $vmsg);
+		} elseif($perform == 'edit') {
+			$video_id = $vmsg['video_id'];
+			unset($vmsg['video_id']);
+			$res = $wpdb->update($wpdb->prefix . "video_message", $vmsg, array('video_id' => $video_id));
+		} elseif($perform == 'delete') {
+			$video_id = $vmsg['video_id'];
 			$res = $wpdb->delete($wpdb->prefix . "video_message", array("video_id" => $video_id));
 		}
 		
-		if($res){
-		$response = array('status' => 'Success');
-		} else {
-			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+		if(isset($_GET['perform'])){
+			if($res){
+			$response = array('status' => 'Success');
+			} else {
+				$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+			}
+			echo json_encode($response);
+			die(0);
 		}
-		echo json_encode($response);
-		die(0);
 	}
 
 	function ic_new_video(){
@@ -281,9 +290,13 @@ class IC_agent_api{
 
 		$_POST['created'] = date("Y-m-d H:i:s");
 
+		$video_message = $_POST['video_message'];
+		unset($_POST['video_message']);
 		$res = $wpdb->insert($wpdb->prefix . "video_library", $_POST);
 		if($res){
-		$response = array('status' => 'Success', 'id' => $wpdb->insert_id);
+			$video_message['video_id'] = $wpdb->insert_id;
+			$this->ic_video_message_update('add', $video_message);
+			$response = array('status' => 'Success', 'id' => $video_message['video_id']);
 		} else {
 			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
 		}
@@ -295,10 +308,12 @@ class IC_agent_api{
 		global $wpdb;
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-
+		$video_message = $_POST['video_message'];
+		unset($_POST['video_message']);
 		$res = $wpdb->update($wpdb->prefix . "video_library", $_POST, $_GET['id']);
 		if($res){
-		$response = array('status' => 'Success');
+			$this->ic_video_message_update('edit', $video_message);
+			$response = array('status' => 'Success');
 		} else {
 			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
 		}

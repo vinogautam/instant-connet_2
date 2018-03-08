@@ -24,7 +24,8 @@ class IC_agent_api{
 	    	'ic_video_message', 'ic_video_message_delete', 'ic_video_message_update', 'ic_message_by_type',
 	    	'test_email', 'ic_agent_endorsement_settings', 'ic_agent_save_endorsement_settings',
 	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details',
-	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail', 'ic_video_message_by_id'
+	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail', 
+		'ic_video_message_by_id', 'ic_message_with_video'
 	    );
 		
 		foreach ($functions as $key => $value) {

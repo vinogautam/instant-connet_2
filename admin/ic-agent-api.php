@@ -253,8 +253,8 @@ class IC_agent_api{
 		global $wpdb;
 
 		$results = $wpdb->get_results("select * from ". $wpdb->prefix . "video_message where video_id='".$_GET['video_id']."'");
-
-		$response = array('status' => 'Success');
+		$data = (array) $results;
+		$response = array('status' => 'Success', 'data' => $data);
 		echo json_encode($response);
 		die(0);
 	}

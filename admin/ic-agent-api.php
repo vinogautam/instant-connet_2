@@ -249,6 +249,16 @@ class IC_agent_api{
 		die(0);
 	}
 
+	function ic_message_with_video(){
+		global $wpdb;
+
+		$results = $wpdb->get_results("select * from ". $wpdb->prefix . "video_message v left join ".$wpdb->prefix . "video_library l on v.video_id = l.id");
+
+		$response = array('status' => 'Success');
+		echo json_encode($response);
+		die(0);
+	}
+
 	function ic_video_message_update($perform = '', $data = array()){
 		global $wpdb;
 
@@ -315,6 +325,7 @@ class IC_agent_api{
 		$res = $wpdb->update($wpdb->prefix . "video_library", $_POST, array('id'=>$_GET['id']));
 		if($res){
 			if(isset($video_message['status_message'])){
+				$video_message['video_id'] = $_GET['id'];
 				$this->ic_video_message_update('edit', $video_message);
 			}
 			$response = array('status' => 'Success');

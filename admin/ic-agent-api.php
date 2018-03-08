@@ -24,7 +24,7 @@ class IC_agent_api{
 	    	'ic_video_message', 'ic_video_message_delete', 'ic_video_message_update', 'ic_message_by_type',
 	    	'test_email', 'ic_agent_endorsement_settings', 'ic_agent_save_endorsement_settings',
 	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details',
-	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail'
+	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail', 'ic_video_message_by_id'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -243,6 +243,16 @@ class IC_agent_api{
 		global $wpdb;
 
 		$results = $wpdb->get_results("select * from ". $wpdb->prefix . "video_message where message_type='".$_GET['type']."'");
+
+		$response = array('status' => 'Success');
+		echo json_encode($response);
+		die(0);
+	}
+	
+	function ic_video_message_by_id(){
+		global $wpdb;
+
+		$results = $wpdb->get_results("select * from ". $wpdb->prefix . "video_message where video_id='".$_GET['video_id']."'");
 
 		$response = array('status' => 'Success');
 		echo json_encode($response);

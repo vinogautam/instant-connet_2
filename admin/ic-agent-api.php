@@ -244,7 +244,7 @@ class IC_agent_api{
 
 		$results = $wpdb->get_results("select * from ". $wpdb->prefix . "video_message where message_type='".$_GET['type']."'");
 
-		$response = array('status' => 'Success');
+		$response = array('status' => 'Success', 'data' => $results);
 		echo json_encode($response);
 		die(0);
 	}
@@ -264,7 +264,7 @@ class IC_agent_api{
 
 		$results = $wpdb->get_results("select * from ". $wpdb->prefix . "video_message v left join ".$wpdb->prefix . "video_library l on v.video_id = l.id");
 
-		$response = array('status' => 'Success');
+		$response = array('status' => 'Success', 'data' => $results);
 		echo json_encode($response);
 		die(0);
 	}

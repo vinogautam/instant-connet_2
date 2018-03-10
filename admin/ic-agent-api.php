@@ -24,7 +24,7 @@ class IC_agent_api{
 	    	'ic_video_message', 'ic_video_message_delete', 'ic_video_message_update', 'ic_message_by_type',
 	    	'test_email', 'ic_agent_endorsement_settings', 'ic_agent_save_endorsement_settings',
 	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details',
-	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail', 'ic_video_message_by_id'
+	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail', 'ic_video_message_by_id', 'ic_register'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -32,6 +32,23 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_register() {
+		global $wpdb;
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$res = $wpdb->insert("tmp_user", array(
+				'firstname' => $_POST['firstname'],
+				'lastname' => $_POST['lastname'],
+				'email' => $_POST['email'],
+				'agent_id' => $_POST['agent_id'],
+				'created' => date('Y-m-d H:i:s')
+			));
+
+		$response = array('status' => 'Success');
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_timekit_add_gmail() {

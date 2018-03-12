@@ -560,14 +560,26 @@ class IC_admin{
         if(is_multisite() && is_super_admin() || current_user_can('manage_options')) {
              
             add_menu_page( 'Instant Connect', 'Instant Connect', 'manage_options', 'instant_connect', array( $this, 'settingsPage' ));
+            add_submenu_page( 'instant_connect', 'Endorsements', 'Endorser Waiting for approval',  9, 'waiting_endorsers', array( &$this, 'waiting_endorsers'));
 			
 			//add_submenu_page( 'instant_connect', 'Endorsements', 'Settings',  9, 'ic_settings', array( &$this, 'settingsPage'));		
         
-        } else {
-            
         }
    
     } 
+
+    public function waiting_endorsers(){
+    	?>
+    	<div class="wrap">
+            <h2>Waiting for approval</h2>           
+            <?php 
+				$endosersTable = new WaitingEndoserTable();
+				$endosersTable->prepare_items();
+				$endosersTable->display();
+			?>
+        </div>
+    	<?php
+    };
     
     //our admin tabs navigation
     public function adminTabs($tabs, $default, $page){

@@ -561,8 +561,6 @@ class IC_admin{
              
             add_menu_page( 'Instant Connect', 'Instant Connect', 'manage_options', 'instant_connect', array( $this, 'settingsPage' ));
             add_submenu_page( 'instant_connect', 'Endorsements', 'Endorser Waiting for approval',  9, 'waiting_endorsers', array( &$this, 'waiting_endorsers'));
-			
-			//add_submenu_page( 'instant_connect', 'Endorsements', 'Settings',  9, 'ic_settings', array( &$this, 'settingsPage'));		
         
         }
    
@@ -579,7 +577,7 @@ class IC_admin{
 			?>
         </div>
     	<?php
-    };
+    }
     
     //our admin tabs navigation
     public function adminTabs($tabs, $default, $page){

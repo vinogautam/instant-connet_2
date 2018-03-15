@@ -25,7 +25,7 @@ class IC_agent_api{
 	    	'test_email', 'ic_agent_endorsement_settings', 'ic_agent_save_endorsement_settings',
 	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details',
 	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail', 
-			'ic_video_message_by_id', 'ic_message_with_video', 'ic_register'
+			'ic_video_message_by_id', 'ic_message_with_video', 'ic_register', 'ic_get_tmp_user', 'ic_update_user_status'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -33,6 +33,56 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_get_tmp_user(){
+		global $wpdb;
+
+		$results = $wpdb->get_results("select * from tmp_user where id='".$_GET['id']."'");
+
+		$response = array('status' => 'Success');
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_update_user_status(){
+		global $wpdb, $ntm_mail;
+
+		$results = $wpdb->update("tmp_user", array(
+				'status' => $_POST['status']
+			), array('id' => $_POST['id'])
+		);
+
+		if($_POST['status'] == 2){
+			$tmp_user = $wpdb->get_row("select * from tmp_user where id='".$_POST['id']."'");
+			$user = array();
+			$user['role'] = 'endorser';
+			$user['user_email'] = $user['email'];
+			$user['user_login'] = strtolower($user['firstname'].'_'.$user['lastname']);
+			
+			$user_id = username_exists( $user['user_login'] );
+			if ( !$user_id and email_exists($user['user_email']) == false ) {
+				$user['user_pass'] = wp_generate_password( $length=12, $include_standard_special_chars=false );
+				$user_id = wp_insert_user( $user ) ;
+				if (  is_wp_error( $user_id ) ) {
+					$response = array('status' => 'Error', 'msg' => 'Something went wrong. Try Again!!!.');
+				}
+				else
+				{
+					update_user_meta($user_id, 'endorser_letter', $_POST['endorser_letter']);
+					update_user_meta($user_id, 'endorsement_letter', $_POST['endorsement_letter']);
+					$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);
+					$ntm_mail->send_notification_mail($user_id);
+
+					$response = array('status' => 'Success', 'msg' => 'User created successfully.');
+				}
+			} else {
+				$response = array('status' => 'Error', 'msg' => 'User already exists.  Password inherited.');
+			}
+		}
+		
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_register() {
@@ -280,7 +330,7 @@ class IC_agent_api{
 	function ic_message_with_video(){
 		global $wpdb;
 
-		$results = $wpdb->get_results("select * from ". $wpdb->prefix . "video_message v left join ".$wpdb->prefix . "video_library l on v.video_id = l.id");
+		$results = $wpdb->get_results("select *,l.id as video_id, v.id as msg_id, v.status_message as status_message, l.status_message as video_text from ". $wpdb->prefix . "video_message v left join ".$wpdb->prefix . "video_library l on v.video_id = l.id");
 
 		$response = array('status' => 'Success', 'data' => $results);
 		echo json_encode($response);
@@ -301,13 +351,13 @@ class IC_agent_api{
 
 		if($perform == 'add'){
 			$res = $wpdb->insert($wpdb->prefix . "video_message", $vmsg);
-		} elseif($perform == 'edit') {
-			$video_id = $vmsg['video_id'];
-			unset($vmsg['video_id']);
-			$res = $wpdb->update($wpdb->prefix . "video_message", $vmsg, array('video_id' => $video_id));
+		} elseif($perform == 'update') {
+			$msg_id = $vmsg['msg_id'];
+			unset($vmsg['msg_id']);
+			$res = $wpdb->update($wpdb->prefix . "video_message", $vmsg, array('id' => $msg_id));
 		} elseif($perform == 'delete') {
-			$video_id = $vmsg['video_id'];
-			$res = $wpdb->delete($wpdb->prefix . "video_message", array("video_id" => $video_id));
+			$msg_id = $vmsg['msg_id'];
+			$res = $wpdb->delete($wpdb->prefix . "video_message", array("id" => $msg_id));
 		}
 		
 		if(isset($_GET['perform'])){

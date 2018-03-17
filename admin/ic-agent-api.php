@@ -38,9 +38,21 @@ class IC_agent_api{
 	function ic_get_tmp_user(){
 		global $wpdb;
 
-		$results = $wpdb->get_results("select * from tmp_user where id='".$_GET['id']."'");
 
-		$response = array('status' => 'Success');
+
+		$recordsTotal = $wpdb->get_results("select * from tmp_user where status = 0");
+		$start = $_GET['start'];
+		$length = $_GET['length'];
+		$offset = $start * $length;
+		$order = $_GET['columns'][$_GET['order'][0]['column']]['data'];
+		$orderby = $_GET['order'][0]['dir'];
+		$recordsFiltered = $wpdb->get_results("select * from tmp_user where status = 0 order by $order $orderby limit $offset, $length ");
+
+		$response = array('status' => 'Success', 
+							'data' => $results,
+						  	'recordsTotal' => count($recordsTotal),
+						  	'recordsFiltered' => count($recordsFiltered),
+						);
 		echo json_encode($response);
 		die(0);
 	}
@@ -94,7 +106,8 @@ class IC_agent_api{
 				'lastname' => $_POST['lastname'],
 				'email' => $_POST['email'],
 				'agent_id' => $_POST['agent_id'],
-				'created' => date('Y-m-d H:i:s')
+				'created' => date('Y-m-d H:i:s'),
+				'status' => 0
 			));
 
 		$response = array('status' => 'Success');
@@ -604,7 +617,16 @@ class IC_agent_api{
 			}
 		}*/
 
-		$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns");
+		$start = $_GET['start'];
+		$length = $_GET['length'];
+		$offset = $start * $length;
+		$type = $_GET['type'];
+		$recordsTotal = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where type = $type");
+		
+		$order = $_GET['columns'][$_GET['order'][0]['column']]['data'];
+		$orderby = $_GET['order'][0]['dir'];
+
+		$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where type = $type order by $order $orderby limit $offset, $length");
 		foreach ($results as $key => $value) {
 			$value = (array) $value;
 
@@ -620,6 +642,11 @@ class IC_agent_api{
 			$campaigns[] = $value;
 		}
 
+		$response = array('status' => 'Success', 
+							'data' => $results,
+						  	'recordsTotal' => count($recordsTotal),
+						  	'recordsFiltered' => count($campaigns),
+						);
 
 		$response = array('status' => 'Success', 'data' => $campaigns);
 		echo json_encode($response);

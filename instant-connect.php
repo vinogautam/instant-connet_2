@@ -299,6 +299,7 @@ if(!class_exists('Stripe'))
 			   agent_id int(11),
 			   agent_status int(1),
 			   file_name tinytext NOT NULL,
+			   name tinytext NOT NULL,
 			   file_url tinytext NOT NULL,
 			   template_type tinytext NOT NULL,
 			   created datetime,

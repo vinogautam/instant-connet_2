@@ -25,7 +25,8 @@ class IC_agent_api{
 	    	'test_email', 'ic_agent_endorsement_settings', 'ic_agent_save_endorsement_settings',
 	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details',
 	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail', 
-			'ic_video_message_by_id', 'ic_message_with_video', 'ic_register', 'ic_get_tmp_user', 'ic_update_user_status'
+			'ic_video_message_by_id', 'ic_message_with_video', 'ic_register', 'ic_get_tmp_user', 'ic_update_user_status',
+			'ic_endorser_reset_password'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -49,7 +50,7 @@ class IC_agent_api{
 		$recordsFiltered = $wpdb->get_results("select * from tmp_user where status = 0 order by $order $orderby limit $offset, $length ");
 
 		$response = array('status' => 'Success', 
-							'data' => $results,
+							'data' => $recordsFiltered,
 						  	'recordsTotal' => count($recordsTotal),
 						  	'recordsFiltered' => count($recordsFiltered),
 						);
@@ -617,16 +618,8 @@ class IC_agent_api{
 			}
 		}*/
 
-		$start = $_GET['start'];
-		$length = $_GET['length'];
-		$offset = $start * $length;
 		$type = $_GET['type'];
-		$recordsTotal = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where type = $type");
-		
-		$order = $_GET['columns'][$_GET['order'][0]['column']]['data'];
-		$orderby = $_GET['order'][0]['dir'];
-
-		$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where type = $type order by $order $orderby limit $offset, $length");
+		$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where type = $type");
 		foreach ($results as $key => $value) {
 			$value = (array) $value;
 
@@ -642,19 +635,13 @@ class IC_agent_api{
 			$campaigns[] = $value;
 		}
 
-		$response = array('status' => 'Success', 
-							'data' => $results,
-						  	'recordsTotal' => count($recordsTotal),
-						  	'recordsFiltered' => count($campaigns),
-						);
-
 		$response = array('status' => 'Success', 'data' => $campaigns);
 		echo json_encode($response);
 		die(0);
 	}
 
 	function ic_endorser_reset_password(){
-		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		$_POST = (array) json_decode(file_get_contents('php://input'));
 
 		wp_set_password( $_POST['password'], $_GET['id'] );
 
@@ -666,7 +653,7 @@ class IC_agent_api{
 	function ic_endorser_login(){
 		global $wpdb, $ntm_mail;
 
-		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		$_POST = (array) json_decode(file_get_contents('php://input'));
 
 		$creds = array();
 		$creds['user_login'] = $_POST['email'];
@@ -713,7 +700,7 @@ class IC_agent_api{
 				);
 			$response = array('status' => 'Success', 'data' => $data);
 		} else {
-			$response = array('status' => 'Error', 'msg' => 'Invalid link!!');
+			$response = array('status' => 'Error', 'msg' => $current_user->get_error_message());
 		}
 
 		echo json_encode($response);

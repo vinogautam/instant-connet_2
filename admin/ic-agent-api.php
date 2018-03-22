@@ -25,7 +25,7 @@ class IC_agent_api{
 	    	'test_email', 'ic_agent_endorsement_settings', 'ic_agent_save_endorsement_settings',
 	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details',
 	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail', 
-			'ic_video_message_by_id', 'ic_message_with_video', 'ic_register', 'ic_get_tmp_user', 'ic_update_user_status',
+			'ic_video_message_by_id', 'ic_message_with_video', 'ic_endorser_register', 'ic_get_tmp_user', 'ic_update_user_status',
 			'ic_endorser_reset_password'
 	    );
 		
@@ -98,9 +98,9 @@ class IC_agent_api{
 		die(0);
 	}
 
-	function ic_register() {
+	function ic_endorser_register() {
 		global $wpdb;
-		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		$_POST = (array) json_decode(file_get_contents('php://input'));
 
 		$res = $wpdb->insert("tmp_user", array(
 				'firstname' => $_POST['firstname'],
@@ -111,7 +111,7 @@ class IC_agent_api{
 				'status' => 0
 			));
 
-		$response = array('status' => 'Success');
+		$response = array('status' => 'Success', 'data' => $res);
 		echo json_encode($response);
 		die(0);
 	}
@@ -619,7 +619,7 @@ class IC_agent_api{
 		}*/
 
 		$type = $_GET['type'];
-		$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where type = $type");
+		$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where type = '$type'");
 		foreach ($results as $key => $value) {
 			$value = (array) $value;
 

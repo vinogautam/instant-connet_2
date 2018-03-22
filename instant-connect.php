@@ -55,6 +55,8 @@ if(!class_exists('Stripe'))
 		add_action( 'add_meta_boxes', array( &$this, 'ic_meta_boxes' ));
 		add_action( 'save_post', array( &$this, 'ic_save_meta_box' ));
 
+		add_shortcode('REGISTER_FORM', array( &$this, 'ic_register_form'));
+
 		$ntmadmin = new IC_admin();
 		new IC_Metabox();
 		new IC_ajax();
@@ -414,5 +416,52 @@ if(!class_exists('Stripe'))
 			);	
 
 			wp_enqueue_style( 'jquery-ui-datepicker' );
+	}
+
+	function ic_register_form(){
+		?>
+		<div class="modal-body register-form">
+        <h4>Register</h4>
+        <p>Please register to your account</p>
+         <form id="ic_register_form" name="ic_register_form" action="" class="mail-box">
+            <p style="display: none;" class="register_status"></p>
+            <div class="form-group">
+                <label class="control-label" for="email">Firstname</label>
+                <input type="text" class="form-control" name="firstname" placeholder="Enter Firstname">
+            </div>
+            <div class="form-group">
+                <label class="control-label" for="email">Lastname</label>
+                <input type="text" class="form-control" name="lastname" placeholder="Enter Lastname">
+            </div>
+            <div class="form-group">
+                <label class="control-label" for="email">Email</label>
+                <input type="email" class="form-control" name="email"  placeholder="Enter email">
+            </div>
+            <div class="form-group">
+                <label class="control-label" for="email">Phone</label>
+                <input type="email" class="form-control" name="phone"  placeholder="Enter Phone">
+            </div>
+            <div class="form-group">
+                <label class="control-label" for="email">Address</label>
+                <textarea class="form-control" name="address"  placeholder="Enter Address"></textarea>
+            </div>
+            <input type="hidden" name="campaign_id" value="<?= $_GET['campaign_id']?>">
+            <input type="hidden" name="agent_id" value="<?= $_GET['agent_id']?>">
+            <input class="submit_button" type="submit" name="submit" value="Register">
+          </form>
+
+          <script type="text/javascript">
+          	jQuery(document).ready(function(){
+          		jQuery('#ic_register_form .submit_button').click(function(){
+          			var form_data = jQuery('#ic_register_form').serialize();
+          			jQuery.post("<?= site_url('/wp-admin/admin-ajax.php?action=ic_endorser_register')?>", form_data).success(function(res){
+          				jQuery('#register_status').text(res.status);
+          				jQuery('#register_status').show();
+          			});
+          		});
+          	});
+          </script>
+        </div>
+		<?php
 	}
  }

@@ -26,7 +26,7 @@ class IC_agent_api{
 	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details',
 	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail', 
 			'ic_video_message_by_id', 'ic_message_with_video', 'ic_endorser_register', 'ic_get_tmp_user', 'ic_update_user_status',
-			'ic_endorser_reset_password'
+			'ic_endorser_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -34,6 +34,67 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+
+	function ic_get_giftbit_region(){
+
+		$option = get_option('giftbit');
+		
+		$headers = array('Authorization: Bearer '.$option['api']);
+		
+		if(isset($option['sandbox']))
+			$ch = curl_init("https://testbedapp.giftbit.com/papi/v1/marketplace/region");
+		else	
+			$ch = curl_init("https://api.giftbit.com/papi/v1/marketplace/region");
+		
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		$curl_response = curl_exec($ch);
+		curl_close($ch);
+        
+        $regions = array();
+		$subregions = array();
+		foreach(json_decode($curl_response)->regions as $res)
+		{
+			if(isset($res->parent_id))
+				$subregions[] = $res;
+			else
+				$regions[] = $res;
+		}
+		
+		$response = array('status' => 'Success', 
+							'data' => array(
+								'region' => $regions,
+								'subregion' => $subregions
+							)
+						);
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_get_giftbit_brands(){
+		$option = get_option('giftbit');
+		
+		$headers = array('Authorization: Bearer '.$option['api']);
+
+		if(isset($option['sandbox']))
+				$ch = curl_init("https://testbedapp.giftbit.com/papi/v1/marketplace/?min_price_in_cents=".$_GET['min_amount']."&max_price_in_cents=".$_GET['max_amount']."&region=".$_GET['region']);
+			else	
+				$ch = curl_init("https://api.giftbit.com/papi/v1/marketplace/?min_price_in_cents=".$_GET['min_amount']."&max_price_in_cents=".$_GET['max_amount']."&region=".$_GET['region']);
+			
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			$curl_response3 = curl_exec($ch);
+			curl_close($ch);
+
+			$response = array('status' => 'Success', 
+							'data' => json_decode($curl_response3)->marketplace_gifts
+						);
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_get_tmp_user(){

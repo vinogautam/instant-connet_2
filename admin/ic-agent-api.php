@@ -534,13 +534,20 @@ class IC_agent_api{
 		global $wpdb;
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-
+		
+		$complete = 0;
+		
+		if(isset($_POST['completed'])) {
+			$complete = 1;
+		}
+		
 		$res = $wpdb->insert($wpdb->prefix . "campaigns", array(
 					'title' => $_POST['title'],
 					'type' => $_POST['type'],
 					//'is_default' => $_POST['is_default'],
 					'is_main_site' => is_main_site(),
-					'strategy' => $_POST['strategy']
+					'strategy' => $_POST['strategy'],
+					'completed' => $complete
 				));
 		
 		if($res) {
@@ -596,11 +603,16 @@ class IC_agent_api{
 		global $wpdb;
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-
+		$complete = 0;
+		if(isset($_POST['completed'])) {
+			$complete = 1;
+		}
+		
 		$res = $wpdb->update($wpdb->prefix . "campaigns", array(
 					'title' => $_POST['title'],
 					'type' => $_POST['type'],
-					'strategy' => $_POST['strategy']
+					'strategy' => $_POST['strategy'],
+					'completed' => $complete,
 				), array('id' => $_POST['id']));
 		
 		///if($res) {
@@ -678,9 +690,19 @@ class IC_agent_api{
 				$campaigns[] = $value;
 			}
 		}*/
+		if(isset($_GET['type'])) {
+			$type = $_GET['type'];
+			$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where type = '$type'");
+		} else {
+			
+			if(isset($_GET['default'])) {
+				$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where is_default = 1");
+			} else {
+				$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns");
+			}
+		}
 
-		$type = $_GET['type'];
-		$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where type = '$type'");
+
 		foreach ($results as $key => $value) {
 			$value = (array) $value;
 
@@ -694,6 +716,7 @@ class IC_agent_api{
 			}
 
 			$campaigns[] = $value;
+
 		}
 
 		$response = array('status' => 'Success', 'data' => $campaigns);

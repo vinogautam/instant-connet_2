@@ -266,10 +266,11 @@ if(!class_exists('Stripe'))
 			   linkedin tinytext NOT NULL,
 			   gplus tinytext NOT NULL,
 			   type tinytext NOT NULL,
-			   is_default int(1),
+			   is_default int(1) DEFAULT 0,
 			   is_main_site boolean,
 			   strategy int(11),
 			   created datetime,
+			   completed int(1) DEFAULT 0,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

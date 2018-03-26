@@ -709,7 +709,7 @@ class IC_agent_api{
 
 		$dropdown = '';
 		if(isset($_GET['dropdown']) && $_GET['dropdown'] == 'true'){
-			$dropdown = 'and status = 1'
+			$dropdown = 'and completed = 1'
 		}
 
 		if(isset($_GET['type'])) {
@@ -720,7 +720,7 @@ class IC_agent_api{
 			if(isset($_GET['default'])) {
 				$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where is_default = 1 $dropdown");
 			} elseif($dropdown) {
-				$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where status = 1");
+				$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where completed = 1");
 			} else {
 				$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns");
 			}

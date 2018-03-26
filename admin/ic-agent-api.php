@@ -340,13 +340,27 @@ class IC_agent_api{
 	}
 
 	function ic_set_default_campaign(){
+		global $wpdb;
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
+		
+
+		if(isset($_POST['prev_id'])) {
+			 $res = $wpdb->update($wpdb->prefix . "campaigns", array(			
+					'is_default' => 0,
+				), array('id' => $_POST['prev_id']));
+		}
+
+		$res = $wpdb->update($wpdb->prefix . "campaigns", array(
+				'is_default' => 1,
+				), array('id' => $_POST['new_id'])); 
+		
+		
 		$camps = get_user_meta($_POST['user_id'], 'default_campaign', true);
 
 		$camps = $camps ? $camps : [];
 
-		$camps[$_POST['template']] = $_POST['temp_id'];
+		$camps[$_POST['template']] = $_POST['new_id'];
 
 		update_user_meta($_POST['user_id'], 'default_campaign', $camps);
 

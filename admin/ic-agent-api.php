@@ -706,13 +706,21 @@ class IC_agent_api{
 				$campaigns[] = $value;
 			}
 		}*/
+
+		$dropdown = '';
+		if(isset($_GET['dropdown']) && $_GET['dropdown'] == 'true'){
+			$dropdown = 'and status = 1'
+		}
+
 		if(isset($_GET['type'])) {
 			$type = $_GET['type'];
-			$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where type = '$type'");
+			$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where type = '$type' $dropdown");
 		} else {
 			
 			if(isset($_GET['default'])) {
-				$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where is_default = 1");
+				$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where is_default = 1 $dropdown");
+			} elseif($dropdown) {
+				$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where status = 1");
 			} else {
 				$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns");
 			}

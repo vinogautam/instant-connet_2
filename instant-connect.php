@@ -269,6 +269,7 @@ if(!class_exists('Stripe'))
 			   is_default int(1) DEFAULT 0,
 			   is_main_site boolean,
 			   strategy int(11),
+			   status int(1),
 			   created datetime,
 			   completed int(1) DEFAULT 0,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";

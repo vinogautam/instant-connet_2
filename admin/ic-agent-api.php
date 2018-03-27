@@ -26,7 +26,7 @@ class IC_agent_api{
 	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details',
 	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail', 
 			'ic_video_message_by_id', 'ic_message_with_video', 'ic_endorser_register', 'ic_get_tmp_user', 'ic_update_user_status',
-			'ic_endorser_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands'
+			'ic_endorser_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands', 'ic_send_giftbit_campaign'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -36,6 +36,76 @@ class IC_agent_api{
 	    
 	}
 
+	function ic_send_giftbit_campaign(){
+		global $wpdb;
+
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+
+		$points = $_POST['points'];
+		$user_id = $_POST['user_id'];
+
+		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$user_id);
+		$avail_points = $response->points ? $response->points : 0;
+
+		if($points > $avail_points){
+			$response = array('status' => 'Error', 
+								'msg' => 'Invalid Point selection'
+							);
+		}
+		else {
+			$gift_id = $_POST['gift_id'];
+			$option = get_option('giftbit');
+			
+			$headers = array('Authorization: Bearer '.$option['api']);
+			$amount = ($points / get_option('points_per_dollar')) * 100;
+			$user_info = get_userdata($user_id);
+
+			$headers = array('Authorization: Bearer ' . $option['api'], 'Accept: application/json', 'Content-Type: application/json');
+			$data_string = array(
+							 'subject' => 'Endorser Gift',
+							 'message' => 'Test message',
+							 'contacts' => array(array('firstname' => get_user_meta( $user_id, 'first_name', true), 'lastname' => get_user_meta( $user_id, 'last_name', true), 'email' => $user_info->user_email)),
+							 'marketplace_gifts' => array(array('id' => $gift_id, 'price_in_cents' => $amount)),
+							 'expiry' => date('Y-m-d', strtotime('+6 months')),
+							 'gift_template' => 'XJUPY',
+							 'delivery_type' => 'SHORTLINK',
+							 'id' => time()
+							);
+			//echo json_encode($data_string);				
+			if(isset($option['sandbox']))
+				$ch = curl_init("https://testbedapp.giftbit.com/papi/v1/campaign");
+			else	
+				$ch = curl_init("https://api.giftbit.com/papi/v1/campaign");
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data_string));
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			$curl_response2 = curl_exec($ch);
+			curl_close($ch);
+			
+			$option = get_option('giftbit');
+			$option['amount'] = $option['amount'] - $amount;
+			update_option("giftbit", $option);
+
+			$data = array(
+							'endorser_id' =>$user_id,
+							'points' => -$points,
+							'type' => 'Redeem Point',
+							'notes' => json_decode($curl_response2)->campaign->uuid,
+							'created'	=> date("Y-m-d H:i:s")
+							);
+			$wpdb->insert($wpdb->prefix . "points_transaction", $data);
+
+			$response = array('status' => 'Success', 
+								'msg' => 'Gift coupon sent to your mail'
+							);
+		}
+
+		
+		echo json_encode($response);
+		die(0);
+	}
 
 	function ic_get_giftbit_region(){
 
@@ -121,6 +191,8 @@ class IC_agent_api{
 
 	function ic_update_user_status(){
 		global $wpdb, $ntm_mail;
+
+		$_POST = (array) json_decode(file_get_contents('php://input'));
 
 		$results = $wpdb->update("tmp_user", array(
 				'status' => $_POST['status']
@@ -709,7 +781,7 @@ class IC_agent_api{
 
 		$dropdown = '';
 		if(isset($_GET['dropdown']) && $_GET['dropdown'] == 'true'){
-			$dropdown = 'and completed = 1'
+			$dropdown = 'and completed = 1';
 		}
 
 		if(isset($_GET['type'])) {

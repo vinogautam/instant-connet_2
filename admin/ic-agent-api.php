@@ -53,6 +53,10 @@ class IC_agent_api{
 				$campaign = get_user_meta($value->ID, 'campaign', true);
 				$templates = $wpdb->get_row("select * from ".$wpdb->prefix."campaign_templates where name = 'Followup mail' and campaign_id=".$campaign);
 
+				$date1=date_create($value->user_registered);
+				$date2=date_create(date('Y-m-d'));
+				$diff=date_diff($date1,$date2);
+
 				$subject = stripslashes(stripslashes($templates->subject)) ? stripslashes(stripslashes($templates->subject)) : 'Welcome to financialinsiders';
 				$preheader_text = stripslashes(stripslashes($templates->preheader_text));
 				$content = str_replace("<br />", "", stripslashes(stripslashes($templates->template)));
@@ -61,7 +65,7 @@ class IC_agent_api{
 				$content 	=	str_ireplace('[AGENT]', $agent_info->user_login, $content);
 				$content 	=	str_ireplace('[AGENT_EMAIL]', $agent_info->user_email, $content);				
 				$content	= 	str_ireplace('[SITE]', get_option('blogname'), $content);
-				
+				$content	= 	str_ireplace('[DAYS]', $diff->format("%a"), $content);
 				
 				$fromName = get_option('blogname');
 				$fromEmail = get_option('admin_email');		

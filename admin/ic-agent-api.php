@@ -26,7 +26,8 @@ class IC_agent_api{
 	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details',
 	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail', 
 			'ic_video_message_by_id', 'ic_message_with_video', 'ic_endorser_register', 'ic_get_tmp_user', 'ic_update_user_status',
-			'ic_endorser_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands', 'ic_send_giftbit_campaign'
+			'ic_endorser_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands', 'ic_send_giftbit_campaign',
+			'ic_follow_up_email'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -34,6 +35,49 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_follow_up_email(){
+		global $wpdb, $ntm_mail;
+
+		$data = (array)get_users(array('role' => 'endorser'));
+		$cnt = 0;
+		foreach ($data as $key => $value) {
+			$status = update_user_meta($value->ID, 'end_follow_up', true);
+
+			if(!$status){
+
+				$blog_id = get_active_blog_for_user($value->ID)->blog_id;
+				$agent_id = get_blog_option($blog_id, 'agent_id');
+				$agent_info = get_userdata($agent_id);
+				$campaign = get_user_meta($value->ID, 'campaign', true);
+				$templates = $wpdb->get_row("select * from ".$wpdb->prefix."campaign_templates where name = 'Followup mail' and campaign_id=".$campaign);
+
+				$subject = stripslashes(stripslashes($templates->subject)) ? stripslashes(stripslashes($templates->subject)) : 'Welcome to financialinsiders';
+				$preheader_text = stripslashes(stripslashes($templates->preheader_text));
+				$content = str_replace("<br />", "", stripslashes(stripslashes($templates->template)));
+
+				$content 	=	str_ireplace('[ENDORSER]', get_user_meta($value->ID, 'first_name', true).' '.get_user_meta($value->ID, 'last_name', true), $content);
+				$content 	=	str_ireplace('[AGENT]', $agent_info->user_login, $content);
+				$content 	=	str_ireplace('[AGENT_EMAIL]', $agent_info->user_email, $content);				
+				$content	= 	str_ireplace('[SITE]', get_option('blogname'), $content);
+				
+				
+				$fromName = get_option('blogname');
+				$fromEmail = get_option('admin_email');		
+				$message	=	$ntm_mail->get_mail_template($content, $preheader_text);
+							
+				if($ntm_mail->send_mail($value->user_email, $subject , $message, $fromName, $fromEmail )){
+					$cnt++;
+				}
+			}
+		}
+
+		$response = array('status' => 'Success', 
+								'msg' => $cnt.' follow up mail sent'
+							);
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_send_giftbit_campaign(){
@@ -1223,6 +1267,8 @@ class IC_agent_api{
 							'created'	=> date("Y-m-d H:i:s")
 							);
 			$wpdb->insert($wpdb->prefix . "points_transaction", $data);
+
+			update_user_meta($_POST['endorser_id'], 'end_follow_up', 1);
 		}
 		
 		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$_POST['endorser_id']);
@@ -1287,7 +1333,7 @@ class IC_agent_api{
 		$wpdb->insert($wpdb->prefix . "points_transaction", $data);
 		
 		update_user_meta($_POST['id'], "invitation_sent", (get_user_meta($_POST['id'], "invitation_sent", true) + count($contact_list)));
-
+		update_user_meta($_POST['id'], 'end_follow_up', 1);
 
 		die(0);
 	}
@@ -1511,8 +1557,26 @@ $timekitTimeZone = get_user_meta((int)$user->data->ID, 'timekits_time_zone', tru
 
 	function ic_endorser_list(){
 		global $wpdb;
-		$data = (array)get_users(array('role'=>'endorser'));
+
+		$arr = array('role'=>'endorser');
+		$arr['order'] = $_GET['columns'][$_GET['order'][0]['column']]['data'];
+		$arr['orderby'] = $_GET['order'][0]['dir'];
+		$data = (array)get_users();
 		
+		$recordsTotal = $wpdb->get_results("select * from tmp_user where status = 0");
+		$start = $_GET['start'];
+		$length = $_GET['length'];
+		$offset = $start * $length;
+		$order = 
+		
+		$recordsFiltered = $wpdb->get_results("select * from tmp_user where status = 0 order by $order $orderby limit $offset, $length ");
+
+		$response = array('status' => 'Success', 
+							'data' => $recordsFiltered,
+						  	'recordsTotal' => count($recordsTotal),
+						  	'recordsFiltered' => count($recordsFiltered),
+						);
+
         $newdat = array();
 		foreach($data as $v){
 			$v = (array)$v;

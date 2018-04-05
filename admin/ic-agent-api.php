@@ -910,7 +910,7 @@ class IC_agent_api{
 			$templates = $wpdb->get_row("select * from wp_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
 
 			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
-
+			$endorsement_settings = get_option('endorsement_settings');
 			$data = array(
 					'endorser' => $current_user,
 					'points' => $points->points ? $points->points : 0,
@@ -924,7 +924,8 @@ class IC_agent_api{
 					'fb_text' => $dcampaign->facebook,
 					'tw_text' => $dcampaign->twitter,
 					'li_text' => $dcampaign->linkedin,
-					'agent_avatar' => get_avatar_url($agent_id)
+					'agent_avatar' => get_avatar_url($agent_id),
+					'point_value' =>  $endorsement_settings ? $endorsement_settings['point_value'] : 10;
 				);
 			$response = array('status' => 'Success', 'data' => $data);
 		} else {
@@ -1482,7 +1483,7 @@ $timekitTimeZone = get_user_meta((int)$user->data->ID, 'timekits_time_zone', tru
 			$membership = $wpdb->get_row("select * from wp_pmpro_memberships_users where user_id=".$user->data->ID);
 			$data['membership'] = isset($membership->membership_id) ? $membership->membership_id : 0;
 			$data['timekit_gmail'] = $timekitGmail;
-                        $data['timekit_time_zone'] = $timekitTimeZone;
+            $data['timekit_time_zone'] = $timekitTimeZone;
 			$response = array('status' => 'Success', 'data' => $data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl->siteurl);
 		}
 		echo json_encode($response);

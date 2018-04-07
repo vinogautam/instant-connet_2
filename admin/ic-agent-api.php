@@ -27,7 +27,7 @@ class IC_agent_api{
 	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail', 
 			'ic_video_message_by_id', 'ic_message_with_video', 'ic_endorser_register', 'ic_get_tmp_user', 'ic_update_user_status',
 			'ic_endorser_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands', 'ic_send_giftbit_campaign',
-			'ic_follow_up_email'
+			'ic_follow_up_email', 'ic_get_predefined_notes', 'ic_notes_action'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -35,6 +35,47 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_get_predefined_notes(){
+		global $wpdb;
+
+		$results = $wpdb->get_results("select * from ".$wpdb->prefix . "predefined_notes");
+
+		$response = array('status' => 'Success', 'data' => $results);
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_notes_action(){
+		global $wpdb;
+
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		
+		$perform = $_GET['perform'];
+		$vmsg = $_POST;
+		$msg_id = '';
+
+		if($perform == 'add'){
+			$vmsg['created'] = date('Y-m-d H:i:s')
+			$res = $wpdb->insert($wpdb->prefix . "predefined_notes", $vmsg);
+			$msg_id = $wpdb->insert_id
+		} elseif($perform == 'update') {
+			$msg_id = $vmsg['msg_id'];
+			unset($vmsg['msg_id']);
+			$res = $wpdb->update($wpdb->prefix . "predefined_notes", $vmsg, array('id' => $msg_id));
+		} elseif($perform == 'delete') {
+			$msg_id = $vmsg['msg_id'];
+			$res = $wpdb->delete($wpdb->prefix . "predefined_notes", array("id" => $msg_id));
+		}
+		
+		if($msg_id){
+			$response = array('status' => 'Success', 'id' => $msg_id);
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+		}
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_follow_up_email(){
@@ -335,7 +376,7 @@ class IC_agent_api{
 
 		$results = $wpdb->get_results("select * from agent_billing where user_id='".$_GET['user_id']."'");
 
-		$response = array('status' => 'Success');
+		$response = array('status' => 'Success', 'data' => $results);
 		echo json_encode($response);
 		die(0);
 	}

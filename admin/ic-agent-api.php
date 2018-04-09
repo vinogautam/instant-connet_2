@@ -239,9 +239,9 @@ class IC_agent_api{
 		$headers = array('Authorization: Bearer '.$option['api']);
 
 		if(isset($option['sandbox']))
-				$ch = curl_init("https://testbedapp.giftbit.com/papi/v1/marketplace/?min_price_in_cents=".$_GET['min_amount']."&max_price_in_cents=".$_GET['max_amount']."&region=".$_GET['region']);
+				$ch = curl_init("https://testbedapp.giftbit.com/papi/v1/brands/?min_price_in_cents=".$_GET['min_amount']."&max_price_in_cents=".$_GET['max_amount']."&region=".$_GET['region']);
 			else	
-				$ch = curl_init("https://api.giftbit.com/papi/v1/marketplace/?min_price_in_cents=".$_GET['min_amount']."&max_price_in_cents=".$_GET['max_amount']."&region=".$_GET['region']);
+				$ch = curl_init("https://api.giftbit.com/papi/v1/brands/?min_price_in_cents=".$_GET['min_amount']."&max_price_in_cents=".$_GET['max_amount']."&region=".$_GET['region']);
 			
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

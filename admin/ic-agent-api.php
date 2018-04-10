@@ -950,6 +950,8 @@ class IC_agent_api{
 
 			$templates = $wpdb->get_row("select * from wp_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
 
+			$splittemplate = explode('[NOTES]', $templates);
+
 			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
 			$endorsement_settings = get_option('endorsement_settings');
 			$data = array(
@@ -958,7 +960,11 @@ class IC_agent_api{
 					'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')).'&video='.$video,
 					'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')).'&video='.$video,
 					'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')).'&video='.$video,
-					'mailtemplate' => $mailtemplate,
+					'mailtemplate' => array(
+						'header' => $splittemplate[0],
+						'footer' => $splittemplate[1],
+						'body' => '[NOTES]'
+					),
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
 					'twitter_text' => get_option('twitter_text'),

@@ -360,7 +360,7 @@ if(!class_exists('Stripe'))
 			dbDelta($sql_one);
 		}
 
-		$mailtemplates = $wpdb->prefix . "predefined_notes";
+		$mailtemplates = "predefined_notes";
 
 		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){
 			$sql_one = "CREATE TABLE " . $mailtemplates . "(

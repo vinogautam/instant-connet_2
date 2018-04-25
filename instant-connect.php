@@ -366,6 +366,7 @@ if(!class_exists('Stripe'))
 			$sql_one = "CREATE TABLE " . $mailtemplates . "(
 			  id int(11) NOT NULL AUTO_INCREMENT,
 			  agent_id int(11),
+			  campaign_id int(11),
 			  name tinytext NOT NULL,
 			  content tinytext NOT NULL,
 			  status int(1),

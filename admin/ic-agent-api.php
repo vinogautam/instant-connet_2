@@ -952,7 +952,7 @@ class IC_agent_api{
 			$agent_id = get_blog_option($blog_id, 'agent_id');
 
 
-			$points = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$current_user->ID);
+			$points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id=".$current_user->ID);
 
 			$campaign = get_user_meta($current_user->ID, 'campaign', true);
 			$templates = $wpdb->get_row("select * from wp_".$blog_id."_campaign_templates where name = 'Endorsement Letter' and campaign_id=".$campaign);
@@ -966,8 +966,8 @@ class IC_agent_api{
 			$dcampaign = $wpdb->get_row("select * from wp_campaigns where id=".$campaign);
 			$pagelink = get_post_meta($dcampaign->strategy, 'strategy_link', true);
 
-
-			$splittemplate = explode('[ENDORSERS NOTES]', $mailtemplate);
+			$content = str_replace("<br />", "", stripslashes(stripslashes($templates->template)));
+			//$splittemplate = explode('[ENDORSERS NOTES]', $mailtemplate);
 
 			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
 			$endorsement_settings = get_option('endorsement_settings');
@@ -977,11 +977,11 @@ class IC_agent_api{
 					'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')).'&video='.$video,
 					'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')).'&video='.$video,
 					'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')).'&video='.$video,
-					//'mailtemplate' => array(
-					//	'header' => $splittemplate[0],
-						//'footer' => $splittemplate[1],
-						//'body' => '[NOTES]'
-					//),
+					// 'mailtemplate' => array(
+					// 	'header' => $splittemplate[0],
+					// 	'footer' => $splittemplate[1],
+					// 	'body' => '[NOTES]'
+					// ),
 					'mailtemplate' => str_replace('[ENDORSERS NOTES]', "<div id='dynamicNoteContainer' ckeditor='textEditorOptions' ng-model='bodyContent' style='background-color: white;'>", $content),
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
@@ -991,7 +991,7 @@ class IC_agent_api{
 					'tw_text' => $dcampaign->twitter,
 					'li_text' => $dcampaign->linkedin,
 					'agent_avatar' => get_avatar_url($agent_id),
-					'point_value' =>  $endorsement_settings ? $endorsement_settings['point_value'] : 10
+					'point' =>  $endorsement_settings
 				);
 			$response = array('status' => 'Success', 'data' => $data);
 		} else {

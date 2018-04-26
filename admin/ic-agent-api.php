@@ -46,7 +46,7 @@ class IC_agent_api{
 		$response = array('status' => 'Success', 
 							'data' => $recordsTotal
 						);
-		}
+		
 		echo json_encode($response);
 		die(0);
 	}

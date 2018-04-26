@@ -41,21 +41,8 @@ class IC_agent_api{
 		global $wpdb;
 
 		
-		$recordsTotal = $wpdb->get_results("select * from predefined_notes where agent_id = ".$_GET['agent_id']);
-		if(!isset($_GET['frontend'])){
-		$start = $_GET['start'];
-		$length = $_GET['length'];
-		$offset = $start * $length;
-		$order = $_GET['columns'][$_GET['order'][0]['column']]['data'];
-		$orderby = $_GET['order'][0]['dir'];
-		$recordsFiltered = $wpdb->get_results("select * from predefined_notes where agent_id = ".$_GET['agent_id']." order by $order $orderby limit $offset, $length ");
-
-		$response = array('status' => 'Success', 
-							'data' => $recordsFiltered,
-						  	'recordsTotal' => count($recordsTotal),
-						  	'recordsFiltered' => count($recordsFiltered),
-						);
-		} else {
+		$recordsTotal = $wpdb->get_results("select * from predefined_notes where campaign_id = ".$_GET['campaign_id']);
+		
 		$response = array('status' => 'Success', 
 							'data' => $recordsTotal
 						);

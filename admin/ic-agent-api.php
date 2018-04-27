@@ -978,7 +978,8 @@ class IC_agent_api{
 					'tw_text' => $dcampaign->twitter,
 					'li_text' => $dcampaign->linkedin,
 					'agent_avatar' => get_avatar_url($agent_id),
-					'point' =>  $endorsement_settings
+					'point' =>  $endorsement_settings,
+					'campaign' => $campaign
 				);
 			$response = array('status' => 'Success', 'data' => $data);
 		} else {

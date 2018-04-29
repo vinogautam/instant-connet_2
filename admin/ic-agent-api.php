@@ -26,7 +26,8 @@ class IC_agent_api{
 	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details',
 	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail', 
 			'ic_video_message_by_id', 'ic_message_with_video', 'ic_endorser_register', 'ic_get_tmp_user', 'ic_update_user_status',
-			'ic_endorser_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands'
+			'ic_endorser_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands', 'ic_send_giftbit_campaign',
+			'ic_follow_up_email', 'ic_get_predefined_notes', 'ic_notes_action'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -36,6 +37,168 @@ class IC_agent_api{
 	    
 	}
 
+	function ic_get_predefined_notes(){
+		global $wpdb;
+
+		
+		$recordsTotal = $wpdb->get_results("select * from predefined_notes where campaign_id = ".$_GET['campaign_id']);
+		
+		$response = array('status' => 'Success', 
+							'data' => $recordsTotal
+						);
+		
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_notes_action(){
+		global $wpdb;
+
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		
+		$perform = $_GET['perform'];
+		$vmsg = $_POST;
+		$msg_id = '';
+
+		if($perform == 'add'){
+			$vmsg['created'] = date('Y-m-d H:i:s');
+			$res = $wpdb->insert("predefined_notes", $vmsg);
+			$msg_id = $wpdb->insert_id;
+		} elseif($perform == 'update') {
+			$msg_id = $vmsg['id'];
+			unset($vmsg['msg_id']);
+			$res = $wpdb->update("predefined_notes", $vmsg, array('id' => $msg_id));
+		} elseif($perform == 'delete') {
+			$msg_id = $vmsg['id'];
+			$res = $wpdb->delete("predefined_notes", array("id" => $msg_id));
+		}
+		
+		if($msg_id){
+			$response = array('status' => 'Success', 'id' => $msg_id);
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+		}
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_follow_up_email(){
+		global $wpdb, $ntm_mail;
+
+		$data = (array)get_users(array('role' => 'endorser'));
+		$cnt = 0;
+		foreach ($data as $key => $value) {
+			$status = update_user_meta($value->ID, 'end_follow_up', true);
+
+			if(!$status){
+
+				$blog_id = get_active_blog_for_user($value->ID)->blog_id;
+				$agent_id = get_blog_option($blog_id, 'agent_id');
+				$agent_info = get_userdata($agent_id);
+				$campaign = get_user_meta($value->ID, 'campaign', true);
+				$templates = $wpdb->get_row("select * from ".$wpdb->prefix."campaign_templates where name = 'Followup mail' and campaign_id=".$campaign);
+
+				$date1=date_create($value->user_registered);
+				$date2=date_create(date('Y-m-d'));
+				$diff=date_diff($date1,$date2);
+
+				$subject = stripslashes(stripslashes($templates->subject)) ? stripslashes(stripslashes($templates->subject)) : 'Welcome to financialinsiders';
+				$preheader_text = stripslashes(stripslashes($templates->preheader_text));
+				$content = str_replace("<br />", "", stripslashes(stripslashes($templates->template)));
+
+				$content 	=	str_ireplace('[ENDORSER]', get_user_meta($value->ID, 'first_name', true).' '.get_user_meta($value->ID, 'last_name', true), $content);
+				$content 	=	str_ireplace('[AGENT]', $agent_info->user_login, $content);
+				$content 	=	str_ireplace('[AGENT_EMAIL]', $agent_info->user_email, $content);				
+				$content	= 	str_ireplace('[SITE]', get_option('blogname'), $content);
+				$content	= 	str_ireplace('[DAYS]', $diff->format("%a"), $content);
+				
+				$fromName = get_option('blogname');
+				$fromEmail = get_option('admin_email');		
+				$message	=	$ntm_mail->get_mail_template($content, $preheader_text);
+							
+				if($ntm_mail->send_mail($value->user_email, $subject , $message, $fromName, $fromEmail )){
+					$cnt++;
+				}
+			}
+		}
+
+		$response = array('status' => 'Success', 
+								'msg' => $cnt.' follow up mail sent'
+							);
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_send_giftbit_campaign(){
+		global $wpdb;
+
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+
+		$points = $_POST['points'];
+		$user_id = $_POST['user_id'];
+
+		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$user_id);
+		$avail_points = $response->points ? $response->points : 0;
+
+		if($points > $avail_points){
+			$response = array('status' => 'Error', 
+								'msg' => 'Invalid Point selection'
+							);
+		}
+		else {
+			$gift_id = $_POST['gift_id'];
+			$option = get_option('giftbit');
+			
+			$headers = array('Authorization: Bearer '.$option['api']);
+			$amount = ($points / get_option('points_per_dollar')) * 100;
+			$user_info = get_userdata($user_id);
+
+			$headers = array('Authorization: Bearer ' . $option['api'], 'Accept: application/json', 'Content-Type: application/json');
+			$data_string = array(
+							 'subject' => 'Endorser Gift',
+							 'message' => 'Test message',
+							 'contacts' => array(array('firstname' => get_user_meta( $user_id, 'first_name', true), 'lastname' => get_user_meta( $user_id, 'last_name', true), 'email' => $user_info->user_email)),
+							 'marketplace_gifts' => array(array('id' => $gift_id, 'price_in_cents' => $amount)),
+							 'expiry' => date('Y-m-d', strtotime('+6 months')),
+							 'gift_template' => 'XJUPY',
+							 'delivery_type' => 'SHORTLINK',
+							 'id' => time()
+							);
+			//echo json_encode($data_string);				
+			if(isset($option['sandbox']))
+				$ch = curl_init("https://testbedapp.giftbit.com/papi/v1/campaign");
+			else	
+				$ch = curl_init("https://api.giftbit.com/papi/v1/campaign");
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data_string));
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			$curl_response2 = curl_exec($ch);
+			curl_close($ch);
+			
+			$option = get_option('giftbit');
+			$option['amount'] = $option['amount'] - $amount;
+			update_option("giftbit", $option);
+
+			$data = array(
+							'endorser_id' =>$user_id,
+							'points' => -$points,
+							'type' => 'Redeem Point',
+							'notes' => json_decode($curl_response2)->campaign->uuid,
+							'created'	=> date("Y-m-d H:i:s")
+							);
+			$wpdb->insert($wpdb->prefix . "points_transaction", $data);
+
+			$response = array('status' => 'Success', 
+								'msg' => 'Gift coupon sent to your mail'
+							);
+		}
+
+		
+		echo json_encode($response);
+		die(0);
+	}
 
 	function ic_get_giftbit_region(){
 
@@ -80,9 +243,9 @@ class IC_agent_api{
 		$headers = array('Authorization: Bearer '.$option['api']);
 
 		if(isset($option['sandbox']))
-				$ch = curl_init("https://testbedapp.giftbit.com/papi/v1/marketplace/?min_price_in_cents=".$_GET['min_amount']."&max_price_in_cents=".$_GET['max_amount']."&region=".$_GET['region']);
+				$ch = curl_init("https://testbedapp.giftbit.com/papi/v1/brands/?min_price_in_cents=".$_GET['min_amount']."&max_price_in_cents=".$_GET['max_amount']."&region=".$_GET['region']);
 			else	
-				$ch = curl_init("https://api.giftbit.com/papi/v1/marketplace/?min_price_in_cents=".$_GET['min_amount']."&max_price_in_cents=".$_GET['max_amount']."&region=".$_GET['region']);
+				$ch = curl_init("https://api.giftbit.com/papi/v1/brands/?min_price_in_cents=".$_GET['min_amount']."&max_price_in_cents=".$_GET['max_amount']."&region=".$_GET['region']);
 			
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -91,7 +254,7 @@ class IC_agent_api{
 			curl_close($ch);
 
 			$response = array('status' => 'Success', 
-							'data' => json_decode($curl_response3)->marketplace_gifts
+							'data' => json_decode($curl_response3)
 						);
 		echo json_encode($response);
 		die(0);
@@ -122,17 +285,19 @@ class IC_agent_api{
 	function ic_update_user_status(){
 		global $wpdb, $ntm_mail;
 
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+
 		$results = $wpdb->update("tmp_user", array(
 				'status' => $_POST['status']
 			), array('id' => $_POST['id'])
 		);
 
 		if($_POST['status'] == 2){
-			$tmp_user = $wpdb->get_row("select * from tmp_user where id='".$_POST['id']."'");
+			$tmp_user = (array)$wpdb->get_row("select * from tmp_user where id='".$_POST['id']."'");
 			$user = array();
 			$user['role'] = 'endorser';
-			$user['user_email'] = $user['email'];
-			$user['user_login'] = strtolower($user['firstname'].'_'.$user['lastname']);
+			$user['user_email'] = $tmp_user['email'];
+			$user['user_login'] = strtolower($tmp_user['firstname'].'_'.$tmp_user['lastname']);
 			
 			$user_id = username_exists( $user['user_login'] );
 			if ( !$user_id and email_exists($user['user_email']) == false ) {
@@ -215,7 +380,7 @@ class IC_agent_api{
 
 		$results = $wpdb->get_results("select * from agent_billing where user_id='".$_GET['user_id']."'");
 
-		$response = array('status' => 'Success');
+		$response = array('status' => 'Success', 'data' => $results);
 		echo json_encode($response);
 		die(0);
 	}
@@ -340,13 +505,27 @@ class IC_agent_api{
 	}
 
 	function ic_set_default_campaign(){
+		global $wpdb;
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
+		
+
+		if(isset($_POST['prev_id'])) {
+			 $res = $wpdb->update($wpdb->prefix . "campaigns", array(			
+					'is_default' => 0,
+				), array('id' => $_POST['prev_id']));
+		}
+
+		$res = $wpdb->update($wpdb->prefix . "campaigns", array(
+				'is_default' => 1,
+				), array('id' => $_POST['new_id'])); 
+		
+		
 		$camps = get_user_meta($_POST['user_id'], 'default_campaign', true);
 
 		$camps = $camps ? $camps : [];
 
-		$camps[$_POST['template']] = $_POST['temp_id'];
+		$camps[$_POST['template']] = $_POST['new_id'];
 
 		update_user_meta($_POST['user_id'], 'default_campaign', $camps);
 
@@ -603,7 +782,9 @@ class IC_agent_api{
 		global $wpdb;
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		
 		$complete = 0;
+		
 		if(isset($_POST['completed'])) {
 			$complete = 1;
 		}
@@ -690,13 +871,21 @@ class IC_agent_api{
 				$campaigns[] = $value;
 			}
 		}*/
+
+		$dropdown = '';
+		if(isset($_GET['dropdown']) && $_GET['dropdown'] == 'true'){
+			$dropdown = 'and completed = 1';
+		}
+
 		if(isset($_GET['type'])) {
 			$type = $_GET['type'];
-			$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where type = '$type'");
+			$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where type = '$type' $dropdown");
 		} else {
 			
 			if(isset($_GET['default'])) {
-				$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where is_default = 1");
+				$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where is_default = 1 $dropdown");
+			} elseif($dropdown) {
+				$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns where completed = 1");
 			} else {
 				$results = $wpdb->get_results("select * from ".$wpdb->prefix . "campaigns");
 			}
@@ -745,42 +934,52 @@ class IC_agent_api{
 		$creds['remember'] = true;
 		$current_user = wp_signon( $creds, false );
 
-		$points = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$current_user->ID);
-
-		$campaign = get_user_meta($current_user->ID, 'campaign', true);
-		$templates = $wpdb->get_row("select * from wp_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
-
-		$subject = 'Endorser Invitation';
-		$content = str_replace("<br />", "", stripslashes(stripslashes($templates->template)));
-
-		$mailtemplate = '<html><head><style>'.stripslashes(strip_tags(get_option('mail_template_css'))).'</style></head><body>'.$content.'</body></html>';
-
 		if(!is_wp_error($current_user)) {
 			$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
 			$agent_id = get_blog_option($blog_id, 'agent_id');
+
+
+			$points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id=".$current_user->ID);
+
+			$campaign = get_user_meta($current_user->ID, 'campaign', true);
+			$templates = $wpdb->get_row("select * from wp_".$blog_id."_campaign_templates where name = 'Endorsement Letter' and campaign_id=".$campaign);
+
+			$content = str_replace("<br />", "", stripslashes(stripslashes($templates->template)));
+
+			$mailtemplate = '<html><head><style>'.stripslashes(strip_tags(get_option('mail_template_css'))).'</style></head><body>'.$content.'</body></html>';
+
 
 			$campaign = get_user_meta($current_user->ID, 'campaign', true);
 			$dcampaign = $wpdb->get_row("select * from wp_campaigns where id=".$campaign);
 			$pagelink = get_post_meta($dcampaign->strategy, 'strategy_link', true);
 
-			$templates = $wpdb->get_row("select * from wp_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
+			$content = str_replace("<br />", "", stripslashes(stripslashes($templates->template)));
+			//$splittemplate = explode('[ENDORSERS NOTES]', $mailtemplate);
 
 			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
-
+			$endorsement_settings = get_option('endorsement_settings');
 			$data = array(
 					'endorser' => $current_user,
 					'points' => $points->points ? $points->points : 0,
 					'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')).'&video='.$video,
 					'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')).'&video='.$video,
 					'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')).'&video='.$video,
-					'mailtemplate' => $mailtemplate,
+					// 'mailtemplate' => array(
+					// 	'header' => $splittemplate[0],
+					// 	'footer' => $splittemplate[1],
+					// 	'body' => '[NOTES]'
+					// ),
+					'mailtemplate' => str_replace('[ENDORSERS NOTES]', "<div id='dynamicNoteContainer' ckeditor='textEditorOptions' ng-model='bodyContent' style='background-color: white;'>", $content),
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
 					'twitter_text' => get_option('twitter_text'),
+					'points_per_dollar' => get_option('points_per_dollar'),
 					'fb_text' => $dcampaign->facebook,
 					'tw_text' => $dcampaign->twitter,
 					'li_text' => $dcampaign->linkedin,
-					'agent_avatar' => get_avatar_url($agent_id)
+					'agent_avatar' => get_avatar_url($agent_id),
+					'point' =>  $endorsement_settings,
+					'campaign' => $campaign
 				);
 			$response = array('status' => 'Success', 'data' => $data);
 		} else {
@@ -1127,6 +1326,8 @@ class IC_agent_api{
 							'created'	=> date("Y-m-d H:i:s")
 							);
 			$wpdb->insert($wpdb->prefix . "points_transaction", $data);
+
+			update_user_meta($_POST['endorser_id'], 'end_follow_up', 1);
 		}
 		
 		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$_POST['endorser_id']);
@@ -1191,7 +1392,7 @@ class IC_agent_api{
 		$wpdb->insert($wpdb->prefix . "points_transaction", $data);
 		
 		update_user_meta($_POST['id'], "invitation_sent", (get_user_meta($_POST['id'], "invitation_sent", true) + count($contact_list)));
-
+		update_user_meta($_POST['id'], 'end_follow_up', 1);
 
 		die(0);
 	}
@@ -1336,7 +1537,7 @@ $timekitTimeZone = get_user_meta((int)$user->data->ID, 'timekits_time_zone', tru
 			$membership = $wpdb->get_row("select * from wp_pmpro_memberships_users where user_id=".$user->data->ID);
 			$data['membership'] = isset($membership->membership_id) ? $membership->membership_id : 0;
 			$data['timekit_gmail'] = $timekitGmail;
-                        $data['timekit_time_zone'] = $timekitTimeZone;
+            $data['timekit_time_zone'] = $timekitTimeZone;
 			$response = array('status' => 'Success', 'data' => $data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl->siteurl);
 		}
 		echo json_encode($response);
@@ -1415,8 +1616,26 @@ $timekitTimeZone = get_user_meta((int)$user->data->ID, 'timekits_time_zone', tru
 
 	function ic_endorser_list(){
 		global $wpdb;
-		$data = (array)get_users(array('role'=>'endorser'));
+
+		$arr = array('role'=>'endorser');
+		$arr['order'] = $_GET['columns'][$_GET['order'][0]['column']]['data'];
+		$arr['orderby'] = $_GET['order'][0]['dir'];
+		$data = (array)get_users();
 		
+		$recordsTotal = $wpdb->get_results("select * from tmp_user where status = 0");
+		$start = $_GET['start'];
+		$length = $_GET['length'];
+		$offset = $start * $length;
+		$order = 
+		
+		$recordsFiltered = $wpdb->get_results("select * from tmp_user where status = 0 order by $order $orderby limit $offset, $length ");
+
+		$response = array('status' => 'Success', 
+							'data' => $recordsFiltered,
+						  	'recordsTotal' => count($recordsTotal),
+						  	'recordsFiltered' => count($recordsFiltered),
+						);
+
         $newdat = array();
 		foreach($data as $v){
 			$v = (array)$v;

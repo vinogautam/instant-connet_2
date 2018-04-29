@@ -266,10 +266,11 @@ if(!class_exists('Stripe'))
 			   linkedin tinytext NOT NULL,
 			   gplus tinytext NOT NULL,
 			   type tinytext NOT NULL,
-			   is_default int(1),
+			   is_default int(1) DEFAULT 0,
 			   is_main_site boolean,
 			   strategy int(11),
 			   created datetime,
+			   completed int(1) DEFAULT 0,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -353,6 +354,23 @@ if(!class_exists('Stripe'))
 			   email tinytext NOT NULL,
 			   status int(1),
 			   created datetime,
+			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
+
+			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+			dbDelta($sql_one);
+		}
+
+		$mailtemplates = "predefined_notes";
+
+		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){
+			$sql_one = "CREATE TABLE " . $mailtemplates . "(
+			  id int(11) NOT NULL AUTO_INCREMENT,
+			  agent_id int(11),
+			  campaign_id int(11),
+			  name tinytext NOT NULL,
+			  content tinytext NOT NULL,
+			  status int(1),
+			  created datetime,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

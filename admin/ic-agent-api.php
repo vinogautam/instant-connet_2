@@ -1048,7 +1048,9 @@ class IC_agent_api{
 					'fb_text' => $dcampaign->facebook,
 					'tw_text' => $dcampaign->twitter,
 					'li_text' => $dcampaign->linkedin,
-					'agent_avatar' => get_avatar_url($agent_id)
+					'agent_avatar' => get_avatar_url($agent_id),
+					'campaign' => $campaign
+
 				);
 			$response = array('status' => 'Success', 'data' => $data);
 		} else {

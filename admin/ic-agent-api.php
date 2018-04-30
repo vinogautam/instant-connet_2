@@ -88,7 +88,7 @@ class IC_agent_api{
 		$data = (array)get_users(array('role' => 'endorser'));
 		$cnt = 0;
 		foreach ($data as $key => $value) {
-			$status = update_user_meta($value->ID, 'end_follow_up', true);
+			$status = get_user_meta($value->ID, 'end_follow_up', true);
 
 			if(!$status){
 
@@ -964,11 +964,6 @@ class IC_agent_api{
 					'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')).'&video='.$video,
 					'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')).'&video='.$video,
 					'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')).'&video='.$video,
-					// 'mailtemplate' => array(
-					// 	'header' => $splittemplate[0],
-					// 	'footer' => $splittemplate[1],
-					// 	'body' => '[NOTES]'
-					// ),
 					'mailtemplate' => str_replace('[ENDORSERS NOTES]', "<div id='dynamicNoteContainer' ckeditor='textEditorOptions' ng-model='bodyContent' style='background-color: white;'>", $content),
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
@@ -1320,14 +1315,26 @@ class IC_agent_api{
 			$settings = get_user_meta($agent_id, 'endorsement_settings', true);
 			$points = $_POST['type'] == 'fbShare' ? $settings['fb_point_value'] : $settings['linked_point_value'] ;
 
-			$data = array(
-							'endorser_id' =>$_POST['endorser_id'],
-							'points' => $points,
-							'type' => $_POST['type'],
-							'notes' => $_POST['notes'],
-							'created'	=> date("Y-m-d H:i:s")
-							);
-			$wpdb->insert($wpdb->prefix . "points_transaction", $data);
+			$monthly_invitation_allowance = $settings[['monthly_invitation_allowance'];
+			$results = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where created like '".date("Y-m-")."%' and user_id='".$_POST['endorser_id']."'");
+
+			$endorser_points = $results->points ? $results->points : 0;
+
+			if($endorser_points < $monthly_invitation_allowance){
+
+				if(($points + $endorser_points) > $monthly_invitation_allowance){
+					$points = $monthly_invitation_allowance - $endorser_points;
+				}
+
+				$data = array(
+								'endorser_id' =>$_POST['endorser_id'],
+								'points' => $points,
+								'type' => $_POST['type'],
+								'notes' => $_POST['notes'],
+								'created'	=> date("Y-m-d H:i:s")
+								);
+				$wpdb->insert($wpdb->prefix . "points_transaction", $data);
+			}
 
 			update_user_meta($_POST['endorser_id'], 'end_follow_up', 1);
 		}
@@ -1380,20 +1387,36 @@ class IC_agent_api{
 		$agent_id = get_blog_option($blog_id, 'agent_id');
 		$points = get_user_meta($agent_id, 'endorsement_settings', true)['email_point_value'];
 		$note_points = get_user_meta($agent_id, 'endorsement_settings', true)['note_point_value'];
-
 		if(strlen($notes) > 100){
 			$points += $note_points;
 		}
 
-		$data = array(
-						'endorser_id' => $_POST['id'],
-						'points' => $points,
-						'type' => 'email_invitation',
-						'created'	=> date("Y-m-d H:i:s")
-						);
-		$wpdb->insert($wpdb->prefix . "points_transaction", $data);
+		$monthly_invitation_allowance = get_user_meta($agent_id, 'endorsement_settings', true)['monthly_invitation_allowance'];
 		
-		update_user_meta($_POST['id'], "invitation_sent", (get_user_meta($_POST['id'], "invitation_sent", true) + count($contact_list)));
+		$results = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where created like '".date("Y-m-")."%' and user_id='".$_POST['id']."'");
+
+		$endorser_points = $results->points ? $results->points : 0;
+
+		if($endorser_points < $monthly_invitation_allowance){
+
+			$total_points = $points * $contact_list;
+
+
+			if(($total_points + $endorser_points) > $monthly_invitation_allowance){
+				$total_points = $monthly_invitation_allowance - $endorser_points;
+			}
+
+			$data = array(
+							'endorser_id' => $_POST['id'],
+							'points' => $total_points,
+							'type' => 'email_invitation',
+							'created'	=> date("Y-m-d H:i:s")
+							);
+			$wpdb->insert($wpdb->prefix . "points_transaction", $data);
+			
+			update_user_meta($_POST['id'], "invitation_sent", (get_user_meta($_POST['id'], "invitation_sent", true) + count($contact_list)));
+		}
+
 		update_user_meta($_POST['id'], 'end_follow_up', 1);
 
 		die(0);

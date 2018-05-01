@@ -957,7 +957,7 @@ class IC_agent_api{
 			//$splittemplate = explode('[ENDORSERS NOTES]', $mailtemplate);
 
 			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
-			$endorsement_settings = get_option('endorsement_settings');
+			$endorsement_settings = get_user_meta($agent_id, 'endorsement_settings', true);
 			$data = array(
 					'endorser' => $current_user,
 					'points' => $points->points ? $points->points : 0,
@@ -1033,7 +1033,7 @@ class IC_agent_api{
 			$templates = $wpdb->get_row("select * from wp_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
 
 			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
-			$endorsement_settings = get_option('endorsement_settings');
+			$endorsement_settings = get_user_meta($agent_id, 'endorsement_settings', true);
 			$data = array(
 					'endorser' => $current_user,
 					'points' => $points->points ? $points->points : 0,

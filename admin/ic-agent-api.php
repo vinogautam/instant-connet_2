@@ -1002,6 +1002,8 @@ class IC_agent_api{
 		$current_user = wp_signon( $creds, false );
 
 		$points = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$current_user->ID);
+		$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
+			$agent_id = get_blog_option($blog_id, 'agent_id');
 
 		/*$endorser_letter = get_user_meta($current_user->ID, 'endorsement_letter', true);
 		if($endorser_letter)
@@ -1016,10 +1018,12 @@ class IC_agent_api{
 		}*/
 
 		$campaign = get_user_meta($current_user->ID, 'campaign', true);
-		$templates = $wpdb->get_row("select * from wp_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
+		
+			$templates = $wpdb->get_row("select * from wp_".$blog_id."_campaign_templates where name = 'Endorsement Letter' and campaign_id=".$campaign);
 
-		$subject = 'Endorser Invitation';
-		$content = str_replace("<br />", "", stripslashes(stripslashes($templates->template)));
+			$content = str_replace("<br />", "", stripslashes(stripslashes($templates->template)));
+
+			$mailtemplate = '<html><head><style>'.stripslashes(strip_tags(get_option('mail_template_css'))).'</style></head><body>'.$content.'</body></html>';
 
 		$mailtemplate = '<html><head><style>'.stripslashes(strip_tags(get_option('mail_template_css'))).'</style></head><body>'.$content.'</body></html>';
 
@@ -1041,7 +1045,7 @@ class IC_agent_api{
 					'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')).'&video='.$video,
 					'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')).'&video='.$video,
 					'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')).'&video='.$video,
-					'mailtemplate' => $mailtemplate,
+					'mailtemplate' => str_replace('[ENDORSERS NOTES]', "<div id='dynamicNoteContainer' ckeditor='textEditorOptions' ng-model='bodyContent' style='background-color: white;'>", $content),
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
 					'twitter_text' => get_option('twitter_text'),

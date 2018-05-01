@@ -973,7 +973,7 @@ class IC_agent_api{
 					'tw_text' => $dcampaign->twitter,
 					'li_text' => $dcampaign->linkedin,
 					'agent_avatar' => get_avatar_url($agent_id),
-					'point' =>  $endorsement_settings,
+					'point_settings' =>  $endorsement_settings,
 					'campaign' => $campaign
 				);
 			$response = array('status' => 'Success', 'data' => $data);
@@ -1033,7 +1033,7 @@ class IC_agent_api{
 			$templates = $wpdb->get_row("select * from wp_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
 
 			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
-
+			$endorsement_settings = get_option('endorsement_settings');
 			$data = array(
 					'endorser' => $current_user,
 					'points' => $points->points ? $points->points : 0,
@@ -1048,6 +1048,7 @@ class IC_agent_api{
 					'tw_text' => $dcampaign->twitter,
 					'li_text' => $dcampaign->linkedin,
 					'agent_avatar' => get_avatar_url($agent_id),
+					'point_settings' => $endorsement_settings,
 					'campaign' => $campaign
 
 				);

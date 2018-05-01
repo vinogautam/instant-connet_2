@@ -1319,7 +1319,7 @@ class IC_agent_api{
 			$settings = get_user_meta($agent_id, 'endorsement_settings', true);
 			$points = $_POST['type'] == 'fbShare' ? $settings['fb_point_value'] : $settings['linked_point_value'] ;
 
-			$monthly_invitation_allowance = $settings[['monthly_invitation_allowance'];
+			$monthly_invitation_allowance = $settings['monthly_invitation_allowance'];
 			$results = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where created like '".date("Y-m-")."%' and user_id='".$_POST['endorser_id']."'");
 
 			$endorser_points = $results->points ? $results->points : 0;

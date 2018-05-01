@@ -33,7 +33,7 @@ class IC_front{
 			$fiApp.siteId = "<?php echo $siteidd;?>";
 			$fiApp.blogUrl = "<?php echo get_site_url($siteidd);?>";
 			$fiApp.visited_page = "<?php echo $_COOKIE['fa_surfing_page'];?>";
-			$fiApp.introVideo = "<?php echo $_GET['video']; ?>";
+			$fiApp.introVideo = "<?php if(!empty($_GET['video'])) { echo $_GET['video']; } ?>";
 			
 			if($fiApp.endorserId || $fiApp.siteId){
 				var d = document, s = d.createElement('script'); 

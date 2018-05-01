@@ -1364,12 +1364,13 @@ class IC_agent_api{
 		$contact_list = $_POST['contacts'];
 		$notes = $_POST['template'];
 
+		$blog_id = get_active_blog_for_user( $_POST['id'] )->blog_id;
 		$campaign = get_user_meta($_POST['id'], 'campaign', true);
-		$templates = $wpdb->get_row("select * from wp_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
+		$templates = $wpdb->get_row("select * from wp_".$blog_id."_campaign_templates where name = 'Endorsement Letter' and campaign_id=".$campaign);
 
 		$subject = 'Endorser Invitation';
 		$content = str_ireplace("<br />", "", stripslashes(stripslashes($templates->template)));
-		$content = str_ireplace("[NOTES]", $notes, $content);
+		$content = str_ireplace("[ENDORSERS NOTES]", $notes, $content);
 		$endorse_letter = $content;
 
 		foreach($contact_list as $res)

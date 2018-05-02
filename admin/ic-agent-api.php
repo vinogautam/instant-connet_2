@@ -1573,7 +1573,7 @@ class IC_agent_api{
 		$userBlogs = get_blogs_of_user((int)$user->data->ID);
 		$timekitGmail = get_user_meta((int)$user->data->ID, 'timekits_gmail_email', true);
 		$timekitTimeZone = get_user_meta((int)$user->data->ID, 'timekits_time_zone', true);
-		$siteUrl = get_user_meta((int)$user->data->ID, 'domain', true);
+		$siteUrl = get_site_url(get_user_meta((int)$user->data->ID, 'primary_blog', true));
 		if ( is_wp_error($user) ) {
 			$response = array('status' => 'Error', 'msg' => 'Invalid Credentials');
 		}
@@ -1583,7 +1583,7 @@ class IC_agent_api{
 			$data['membership'] = isset($membership->membership_id) ? $membership->membership_id : 0;
 			$data['timekit_gmail'] = $timekitGmail;
             $data['timekit_time_zone'] = $timekitTimeZone;
-			$response = array('status' => 'Success', 'data' => $data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl->siteurl);
+			$response = array('status' => 'Success', 'data' => $data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl);
 		}
 		echo json_encode($response);
 		die(0);

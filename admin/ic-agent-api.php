@@ -1663,8 +1663,8 @@ class IC_agent_api{
 		global $wpdb;
 
 		$arr = array('role'=>'endorser');
-		$arr['order'] = $_GET['columns'][$_GET['order'][0]['column']]['data'];
-		$arr['orderby'] = $_GET['order'][0]['dir'];
+		//$arr['order'] = $_GET['columns'][$_GET['order'][0]['column']]['data'];
+		//$arr['orderby'] = $_GET['order'][0]['dir'];
 		$data = (array)get_users($arr);
 		
 		/*$recordsTotal = $wpdb->get_results("select * from tmp_user where status = 0");

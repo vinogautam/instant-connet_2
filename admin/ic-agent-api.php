@@ -137,7 +137,9 @@ class IC_agent_api{
 		$points = $_POST['points'];
 		$user_id = $_POST['user_id'];
 
-		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$user_id);
+		$blog_id = get_active_blog_for_user($user_id)->blog_id;
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+		$response = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id=".$user_id);
 		$avail_points = $response->points ? $response->points : 0;
 
 		if($points > $avail_points){
@@ -183,12 +185,13 @@ class IC_agent_api{
 
 			$data = array(
 							'endorser_id' =>$user_id,
+							'agent_id' => $agent_id,
 							'points' => -$points,
 							'type' => 'Redeem Point',
 							'notes' => json_decode($curl_response2)->campaign->uuid,
 							'created'	=> date("Y-m-d H:i:s")
 							);
-			$wpdb->insert($wpdb->prefix . "points_transaction", $data);
+			$wpdb->insert("wp_".$blog_id."_points_transaction", $data);
 
 			$response = array('status' => 'Success', 
 								'msg' => 'Gift coupon sent to your mail'
@@ -390,7 +393,8 @@ class IC_agent_api{
 
 		$users = get_users(array('userrole' => 'agent'));
 		foreach ($users as $key => $value) {
-			$results = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where created like '".date("Y-m-")."%' and user_id='".$value->ID."'");
+			$blog_id = get_user_meta($value->ID, 'blog_id', true;)
+			$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and agent_id='".$value->ID."'");
 
 			$amount = $results->points;
 			$res = $wpdb->insert("agent_billing", array(
@@ -940,6 +944,7 @@ class IC_agent_api{
 
 
 			$points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id=".$current_user->ID);
+			$invitation_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and endorser_id='".$current_user->ID."'");
 
 			$campaign = get_user_meta($current_user->ID, 'campaign', true);
 			$templates = $wpdb->get_row("select * from wp_".$blog_id."_campaign_templates where name = 'Endorsement Letter' and campaign_id=".$campaign);
@@ -961,6 +966,7 @@ class IC_agent_api{
 			$data = array(
 					'endorser' => $current_user,
 					'points' => $points->points ? $points->points : 0,
+					'monthly_limit_points' => $invitation_points->points ? $invitation_points->points : 0,
 					'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')).'&video='.$video,
 					'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')).'&video='.$video,
 					'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')).'&video='.$video,
@@ -996,7 +1002,8 @@ class IC_agent_api{
 		$creds['remember'] = true;
 		$current_user = wp_signon( $creds, false );
 
-		$points = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$current_user->ID);
+		$points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id=".$current_user->ID);
+		$invitation_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and endorser_id='".$current_user->ID."'");
 		$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
 			$agent_id = get_blog_option($blog_id, 'agent_id');
 
@@ -1037,6 +1044,7 @@ class IC_agent_api{
 			$data = array(
 					'endorser' => $current_user,
 					'points' => $points->points ? $points->points : 0,
+					'monthly_limit_points' => $invitation_points->points ? $invitation_points->points : 0,
 					'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')).'&video='.$video,
 					'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')).'&video='.$video,
 					'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')).'&video='.$video,
@@ -1070,7 +1078,7 @@ class IC_agent_api{
 		$endorser = get_userdata($endorser_id);
 		$agent_id = get_blog_option($blog_id, 'agent_id');
 
-		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$endorser_id);
+		$response = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id=".$endorser_id);
 
 		$res = array(
 			'name' => get_user_meta($endorser_id, 'first_name', true). ' '. get_user_meta($endorser_id, 'last_name', true),
@@ -1303,7 +1311,9 @@ class IC_agent_api{
 	function ic_get_points(){
 		global $wpdb;
 
-		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$_GET['endorser_id']);
+		$blog_id = get_active_blog_for_user( $_POST['endorser_id'] )->blog_id;
+
+		$response = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where user_id=".$_GET['endorser_id']);
 		$response = array('status' => 'Success', 'total_points' => $response->points ? $response->points : 0);
 		echo json_encode($response);
 		die(0);
@@ -1314,14 +1324,16 @@ class IC_agent_api{
 
 		$_POST = (array) json_decode(file_get_contents('php://input'));
 
+		$blog_id = get_active_blog_for_user( $_POST['endorser_id'] )->blog_id;
+
 		if($_POST['type'] == 'fbShare' || $_POST['type'] == 'liShare'){
-			$blog_id = get_active_blog_for_user( $_POST['endorser_id'] )->blog_id;
+			
 			$agent_id = get_blog_option($blog_id, 'agent_id');
 			$settings = get_user_meta($agent_id, 'endorsement_settings', true);
 			$points = $_POST['type'] == 'fbShare' ? $settings['fb_point_value'] : $settings['linked_point_value'] ;
 
 			$monthly_invitation_allowance = $settings['monthly_invitation_allowance'];
-			$results = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where created like '".date("Y-m-")."%' and user_id='".$_POST['endorser_id']."'");
+			$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and endorser_id='".$_POST['endorser_id']."'");
 
 			$endorser_points = $results->points ? $results->points : 0;
 
@@ -1333,18 +1345,19 @@ class IC_agent_api{
 
 				$data = array(
 								'endorser_id' =>$_POST['endorser_id'],
+								'agent_id' => $agent_id,
 								'points' => $points,
 								'type' => $_POST['type'],
 								'notes' => $_POST['notes'],
 								'created'	=> date("Y-m-d H:i:s")
 								);
-				$wpdb->insert($wpdb->prefix . "points_transaction", $data);
+				$wpdb->insert("wp_".$blog_id."_points_transaction", $data);
 			}
 
 			update_user_meta($_POST['endorser_id'], 'end_follow_up', 1);
 		}
 		
-		$response = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where endorser_id=".$_POST['endorser_id']);
+		$response = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id=".$_POST['endorser_id']);
 		$response = array('status' => 'Success', 'total_points' => $response->points ? $response->points : 0);
 		echo json_encode($response);
 		die(0);
@@ -1399,7 +1412,7 @@ class IC_agent_api{
 
 		$monthly_invitation_allowance = get_user_meta($agent_id, 'endorsement_settings', true)['monthly_invitation_allowance'];
 		
-		$results = $wpdb->get_row("select sum(points) as points from ".$wpdb->prefix . "points_transaction where created like '".date("Y-m-")."%' and user_id='".$_POST['id']."'");
+		$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and user_id='".$_POST['id']."'");
 
 		$endorser_points = $results->points ? $results->points : 0;
 
@@ -1414,11 +1427,12 @@ class IC_agent_api{
 
 			$data = array(
 							'endorser_id' => $_POST['id'],
+							'agent_id' => $agent_id,
 							'points' => $total_points,
 							'type' => 'email_invitation',
 							'created'	=> date("Y-m-d H:i:s")
 							);
-			$wpdb->insert($wpdb->prefix . "points_transaction", $data);
+			$wpdb->insert("wp_".$blog_id."_points_transaction", $data);
 			
 			update_user_meta($_POST['id'], "invitation_sent", (get_user_meta($_POST['id'], "invitation_sent", true) + count($contact_list)));
 		}
@@ -1558,8 +1572,8 @@ class IC_agent_api{
 		$user = wp_signon( $creds, false );
 		$userBlogs = get_blogs_of_user((int)$user->data->ID);
 		$timekitGmail = get_user_meta((int)$user->data->ID, 'timekits_gmail_email', true);
-$timekitTimeZone = get_user_meta((int)$user->data->ID, 'timekits_time_zone', true);
-		$siteUrl = reset($userBlogs);
+		$timekitTimeZone = get_user_meta((int)$user->data->ID, 'timekits_time_zone', true);
+		$siteUrl = get_user_meta((int)$user->data->ID, 'domain', true);
 		if ( is_wp_error($user) ) {
 			$response = array('status' => 'Error', 'msg' => 'Invalid Credentials');
 		}

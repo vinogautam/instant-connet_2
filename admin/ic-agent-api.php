@@ -1605,6 +1605,7 @@ class IC_agent_api{
 			}
 			else
 			{
+				update_user_meta($user_id, 'agent_id', $user['agent_id']);
 				update_user_meta($user_id, 'first_name', $user['first_name']);
 				update_user_meta($user_id, 'last_name', $user['last_name']);
 				update_user_meta($user_id, 'phone', $user['phone']);
@@ -1686,7 +1687,7 @@ class IC_agent_api{
 			$v = (array)$v;
 			$item = (array)$v['data'];
 			$item['id'] = $item['ID'];
-			if(!get_user_meta($item['ID'], 'imcomplete_profile', true)){
+			if(!get_user_meta($item['ID'], 'imcomplete_profile', true) && get_user_meta($item['ID'], 'agent_id', true) == $_GET['agent_id']){
 				$item['invitation'] = get_user_meta($item['ID'], 'invitation_sent', true) 
 				? get_user_meta($item['ID'], 'invitation_sent', true) 
 				: "-";

@@ -1665,9 +1665,9 @@ class IC_agent_api{
 		$arr = array('role'=>'endorser');
 		$arr['order'] = $_GET['columns'][$_GET['order'][0]['column']]['data'];
 		$arr['orderby'] = $_GET['order'][0]['dir'];
-		$data = (array)get_users();
+		$data = (array)get_users($arr);
 		
-		$recordsTotal = $wpdb->get_results("select * from tmp_user where status = 0");
+		/*$recordsTotal = $wpdb->get_results("select * from tmp_user where status = 0");
 		$start = $_GET['start'];
 		$length = $_GET['length'];
 		$offset = $start * $length;
@@ -1679,7 +1679,7 @@ class IC_agent_api{
 							'data' => $recordsFiltered,
 						  	'recordsTotal' => count($recordsTotal),
 						  	'recordsFiltered' => count($recordsFiltered),
-						);
+						);*/
 
         $newdat = array();
 		foreach($data as $v){

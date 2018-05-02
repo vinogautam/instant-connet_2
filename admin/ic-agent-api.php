@@ -393,7 +393,7 @@ class IC_agent_api{
 
 		$users = get_users(array('userrole' => 'agent'));
 		foreach ($users as $key => $value) {
-			$blog_id = get_user_meta($value->ID, 'blog_id', true;)
+			$blog_id = get_user_meta($value->ID, 'blog_id', true);
 			$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and agent_id='".$value->ID."'");
 
 			$amount = $results->points;

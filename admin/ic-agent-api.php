@@ -1413,18 +1413,21 @@ class IC_agent_api{
 
 		$monthly_invitation_allowance = get_user_meta($agent_id, 'endorsement_settings', true)['monthly_invitation_allowance'];
 		
-		$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and user_id='".$_POST['id']."'");
+		$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and endorser_id='".$_POST['id']."'");
 
 		$endorser_points = $results->points ? $results->points : 0;
 
 		if($endorser_points < $monthly_invitation_allowance){
 
-			$total_points = $points * $contact_list;
+			$total_points = $points * count($contact_list);
 
 
 			if(($total_points + $endorser_points) > $monthly_invitation_allowance){
 				$total_points = $monthly_invitation_allowance - $endorser_points;
 			}
+
+
+			$endorser_points = $endorser_points + $total_points;
 
 			$data = array(
 							'endorser_id' => $_POST['id'],
@@ -1440,6 +1443,10 @@ class IC_agent_api{
 
 		update_user_meta($_POST['id'], 'end_follow_up', 1);
 
+		$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id='".$_POST['id']."'");
+		$endorser_points2 = $results->points ? $results->points : 0;
+		$response = array('status' => 'Success', 'msg' => 'Invitation send', 'points' => $endorser_points2, 'allowance' => $endorser_points);
+		echo json_encode($response);
 		die(0);
 	}
 

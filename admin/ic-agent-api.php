@@ -1051,6 +1051,7 @@ class IC_agent_api{
 					'mailtemplate' => str_replace('[ENDORSERS NOTES]', "<div id='dynamicNoteContainer' ckeditor='textEditorOptions' ng-model='bodyContent' style='background-color: white;'>", $content),
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
+					'points_per_dollar' => get_option('points_per_dollar'),
 					'twitter_text' => get_option('twitter_text'),
 					'fb_text' => $dcampaign->facebook,
 					'tw_text' => $dcampaign->twitter,

@@ -159,11 +159,17 @@ class IC_agent_api{
 			$data_string = array(
 							 'subject' => 'Endorser Gift',
 							 'message' => 'Test message',
-							 'contacts' => array(array('firstname' => get_user_meta( $user_id, 'first_name', true), 'lastname' => get_user_meta( $user_id, 'last_name', true), 'email' => $user_info->user_email)),
-							 'marketplace_gifts' => array(array('id' => $gift_id, 'price_in_cents' => $amount)),
+							 'gift_template' => 'NORLZ',
+							 'contacts' => array(
+							 	array(
+							 		'firstname' => get_user_meta( $user_id, 'first_name', true), 
+							 		'lastname' => get_user_meta( $user_id, 'last_name', true), 
+							 		'email' => $user_info->user_email)
+							 	),
+							 'price_in_cents' => $amount,
 							 'expiry' => date('Y-m-d', strtotime('+6 months')),
-							 'gift_template' => 'XJUPY',
-							 'delivery_type' => 'SHORTLINK',
+							 "brand_codes" => [$gift_id],
+							 'delivery_type' => 'GIFTBIT_EMAIL',
 							 'id' => time()
 							);
 			//echo json_encode($data_string);				
@@ -179,23 +185,32 @@ class IC_agent_api{
 			$curl_response2 = curl_exec($ch);
 			curl_close($ch);
 			
-			$option = get_option('giftbit');
-			$option['amount'] = $option['amount'] - $amount;
-			update_option("giftbit", $option);
+			$gift_response = (array)json_decode($curl_response2);
 
-			$data = array(
-							'endorser_id' =>$user_id,
-							'agent_id' => $agent_id,
-							'points' => -$points,
-							'type' => 'Redeem Point',
-							'notes' => json_decode($curl_response2)->campaign->uuid,
-							'created'	=> date("Y-m-d H:i:s")
-							);
-			$wpdb->insert("wp_".$blog_id."_points_transaction", $data);
+			if($gift_response['status'] == 200){
+				$option = get_option('giftbit');
+				$option['amount'] = $option['amount'] - $amount;
+				update_option("giftbit", $option);
 
-			$response = array('status' => 'Success', 
-								'msg' => 'Gift coupon sent to your mail'
-							);
+				$data = array(
+								'endorser_id' =>$user_id,
+								'agent_id' => $agent_id,
+								'points' => -$points,
+								'type' => 'Redeem Point',
+								'notes' => $gift_response['campaign']->uuid,
+								'created'	=> date("Y-m-d H:i:s")
+								);
+				$wpdb->insert("wp_".$blog_id."_points_transaction", $data);
+
+				$response = array('status' => 'Success', 
+									'msg' => 'Gift coupon request initiated, sent to your mail'
+								);
+			} else {
+				$response = array('status' => 'Error', 
+									'msg' => $gift_response['message']
+								);
+			}
+			
 		}
 
 		
@@ -1311,10 +1326,15 @@ class IC_agent_api{
 	function ic_get_points(){
 		global $wpdb;
 
-		$blog_id = get_active_blog_for_user( $_POST['endorser_id'] )->blog_id;
+		$blog_id = get_active_blog_for_user( $_GET['endorser_id'] )->blog_id;
 
-		$response = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where user_id=".$_GET['endorser_id']);
-		$response = array('status' => 'Success', 'total_points' => $response->points ? $response->points : 0);
+		$response = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id=".$_GET['endorser_id']);
+
+		$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and endorser_id='".$_GET['endorser_id']."'");
+
+		$endorser_points = $results->points ? $results->points : 0;
+
+		$response = array('status' => 'Success', 'points' => $response->points ? $response->points : 0, 'allowance' => $endorser_points);
 		echo json_encode($response);
 		die(0);
 	}
@@ -1333,7 +1353,7 @@ class IC_agent_api{
 			$points = $_POST['type'] == 'fbShare' ? $settings['fb_point_value'] : $settings['linked_point_value'] ;
 
 			$monthly_invitation_allowance = $settings['monthly_invitation_allowance'];
-			$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and endorser_id='".$_POST['endorser_id']."'");
+			$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and endorser_id='".$_POST['endorser_id']."'");
 
 			$endorser_points = $results->points ? $results->points : 0;
 
@@ -1342,6 +1362,8 @@ class IC_agent_api{
 				if(($points + $endorser_points) > $monthly_invitation_allowance){
 					$points = $monthly_invitation_allowance - $endorser_points;
 				}
+
+				$endorser_points = $endorser_points + $points;
 
 				$data = array(
 								'endorser_id' =>$_POST['endorser_id'],
@@ -1357,8 +1379,9 @@ class IC_agent_api{
 			update_user_meta($_POST['endorser_id'], 'end_follow_up', 1);
 		}
 		
-		$response = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id=".$_POST['endorser_id']);
-		$response = array('status' => 'Success', 'total_points' => $response->points ? $response->points : 0);
+		$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id='".$_POST['endorser_id']."'");
+		$endorser_points2 = $results->points ? $results->points : 0;
+		$response = array('status' => 'Success', 'msg' => 'Invitation send', 'points' => $endorser_points2, 'allowance' => $endorser_points);
 		echo json_encode($response);
 		die(0);
 	}
@@ -1412,18 +1435,21 @@ class IC_agent_api{
 
 		$monthly_invitation_allowance = get_user_meta($agent_id, 'endorsement_settings', true)['monthly_invitation_allowance'];
 		
-		$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and user_id='".$_POST['id']."'");
+		$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and endorser_id='".$_POST['id']."'");
 
 		$endorser_points = $results->points ? $results->points : 0;
 
 		if($endorser_points < $monthly_invitation_allowance){
 
-			$total_points = $points * $contact_list;
+			$total_points = $points * count($contact_list);
 
 
 			if(($total_points + $endorser_points) > $monthly_invitation_allowance){
 				$total_points = $monthly_invitation_allowance - $endorser_points;
 			}
+
+
+			$endorser_points = $endorser_points + $total_points;
 
 			$data = array(
 							'endorser_id' => $_POST['id'],
@@ -1439,6 +1465,10 @@ class IC_agent_api{
 
 		update_user_meta($_POST['id'], 'end_follow_up', 1);
 
+		$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id='".$_POST['id']."'");
+		$endorser_points2 = $results->points ? $results->points : 0;
+		$response = array('status' => 'Success', 'msg' => 'Invitation send', 'points' => $endorser_points2, 'allowance' => $endorser_points);
+		echo json_encode($response);
 		die(0);
 	}
 
@@ -1454,7 +1484,8 @@ class IC_agent_api{
 			NTM_mail_template::send_gift_mail($mail['mail'], $subject, $message, '', '');
 		}
 
-
+		$response = array('status' => 'Success', 'msg' => 'Invitation send');
+		echo json_encode($response);
 		die(0);
 	}
 

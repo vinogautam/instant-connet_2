@@ -148,7 +148,7 @@ class IC_agent_api{
 							);
 		}
 		else {
-			$gift_id = $_POST['gift_id'];
+			$gift_id = $_POST['brand_code'];
 			$option = get_option('giftbit');
 			
 			$headers = array('Authorization: Bearer '.$option['api']);
@@ -985,7 +985,7 @@ class IC_agent_api{
 					'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')).'&video='.$video,
 					'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')).'&video='.$video,
 					'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')).'&video='.$video,
-					'mailtemplate' => str_replace('[ENDORSERS NOTES]', "<textarea id='dynamicNoteContainer' ckeditor='textEditorOptions' ng-model='bodyContent' style='background-color: white;'></textarea>", $content),
+					'mailtemplate' => str_replace('[ENDORSERS NOTES]', '<div id="dynamicNoteContainer" ng-click="editNote()" dynamic="bodyContent" style="background-color: white;"></div><a href="javascript:void(0)" style="float: right; top: -30px; position: relative; right: 10px;" ng-click="editNote()">Edit</a>', $content),
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
 					'twitter_text' => get_option('twitter_text'),
@@ -1063,7 +1063,7 @@ class IC_agent_api{
 					'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')).'&video='.$video,
 					'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')).'&video='.$video,
 					'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')).'&video='.$video,
-					'mailtemplate' => str_replace('[ENDORSERS NOTES]', "<textarea id='dynamicNoteContainer' ckeditor='textEditorOptions' ng-model='bodyContent' style='background-color: white;'></textarea>", $content),
+					'mailtemplate' => str_replace('[ENDORSERS NOTES]', '<div id="dynamicNoteContainer" ng-click="editNote()" dynamic="bodyContent" style="background-color: white;"></div><a href="javascript:void(0)" style="float: right; top: -30px; position: relative; right: 10px;" ng-click="editNote()">Edit</a>', $content),
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
 					'points_per_dollar' => get_option('points_per_dollar'),

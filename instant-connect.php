@@ -32,7 +32,7 @@ if(!class_exists('Stripe'))
  
  Class Instant_Connect
  {
-	function Instant_Connect()
+	function __construct()
 	{
 		register_activation_hook(__FILE__, array( &$this, 'Endorsement_install'));
 		//register_uninstall_hook(__FILE__, array( &$this, 'Endorsement_uninstall'));
@@ -44,7 +44,7 @@ if(!class_exists('Stripe'))
 			);
 			register_post_type( 'meeting', $args );
 		}
-		
+		add_action( 'wpmu_new_blog', array( &$this, 'on_create_blog' ), 10, 6 );
 		add_action( 'init', 'codex_custom_init' );
 		add_action( 'init', array( &$this, 'strategy_posttype' ));
 		add_action( 'add_meta_boxes', array( &$this, 'ic_strategy_link' ));
@@ -64,6 +64,12 @@ if(!class_exists('Stripe'))
 		new IC_agent_api();
 	}
 	
+	function on_create_blog( $blog_id, $user_id, $domain, $path, $site_id, $meta ) {
+        	switch_to_blog( $blog_id );
+        	$this->Endorsement_install();
+        	restore_current_blog();
+	}
+
 	function strategy_posttype() {
 	$labels = array(
 		'name'               => _x( 'Strategy', 'post type general name', 'your-plugin-textdomain' ),
@@ -174,6 +180,8 @@ if(!class_exists('Stripe'))
 	
 	function Endorsement_install()
 	{
+		
+
 		global $wpdb;
 		
 		$mailtemplates = $wpdb->prefix . "meeting";

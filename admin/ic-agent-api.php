@@ -202,8 +202,17 @@ class IC_agent_api{
 								);
 				$wpdb->insert("wp_".$blog_id."_points_transaction", $data);
 
+				$results1 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and endorser_id='".$user_id."'");
+				$results2 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where  endorser_id='".$user_id."'");
+
+				$endorser_points1 = $results1->points ? $results1->points : 0;
+				$endorser_points2 = $results2->points ? $results2->points : 0;
+
+
 				$response = array('status' => 'Success', 
-									'msg' => 'Gift coupon request initiated, sent to your mail'
+									'msg' => 'Gift coupon request initiated, sent to your mail',
+									'points' => $endorser_points2,
+									'allowance' => $endorser_points1
 								);
 			} else {
 				$response = array('status' => 'Error', 

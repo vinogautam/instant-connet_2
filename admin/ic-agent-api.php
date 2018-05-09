@@ -27,7 +27,8 @@ class IC_agent_api{
 	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail', 
 			'ic_video_message_by_id', 'ic_message_with_video', 'ic_endorser_register', 'ic_get_tmp_user', 'ic_update_user_status',
 			'ic_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands', 'ic_send_giftbit_campaign',
-			'ic_follow_up_email', 'ic_get_predefined_notes', 'ic_notes_action'
+			'ic_follow_up_email', 'ic_get_predefined_notes', 'ic_notes_action', 'ic_forgot_password', 'ic_change_email',
+			'ic_track_invitation_open'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -35,6 +36,24 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+
+	function ic_track_invitation_open(){
+
+		global $wpdb;
+
+		$track_link = explode("#&$#", base64_decode(base64_decode($_GET['ref'])));
+
+		if(count($track_link) == 3)
+		{
+			$blog_id = get_active_blog_for_user( $track_link[1] )->blog_id;
+			$wpdb->update("wp_".$blog_id."_endorsements", array("open_status" => 1), array('id' => $track_link[0]));
+		}
+
+		header('Content-Type: image/gif');
+		echo base64_decode('R0lGODlhAQABAJAAAP8AAAAAACH5BAUQAAAALAAAAAABAAEAAAICBAEAOw==');
+		exit;
 	}
 
 	function ic_get_predefined_notes(){
@@ -983,7 +1002,7 @@ class IC_agent_api{
 
 			$reset_link = '<div>
 			<h2>Hi '.$user->user_login.',</h2>
-			<p>Click the below</p>
+			<p>Click the below link to reset your password</p>
 			<a href="'.$link.'">'.$link.'</a>
 			</div>';
 			$ntm_mail->send_mail($_POST['email'], 'Reset your password', $reset_link);
@@ -1478,68 +1497,84 @@ class IC_agent_api{
 
 		$subject = 'Endorser Invitation';
 		$content = str_ireplace("<br />", "", stripslashes(stripslashes($templates->template)));
-		$content = str_ireplace("[ENDORSERS NOTES]", $notes, $content);
-		$endorse_letter = $content;
-
+		$content = str_ireplace("[ENDORSERS NOTES]", $notes.'[TRACKIMAGE]', $content);
+		$valid = 0;
 		foreach($contact_list as $res)
 		{
 
 			$res = (array)$res;
+
+			$check = $wpdb->get_results('select * from '. $wpdb->prefix .'endorsements where email = "'.$res['email'].'"');
 			
-			$info = array(
-				"name" => $res['name'], 
-				"created" => date("Y-m-d H:i:s"), 
-				"email" => $res['email'],
-				"endorser_id" => $_POST['id'],
-				"tracker_id" => wp_generate_password( $length=12, $include_standard_special_chars=false )
-			);
-			$wpdb->insert($wpdb->prefix . "endorsements", $info);
-			$ntm_mail->send_invitation_mail($info, $_POST['id'], $wpdb->insert_id, $endorse_letter);
+			if(!count($check)){
+
+				$info = array(
+					"name" => $res['name'], 
+					"created" => date("Y-m-d H:i:s"), 
+					"email" => $res['email'],
+					"endorser_id" => $_POST['id'],
+					"tracker_id" => wp_generate_password( $length=12, $include_standard_special_chars=false )
+				);
+				$wpdb->insert($wpdb->prefix . "endorsements", $info);
+				$eeid = $wpdb->insert_id;
+				$image = "<img src='".site_url('?action=ic_track_invitation_open&ref='.base64_encode(base64_encode($eeid.'#&$#'.$_POST['id'].'#&$#'.$info['tracker_id'])))."' width='1' height='1'>";
+				$endorse_letter = $content = str_ireplace("[TRACKIMAGE]", $image, $content);
+				$ntm_mail->send_invitation_mail($info, $_POST['id'], $eeid, $endorse_letter);
+				$valid++;
+			}
 		}
 
-		$blog_id = get_active_blog_for_user( $_POST['id'] )->blog_id;
-		$agent_id = get_blog_option($blog_id, 'agent_id');
-		$points = get_user_meta($agent_id, 'endorsement_settings', true)['email_point_value'];
-		$note_points = get_user_meta($agent_id, 'endorsement_settings', true)['note_point_value'];
-		if(strlen($notes) > 100){
-			$points += $note_points;
-		}
+		if($valid){
 
-		$monthly_invitation_allowance = get_user_meta($agent_id, 'endorsement_settings', true)['monthly_invitation_allowance'];
-		
-		$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and endorser_id='".$_POST['id']."'");
+			$blog_id = get_active_blog_for_user( $_POST['id'] )->blog_id;
+			$agent_id = get_blog_option($blog_id, 'agent_id');
+			$points = get_user_meta($agent_id, 'endorsement_settings', true)['email_point_value'];
+			$note_points = get_user_meta($agent_id, 'endorsement_settings', true)['note_point_value'];
+			
 
-		$endorser_points = $results->points ? $results->points : 0;
+			$monthly_invitation_allowance = get_user_meta($agent_id, 'endorsement_settings', true)['monthly_invitation_allowance'];
+			
+			$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and endorser_id='".$_POST['id']."'");
 
-		if($endorser_points < $monthly_invitation_allowance){
+			$endorser_points = $results->points ? $results->points : 0;
 
-			$total_points = $points * count($contact_list);
+			if($endorser_points < $monthly_invitation_allowance){
+
+				$total_points = $points * $valid;
+
+				if(strlen($notes) > 100){
+					$total_points += $note_points;
+				}
 
 
-			if(($total_points + $endorser_points) > $monthly_invitation_allowance){
-				$total_points = $monthly_invitation_allowance - $endorser_points;
+				if(($total_points + $endorser_points) > $monthly_invitation_allowance){
+					$total_points = $monthly_invitation_allowance - $endorser_points;
+				}
+
+
+				$endorser_points = $endorser_points + $total_points;
+
+				$data = array(
+								'endorser_id' => $_POST['id'],
+								'agent_id' => $agent_id,
+								'points' => $total_points,
+								'type' => 'email_invitation',
+								'created'	=> date("Y-m-d H:i:s")
+								);
+				$wpdb->insert("wp_".$blog_id."_points_transaction", $data);
+				
+				update_user_meta($_POST['id'], "invitation_sent", (get_user_meta($_POST['id'], "invitation_sent", true) + $valid));
 			}
 
+			update_user_meta($_POST['id'], 'end_follow_up', 1);
 
-			$endorser_points = $endorser_points + $total_points;
-
-			$data = array(
-							'endorser_id' => $_POST['id'],
-							'agent_id' => $agent_id,
-							'points' => $total_points,
-							'type' => 'email_invitation',
-							'created'	=> date("Y-m-d H:i:s")
-							);
-			$wpdb->insert("wp_".$blog_id."_points_transaction", $data);
-			
-			update_user_meta($_POST['id'], "invitation_sent", (get_user_meta($_POST['id'], "invitation_sent", true) + count($contact_list)));
+			$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id='".$_POST['id']."'");
+			$endorser_points2 = $results->points ? $results->points : 0;
+			$response = array('status' => 'Success', 'msg' => 'Invitation send', 'points' => $endorser_points2, 'allowance' => $endorser_points, 'valid_email' => $valid);
+		} else{
+			$response = array('status' => 'Error', 'msg' => 'No valid Email, already shared invitation for this email');
 		}
 
-		update_user_meta($_POST['id'], 'end_follow_up', 1);
-
-		$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id='".$_POST['id']."'");
-		$endorser_points2 = $results->points ? $results->points : 0;
-		$response = array('status' => 'Success', 'msg' => 'Invitation send', 'points' => $endorser_points2, 'allowance' => $endorser_points);
 		echo json_encode($response);
 		die(0);
 	}

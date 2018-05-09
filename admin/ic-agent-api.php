@@ -26,7 +26,7 @@ class IC_agent_api{
 	    	'ic_agent_billing_transaction', 'ic_cron_agent_billing', 'ic_agent_update', 'ic_get_agent_details',
 	    	'ic_upgrade_membership', 'ic_endorsement_settings', 'ic_endorser_login', 'ic_timekit_add_gmail', 
 			'ic_video_message_by_id', 'ic_message_with_video', 'ic_endorser_register', 'ic_get_tmp_user', 'ic_update_user_status',
-			'ic_endorser_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands', 'ic_send_giftbit_campaign',
+			'ic_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands', 'ic_send_giftbit_campaign',
 			'ic_follow_up_email', 'ic_get_predefined_notes', 'ic_notes_action'
 	    );
 		
@@ -941,12 +941,74 @@ class IC_agent_api{
 		die(0);
 	}
 
-	function ic_endorser_reset_password(){
+	function ic_reset_password(){
 		$_POST = (array) json_decode(file_get_contents('php://input'));
 
-		wp_set_password( $_POST['password'], $_GET['id'] );
+		if(isset($_POST['id'])){
+			wp_set_password( $_POST['password'], $_POST['id'] );
+			$response = array('status' => 'Success');
+		} elseif(isset($_POST['token'])) {
+			$ct = strtotime('now');
+			$encode_token = explode("#", base64_decode($_POST['token']));
+			if(count($encode_token) == 2 && ($ct - $encode_token[1]) < 3600){
+				wp_set_password( $_POST['password'], $encode_token[0] );
+				$response = array('status' => 'Success');
+			} else {
+				$response = array('status' => 'Error', 'msg' => 'Invalid token');
+			}
+			
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'Invalid data');
+		}
 
-		$response = array('status' => 'Success');
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_forgot_password(){
+		global $ntm_mail;
+
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+
+		$password = wp_generate_password( $length=12, $include_standard_special_chars=false );
+
+		$user = get_user_by( 'email', $_POST['email'] );
+
+		if(isset($user->ID)){
+			wp_set_password( $password, $user->ID);
+
+			$token = base64_encode($user->ID.'#'.strtotime("now"));
+
+			$link = strpos($_POST['link'], '?') ? $_POST['link'].'&token='.$token : $_POST['link'].'?token='.$token;
+
+			$reset_link = '<div>
+			<h2>Hi '.$user->user_login.',</h2>
+			<p>Click the below</p>
+			<a href="'.$link.'">'.$link.'</a>
+			</div>';
+			$ntm_mail->send_mail($_POST['email'], 'Reset your password', $reset_link);
+
+			$response = array('status' => 'Success', 'msg' => 'Reset link sent to you email');
+		}
+		else {
+			$response = array('status' => 'Error', 'msg' => 'Invalid Email');
+		}
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_change_email(){
+		global $wpdb;
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+
+		$user = get_user_by( 'email', $_POST['email'] );
+		if(isset($user->ID)){
+			$response = array('status' => 'Error', 'msg' => 'Email already exist.');
+		} else {
+			$wpdb->update('wp_user', array('user_email' => $_POST['email']), array('ID' => $_POST['id']));
+			$response = array('status' => 'Success');
+		}
+
 		echo json_encode($response);
 		die(0);
 	}

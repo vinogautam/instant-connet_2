@@ -1504,7 +1504,7 @@ class IC_agent_api{
 
 			$res = (array)$res;
 
-			$check = $wpdb->get_results('select * from '. $wpdb->prefix .'endorsements where email = "'.$res['email'].'"');
+			$check = $wpdb->get_results('select * from wp_'.$blog_id.'_endorsements where email = "'.$res['email'].'"');
 			
 			if(!count($check)){
 
@@ -1515,9 +1515,9 @@ class IC_agent_api{
 					"endorser_id" => $_POST['id'],
 					"tracker_id" => wp_generate_password( $length=12, $include_standard_special_chars=false )
 				);
-				$wpdb->insert($wpdb->prefix . "endorsements", $info);
+				$wpdb->insert("wp_".$blog_id."_endorsements", $info);
 				$eeid = $wpdb->insert_id;
-				$image = "<img src='".site_url('?action=ic_track_invitation_open&ref='.base64_encode(base64_encode($eeid.'#&$#'.$_POST['id'].'#&$#'.$info['tracker_id'])))."' width='1' height='1'>";
+				$image = "<img src='".site_url('wp-admin/admin-ajax.php?action=ic_track_invitation_open&ref='.base64_encode(base64_encode($eeid.'#&$#'.$_POST['id'].'#&$#'.$info['tracker_id'])))."' width='1' height='1'>";
 				$endorse_letter = $content = str_ireplace("[TRACKIMAGE]", $image, $content);
 				$ntm_mail->send_invitation_mail($info, $_POST['id'], $eeid, $endorse_letter);
 				$valid++;
@@ -1772,14 +1772,13 @@ class IC_agent_api{
 	function ic_update_endorser() {
 		$user = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		update_user_meta($user['id'], 'endorser_letter', $user['endorser_letter']);
-		update_user_meta($user['id'], 'endorsement_letter', $user['endorsement_letter']);
-		update_user_meta($user['id'], 'phone', $user['phone']);
-		update_user_meta($user['id'], 'first_name', $user['first_name']);
-		update_user_meta($user['id'], 'last_name', $user['last_name']);
-		update_user_meta($user['id'], 'campaign', $user['campaign']);
-		update_user_meta($user['id'], 'video', $user['video']);
-		update_user_meta($user['id'], 'social_campaign', $user['social_campaign']);
+		$user_id = $user['id'];
+		unset($user['id']);
+		
+		foreach ($user as $key => $value) {
+			update_user_meta($user_id, $key, $value);
+		}
+
 		$response = array('status' => 'Success', 'msg' => 'Endorser updated successfully');
 		echo json_encode($response);
 		die(0);

@@ -38,6 +38,20 @@ class IC_agent_api{
 	    
 	}
 
+	function track_api($api, $blog_id, $user_id, $ip=array(), $op=array()){
+		global $wpdb;
+
+		$wpdb->insert('tracking_log', 
+				array(
+					'api' => $api,
+					'blog_id' => $blog_id,
+					'user_id' => $user_id,
+					'track_time' => date('Y-m-d H:i:s'),
+					'input_data' => serialize($ip),
+					'output_data' => serialize($op)
+				)
+		);
+	}
 
 	function ic_track_invitation_open(){
 
@@ -49,6 +63,8 @@ class IC_agent_api{
 		{
 			$blog_id = get_active_blog_for_user( $track_link[1] )->blog_id;
 			$wpdb->update("wp_".$blog_id."_endorsements", array("open_status" => 1), array('id' => $track_link[0]));
+
+			$this->track_api('ic_track_invitation_open', $blog_id, $track_link[1]);
 		}
 
 		header('Content-Type: image/gif');
@@ -137,6 +153,7 @@ class IC_agent_api{
 							
 				if($ntm_mail->send_mail($value->user_email, $subject , $message, $fromName, $fromEmail )){
 					$cnt++;
+					$this->track_api('ic_follow_up_email', $blog_id, $value->ID);
 				}
 			}
 		}
@@ -233,10 +250,12 @@ class IC_agent_api{
 									'points' => $endorser_points2,
 									'allowance' => $endorser_points1
 								);
+				$this->track_api('ic_send_giftbit_campaign', $blog_id, $user_id, array('points' => $points), $response);
 			} else {
 				$response = array('status' => 'Error', 
 									'msg' => $gift_response['message']
 								);
+				$this->track_api('ic_send_giftbit_campaign', $blog_id, $user_id, array('points' => $points), $response);
 			}
 			
 		}
@@ -338,6 +357,9 @@ class IC_agent_api{
 			), array('id' => $_POST['id'])
 		);
 
+		$blog_id = get_active_blog_for_user($_POST['id'])->blog_id;
+		$this->track_api('ic_update_user_status', $blog_id, 0, array('tmp_id' => $_POST['id'],'status' => $_POST['status']));
+
 		if($_POST['status'] == 2){
 			$tmp_user = (array)$wpdb->get_row("select * from tmp_user where id='".$_POST['id']."'");
 			$user = array();
@@ -360,10 +382,14 @@ class IC_agent_api{
 					$ntm_mail->send_notification_mail($user_id);
 
 					$response = array('status' => 'Success', 'msg' => 'User created successfully.');
+					$this->track_api('ic_update_user_status', $blog_id, $user_id, array('status' => $_POST['status']), $response);
 				}
 			} else {
 				$response = array('status' => 'Error', 'msg' => 'User already exists.  Password inherited.');
+				$this->track_api('ic_update_user_status', $blog_id, 0, array('tmp_id' => $_POST['id'],'status' => $_POST['status']), $response);
 			}
+		} else {
+
 		}
 		
 		echo json_encode($response);
@@ -374,14 +400,18 @@ class IC_agent_api{
 		global $wpdb;
 		$_POST = (array) json_decode(file_get_contents('php://input'));
 
-		$res = $wpdb->insert("tmp_user", array(
+		$data = array(
 				'firstname' => $_POST['firstname'],
 				'lastname' => $_POST['lastname'],
 				'email' => $_POST['email'],
 				'agent_id' => $_POST['agent_id'],
 				'created' => date('Y-m-d H:i:s'),
 				'status' => 0
-			));
+			);
+
+		$res = $wpdb->insert("tmp_user", $data);
+		$blog_id = get_active_blog_for_user($_POST['agent_id'])->blog_id;
+		$this->track_api('ic_endorser_register', $blog_id, 0, $res);
 
 		$response = array('status' => 'Success', 'data' => $res);
 		echo json_encode($response);
@@ -390,12 +420,15 @@ class IC_agent_api{
 
 	function ic_timekit_add_gmail() {
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		$blog_id = get_active_blog_for_user($_POST['agent_id'])->blog_id;
 		if(update_user_meta($_POST['agent_id'], 'timekits_gmail_email', $_POST['timekit_gmail_email'])) {
                    update_user_meta($_POST['agent_id'], 'timekits_time_zone', $_POST['timekit_time_zone']);			
                    $response = array('status' => 'Success');
+                   $this->track_api('ic_timekit_add_gmail', $blog_id, $_POST['agent_id'], $_POST, $response);
 			
 		   } else {
 			 $response = array('status' => 'Failed to update');
+			 $this->track_api('ic_timekit_add_gmail', $blog_id, $_POST['agent_id'], $_POST, $response);
 		   }
 		   echo json_encode($response);
                    die(0);
@@ -407,6 +440,8 @@ class IC_agent_api{
 
 		update_user_meta($_GET['user_id'], 'timekit_resource_id', $_POST['timekit_resource_id']);
 		update_user_meta($_GET['user_id'], 'timekit_calendar_id', $_POST['timekit_calendar_id']);
+		$blog_id = get_active_blog_for_user($_GET['user_id'])->blog_id;
+		$this->track_api('ic_agent_update', $blog_id, $_GET['user_id'], $_POST);
 
 		die(0);
 	}
@@ -461,6 +496,10 @@ class IC_agent_api{
 
 		update_user_meta($_GET['agent_id'], 'endorsement_settings', $_POST);
 		$res = get_user_meta($_GET['agent_id'], 'endorsement_settings', true);
+
+
+		$blog_id = get_active_blog_for_user($_GET['user_id'])->blog_id;
+		$this->track_api('ic_agent_save_endorsement_settings', $blog_id, $_GET['user_id'], $_POST);
 		echo json_encode($res);
 		die(0);
 	}
@@ -576,6 +615,9 @@ class IC_agent_api{
 
 		update_user_meta($_POST['user_id'], 'default_campaign', $camps);
 
+		$blog_id = get_active_blog_for_user($_POST['user_id'])->blog_id;
+		$this->track_api('ic_set_default_campaign', $blog_id, $_POST['user_id'], $_POST);
+		
 		$response = array('status' => 'Success', 'res' => get_user_meta($_POST['user_id'], 'default_campaign', true));
 		echo json_encode($response);
 		die(0);
@@ -1774,7 +1816,7 @@ class IC_agent_api{
 
 		$user_id = $user['id'];
 		unset($user['id']);
-		
+
 		foreach ($user as $key => $value) {
 			update_user_meta($user_id, $key, $value);
 		}

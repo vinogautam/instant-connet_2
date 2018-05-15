@@ -38,6 +38,18 @@ class IC_agent_api{
 	    
 	}
 
+	function get_user_activity(){
+		global $wpdb;
+
+		$recordsTotal = $wpdb->get_results("select * from tracking_log where user_id = ".$_GET['id']);
+		
+		$response = array('status' => 'Success', 'data' => $recordsTotal
+						);
+		
+		echo json_encode($response);
+		die(0);
+	}
+
 	function track_api($api, $blog_id, $user_id, $ip=array(), $op=array()){
 		global $wpdb;
 
@@ -411,7 +423,7 @@ class IC_agent_api{
 
 		$res = $wpdb->insert("tmp_user", $data);
 		$blog_id = get_active_blog_for_user($_POST['agent_id'])->blog_id;
-		$this->track_api('ic_endorser_register', $blog_id, 0, $res);
+		$this->track_api('ic_endorser_register', $blog_id, $_POST['agent_id'], $res);
 
 		$response = array('status' => 'Success', 'data' => $res);
 		echo json_encode($response);
@@ -859,8 +871,14 @@ class IC_agent_api{
 
 
 			$response = array('status' => 'Success', 'id' => $id);
+			$blog_id = get_current_blog_id();
+			$agent_id = get_blog_option($blog_id, 'agent_id');
+			$this->track_api('ic_new_campaign', $blog_id, $agent_id, $response);
 		} else {
 			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+			$blog_id = get_current_blog_id();
+			$agent_id = get_blog_option($blog_id, 'agent_id');
+			$this->track_api('ic_new_campaign', $blog_id, $agent_id, $response);
 		}
 		
 		echo json_encode($response);
@@ -1509,14 +1527,26 @@ class IC_agent_api{
 								'created'	=> date("Y-m-d H:i:s")
 								);
 				$wpdb->insert("wp_".$blog_id."_points_transaction", $data);
+
+				$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id='".$_POST['endorser_id']."'");
+				$endorser_points2 = $results->points ? $results->points : 0;
+				$response = array('status' => 'Success', 'msg' => 'Invitation send', 'points' => $endorser_points2, 'allowance' => $endorser_points);
+
+				$track = array('type' => $_POST['type'],  'points_earned' => $points
+				);
+				$this->track_api('ic_add_points', $blog_id, $_POST['endorser_id'], $track, $response);
 			}
 
 			update_user_meta($_POST['endorser_id'], 'end_follow_up', 1);
+
+			$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id='".$_POST['endorser_id']."'");
+			$endorser_points2 = $results->points ? $results->points : 0;
+			$response = array('status' => 'Success', 'msg' => 'Invitation send', 'points' => $endorser_points2, 'allowance' => $endorser_points);
+		} else{
+			$response = array('status' => 'Error', 'msg' => 'Invalid data');
 		}
 		
-		$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id='".$_POST['endorser_id']."'");
-		$endorser_points2 = $results->points ? $results->points : 0;
-		$response = array('status' => 'Success', 'msg' => 'Invitation send', 'points' => $endorser_points2, 'allowance' => $endorser_points);
+		
 		echo json_encode($response);
 		die(0);
 	}
@@ -1568,9 +1598,10 @@ class IC_agent_api{
 			}
 		}
 
-		if($valid){
+		$blog_id = get_active_blog_for_user( $_POST['id'] )->blog_id;
 
-			$blog_id = get_active_blog_for_user( $_POST['id'] )->blog_id;
+		if($valid){
+			
 			$agent_id = get_blog_option($blog_id, 'agent_id');
 			$points = get_user_meta($agent_id, 'endorsement_settings', true)['email_point_value'];
 			$note_points = get_user_meta($agent_id, 'endorsement_settings', true)['note_point_value'];
@@ -1615,8 +1646,15 @@ class IC_agent_api{
 			$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id='".$_POST['id']."'");
 			$endorser_points2 = $results->points ? $results->points : 0;
 			$response = array('status' => 'Success', 'msg' => 'Invitation send', 'points' => $endorser_points2, 'allowance' => $endorser_points, 'valid_email' => $valid);
+
+			$track = array('no_of_contacts' => count($contact_list),  'valid_email' => $valid,
+				'points_earned' => $total_points
+			);
+			$this->track_api('ic_send_endorsement_invitation', $blog_id, $_POST['id'], $track, $response);
 		} else{
 			$response = array('status' => 'Error', 'msg' => 'No valid Email, already shared invitation for this email');
+
+			$this->track_api('ic_send_endorsement_invitation', $blog_id, $_POST['id'], $response);
 		}
 
 		echo json_encode($response);

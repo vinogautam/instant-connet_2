@@ -28,7 +28,7 @@ class IC_agent_api{
 			'ic_video_message_by_id', 'ic_message_with_video', 'ic_endorser_register', 'ic_get_tmp_user', 'ic_update_user_status',
 			'ic_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands', 'ic_send_giftbit_campaign',
 			'ic_follow_up_email', 'ic_get_predefined_notes', 'ic_notes_action', 'ic_forgot_password', 'ic_change_email',
-			'ic_track_invitation_open'
+			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -38,12 +38,46 @@ class IC_agent_api{
 	    
 	}
 
+
+	function get_endorser_invitation(){
+		global $wpdb;
+
+		$blog_id = get_active_blog_for_user( $_GET['id'] )->blog_id;
+
+		$results = $wpdb->get_results("select * from wp_".$blog_id."_endorsements where endorser_id = ".$_GET['id']);
+
+		$response = array('status' => 'Success', 'data' => $results);
+		
+		echo json_encode($response);
+		die(0);
+	}
+
 	function get_user_activity(){
 		global $wpdb;
 
 		$recordsTotal = $wpdb->get_results("select * from tracking_log where user_id = ".$_GET['id']);
 		
-		$response = array('status' => 'Success', 'data' => $recordsTotal
+		$type = (isset($_GET['type']) && $_GET['type']) ? $_GET['type'] : 'all';
+
+		$results = array();
+		foreach ($recordsTotal as $key => $value) {
+
+			$vaue = (array)$value;
+
+			$vaue['input_data'] = unserialize($vaue['input_data']);
+			$vaue['output_data'] = unserialize($vaue['output_data']);
+			
+			if($type == 'all'){
+				$results[] = $vaue;
+			} elseif($type == 'success' && (!isset($vaue['output_data']['status']) || $vaue['output_data']['status'] == 'Success')){
+				$results[] = $vaue;
+			} elseif($type == 'error' && (isset($vaue['output_data']['status']) && $vaue['output_data']['status'] == 'Success')){
+				$results[] = $vaue;
+			}
+			
+		}
+
+		$response = array('status' => 'Success', 'data' => $results
 						);
 		
 		echo json_encode($response);
@@ -74,7 +108,10 @@ class IC_agent_api{
 		if(count($track_link) == 3)
 		{
 			$blog_id = get_active_blog_for_user( $track_link[1] )->blog_id;
-			$wpdb->update("wp_".$blog_id."_endorsements", array("open_status" => 1), array('id' => $track_link[0]));
+			$wpdb->update("wp_".$blog_id."_endorsements", array(
+				"open_status" => 1,
+				"open_time" => date('Y-m-d H:i:s'),
+		), array('id' => $track_link[0]));
 
 			$this->track_api('ic_track_invitation_open', $blog_id, $track_link[1]);
 		}
@@ -262,12 +299,12 @@ class IC_agent_api{
 									'points' => $endorser_points2,
 									'allowance' => $endorser_points1
 								);
-				$this->track_api('ic_send_giftbit_campaign', $blog_id, $user_id, array('points' => $points), $response);
+				$this->track_api('ic_send_giftbit_campaign', $blog_id, $user_id, array('points' => $points, 'brand' => $gift_id), $response);
 			} else {
 				$response = array('status' => 'Error', 
 									'msg' => $gift_response['message']
 								);
-				$this->track_api('ic_send_giftbit_campaign', $blog_id, $user_id, array('points' => $points), $response);
+				$this->track_api('ic_send_giftbit_campaign', $blog_id, $user_id, array('points' => $points, 'brand' => $gift_id), $response);
 			}
 			
 		}
@@ -1122,12 +1159,16 @@ class IC_agent_api{
 
 
 			$campaign = get_user_meta($current_user->ID, 'campaign', true);
-			$dcampaign = $wpdb->get_row("select * from wp_campaigns where id=".$campaign);
-			$pagelink = get_post_meta($dcampaign->strategy, 'strategy_link', true);
+			$dcampaign = $wpdb->get_row("select * from wp_".$blog_id."_campaigns where id=".$campaign);
+			
+			switch_to_blog($blog_id);
+	        $pagelink = get_post_meta($dcampaign->strategy, 'strategy_link', true);
+	        restore_current_blog();
+			
 
 			$content = str_replace("<br />", "", stripslashes(stripslashes($templates->template)));
 			//$splittemplate = explode('[ENDORSERS NOTES]', $mailtemplate);
-
+			$templates = $wpdb->get_row("select * from wp_".$blog_id."_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
 			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
 			$endorsement_settings = get_user_meta($agent_id, 'endorsement_settings', true);
 			$data = array(
@@ -1201,10 +1242,13 @@ class IC_agent_api{
 			$agent_id = get_blog_option($blog_id, 'agent_id');
 
 			$campaign = get_user_meta($current_user->ID, 'campaign', true);
-			$dcampaign = $wpdb->get_row("select * from wp_campaigns where id=".$campaign);
-			$pagelink = get_post_meta($dcampaign->strategy, 'strategy_link', true);
+			$dcampaign = $wpdb->get_row("select * from wp_".$blog_id."_campaigns where id=".$campaign);
+			
+			switch_to_blog($blog_id);
+	        $pagelink = get_post_meta($dcampaign->strategy, 'strategy_link', true);
+	        restore_current_blog();
 
-			$templates = $wpdb->get_row("select * from wp_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
+			$templates = $wpdb->get_row("select * from wp_".$blog_id."_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
 
 			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
 			$endorsement_settings = get_user_meta($agent_id, 'endorsement_settings', true);
@@ -1573,6 +1617,7 @@ class IC_agent_api{
 		$content = str_ireplace("<br />", "", stripslashes(stripslashes($templates->template)));
 		$content = str_ireplace("[ENDORSERS NOTES]", $notes.'[TRACKIMAGE]', $content);
 		$valid = 0;
+		$contact_list_res = [];
 		foreach($contact_list as $res)
 		{
 
@@ -1595,7 +1640,12 @@ class IC_agent_api{
 				$endorse_letter = $content = str_ireplace("[TRACKIMAGE]", $image, $content);
 				$ntm_mail->send_invitation_mail($info, $_POST['id'], $eeid, $endorse_letter);
 				$valid++;
+				$res['valid'] = true;
+			} else {
+				$res['valid'] = false;
 			}
+
+			$contact_list_res[] = $res
 		}
 
 		$blog_id = get_active_blog_for_user( $_POST['id'] )->blog_id;
@@ -1647,14 +1697,14 @@ class IC_agent_api{
 			$endorser_points2 = $results->points ? $results->points : 0;
 			$response = array('status' => 'Success', 'msg' => 'Invitation send', 'points' => $endorser_points2, 'allowance' => $endorser_points, 'valid_email' => $valid);
 
-			$track = array('no_of_contacts' => count($contact_list),  'valid_email' => $valid,
+			$track = array('contacts' => $contact_list_res,  'valid_email' => $valid,
 				'points_earned' => $total_points
 			);
 			$this->track_api('ic_send_endorsement_invitation', $blog_id, $_POST['id'], $track, $response);
 		} else{
 			$response = array('status' => 'Error', 'msg' => 'No valid Email, already shared invitation for this email');
 
-			$this->track_api('ic_send_endorsement_invitation', $blog_id, $_POST['id'], $response);
+			$this->track_api('ic_send_endorsement_invitation', $blog_id, $_POST['id'], array(), $response);
 		}
 
 		echo json_encode($response);

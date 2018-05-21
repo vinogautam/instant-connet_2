@@ -390,7 +390,7 @@ if(!class_exists('Stripe'))
 		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){
 			$sql_one = "CREATE TABLE " . $mailtemplates . "(
 			  id int(11) NOT NULL AUTO_INCREMENT,
-			  api int(11),
+			  api tinytext NOT NULL,
 			  blog_id int(11),
 			  track_time datetime,
 			  user_id int(11),

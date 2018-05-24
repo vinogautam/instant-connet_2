@@ -556,15 +556,126 @@ class IC_admin{
 	}
 
     function add_plugin_pages() {
-        
+
         if(is_multisite() && is_super_admin() || current_user_can('manage_options')) {
              
             add_menu_page( 'Instant Connect', 'Instant Connect', 'manage_options', 'instant_connect', array( $this, 'settingsPage' ));
             add_submenu_page( 'instant_connect', 'Endorsements', 'Endorser Waiting for approval',  9, 'waiting_endorsers', array( &$this, 'waiting_endorsers'));
+
         
+        }
+
+        if(is_main_site()){
+        	$labels = array(
+				'name'               => _x( 'Concepts & Strategy', 'post type general name', 'your-plugin-textdomain' ),
+				'singular_name'      => _x( 'Concepts & Strategy', 'post type singular name', 'your-plugin-textdomain' ),
+				'menu_name'          => _x( 'Concepts & Strategy', 'admin menu', 'your-plugin-textdomain' ),
+				'name_admin_bar'     => _x( 'Concepts & Strategy', 'add new on admin bar', 'your-plugin-textdomain' ),
+				'add_new'            => _x( 'Add New Concepts', 'strategy', 'your-plugin-textdomain' ),
+				'add_new_item'       => __( 'Add New Concepts', 'your-plugin-textdomain' ),
+				'new_item'           => __( 'New Concepts', 'your-plugin-textdomain' ),
+				'edit_item'          => __( 'Edit Concepts', 'your-plugin-textdomain' ),
+				'view_item'          => __( 'View Concepts', 'your-plugin-textdomain' ),
+				'all_items'          => __( 'All Concepts', 'your-plugin-textdomain' ),
+				'search_items'       => __( 'Search Concepts', 'your-plugin-textdomain' ),
+				'parent_item_colon'  => __( 'Parent Concepts:', 'your-plugin-textdomain' ),
+				'not_found'          => __( 'No Concepts found.', 'your-plugin-textdomain' ),
+				'not_found_in_trash' => __( 'No Concepts found in Trash.', 'your-plugin-textdomain' )
+			);
+
+			$args = array(
+				'labels'             => $labels,
+		        'description'        => __( 'Description.', 'your-plugin-textdomain' ),
+				'public'             => true,
+				'publicly_queryable' => true,
+				'show_ui'            => true,
+				'show_in_menu'       => true,
+				'query_var'          => true,
+				'rewrite'            => array( 'slug' => 'concepts' ),
+				'capability_type'    => 'post',
+				'has_archive'        => true,
+				'hierarchical'       => false,
+				'menu_position'      => null,
+				'supports'           => array( 'title', 'editor' )
+			);
+
+			register_post_type( 'concepts', $args );
+        } else {
+        	add_menu_page( 'Blog Info', 'Blog Info', 'manage_options', 'ic_blog_info', array( $this, 'ic_blog_info' ));
+
+
+        	if(isset($_POST['blog_info_save'])){
+        		if ( ! function_exists( 'wp_handle_upload' ) ) {
+				    require_once( ABSPATH . 'wp-admin/includes/file.php' );
+				}
+
+				$sd = $_POST['ic_blog'];
+
+				$uploadedfile = $_FILES['logo'];
+
+				$upload_overrides = array( 'test_form' => false );
+
+				$movefile = wp_handle_upload( $uploadedfile, $upload_overrides );
+
+				if ( $movefile && ! isset( $movefile['error'] ) ) {
+				    $sd['logo'] = $movefile['url'];
+				} 
+
+				update_option('ic_blog_info', $sd);
+        	}
         }
    
     } 
+
+
+    public function ic_blog_info(){
+    	switch_to_blog(1);
+    	$args = array(
+			'posts_per_page'   => -1,
+			'post_type' => 'concepts'
+		);
+        $pagelink = get_posts($args);
+        restore_current_blog();
+        $info = get_option('ic_blog_info');
+    	?>
+    	<div class="wrap">
+            <h2>Blog info</h2> 
+            <form method="post" enctype="multipart/form-data">
+				<table class="form-table">
+					<tbody>
+						<tr>
+							<th scope="row"><label for="blogname">Company Name</label></th>
+							<td><input type="text" class="regular-text" name="ic_blog[name]" value="<?= isset($info['name']) ? $info['name'] : '' ?>"></td>
+							<input type="hidden" name="ic_blog[logo]" value="<?= isset($info['logo']) ? $info['logo'] : '' ?>">
+						</tr>
+						<tr>
+							<th scope="row"><label for="blogname">Company Logo</label></th>
+							<td><input type="file" class="regular-text" name="logo">
+								<?php if(isset($info['logo'])){?>
+								<img src="<?= isset($info['logo']) ? $info['logo'] : '' ?>" width="100">
+								<?php }?>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="blogname">Company Bio</label></th>
+							<td><textarea class="regular-text"  name="ic_blog[bio]"><?= isset($info['bio']) ? $info['bio'] : '' ?></textarea>
+						</tr>
+						<tr>
+							<th scope="row"><label for="blogname">Concepts & Strategies</label></th>
+							<td>
+								<?php foreach ($pagelink as $key => $value) {?>
+									<input <?= is_array($info['concepts']) && in_array($value->ID, $info['concepts']) ? 'checked' : '' ?> type="checkbox" class="regular-text" value="<?= $value->ID;?>" name="ic_blog[concepts][]"><?= $value->post_title;?><br>
+								<?php }?>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<?php submit_button('Save ', 'primary', 'blog_info_save');?>
+			</form>
+        </div>
+    	<?php
+    }
+
 
     public function waiting_endorsers(){
     	?>

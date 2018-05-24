@@ -26,7 +26,7 @@ if(!class_exists('Stripe'))
  include 'includes.php';
  include 'pusher/pusher.php';
  
- global $endorsements, $ntmadmin, $ntm_mail;
+ global $endorsements, $ntmadmin, $ntm_mail, $ic_blog_info;
  $endorsements = new Instant_Connect();
  //$ntm_mail = new IC_mail_template();
  
@@ -62,6 +62,11 @@ if(!class_exists('Stripe'))
 		new IC_ajax();
 		new IC_front();
 		new IC_agent_api();
+
+
+		if(!is_main_site()){
+			$ic_blog_info = get_option('ic_blog_info');
+		}
 	}
 	
 	function on_create_blog( $blog_id, $user_id, $domain, $path, $site_id, $meta ) {

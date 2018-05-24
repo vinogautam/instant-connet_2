@@ -28,7 +28,7 @@ class IC_agent_api{
 			'ic_video_message_by_id', 'ic_message_with_video', 'ic_endorser_register', 'ic_get_tmp_user', 'ic_update_user_status',
 			'ic_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands', 'ic_send_giftbit_campaign',
 			'ic_follow_up_email', 'ic_get_predefined_notes', 'ic_notes_action', 'ic_forgot_password', 'ic_change_email',
-			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation'
+			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation', 'ic_blog_info'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -36,6 +36,13 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_blog_info(){
+		$response = array('status' => 'Success', 'data' => get_option('ic_blog_info'));
+		
+		echo json_encode($response);
+		die(0);
 	}
 
 
@@ -89,8 +96,7 @@ class IC_agent_api{
 			
 		}
 
-		$response = array('status' => 'Success', 'data' => $results
-						);
+		$response = array('status' => 'Success', 'data' => $results);
 		
 		echo json_encode($response);
 		die(0);
@@ -1380,7 +1386,7 @@ class IC_agent_api{
 
 		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		
-		$resuts = $wpdb->get_results('select * from wp_leads where email = "'. $lead['email'].'"');
+		$resuts = $wpdb->get_results('select * from wp_leads where email = "'. $lead['email'] .'"');
 		if(count($resuts)){
 			$wpdb->update("wp_leads", $lead, array('email' => $lead['email']));
 			$lead_id = $resuts[0]->id;

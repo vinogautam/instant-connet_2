@@ -113,6 +113,19 @@ if (scope.$last === true) {
 		});
 	});
 
+	<?php if(!isset($_GET['admin'])){
+
+	global $wpdb; $results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$_GET['pid']);?>
+
+	<?php if($results->endorser && $results->gift_status == 0){?>
+	setTimeout(function(){
+		$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=send_ic_gift&id=$_GET['pid']').then(function(res){
+
+		});
+	}, 300000);
+
+	<?php }?>
+
 	$interval(function(){
 		$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=ic_update_active_time&id=<?php echo $_GET['id'];?>').then(function(){
 

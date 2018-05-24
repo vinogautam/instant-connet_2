@@ -46,7 +46,19 @@ class IC_agent_api{
 
 		$results = $wpdb->get_results("select * from wp_".$blog_id."_endorsements where endorser_id = ".$_GET['id']);
 
-		$response = array('status' => 'Success', 'data' => $results);
+		$new_results = array();
+		foreach ($results as $key => $value) {
+			$value = (array) $value;
+			$user = get_user_by( 'email', $value['email'] );
+			if(isset($user->ID)){
+				$value['user_id'] = $user->ID;
+			} else {
+				$value['user_id'] = 0;
+			}
+			$new_results[] = $value;
+		}
+
+		$response = array('status' => 'Success', 'data' => $new_results);
 		
 		echo json_encode($response);
 		die(0);
@@ -1645,7 +1657,7 @@ class IC_agent_api{
 				$res['valid'] = false;
 			}
 
-			$contact_list_res[] = $res
+			$contact_list_res[] = $res;
 		}
 
 		$blog_id = get_active_blog_for_user( $_POST['id'] )->blog_id;

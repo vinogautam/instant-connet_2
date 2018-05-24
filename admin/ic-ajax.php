@@ -61,10 +61,13 @@ class IC_ajax{
     	$results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$_GET['id']);
 
     	$points = 25;
-		$type = 'Instant connect success meeting';
+		$type = 'Instant connect Chat';
 		$new_balance = $endorsements->get_endorser_points($results->endorser) + $points;
 		$data = array('points' => $points, 'credit' => 1, 'endorser_id' => $results->endorser, 'new_balance' => $new_balance, 'transaction_on' => date("Y-m-d H:i:s"), 'type' => $type);
 		$endorsements->add_points($data);
+		$data['participant_id'] = $_GET['id'];
+		$blog_id = get_active_blog_for_user( $results->endorser )->blog_id;
+		IC_agent_api::track_api('chat_participants', $blog_id, $results->endorser, $data);
     }
 
     function send_ic_gift()
@@ -91,6 +94,10 @@ class IC_ajax{
 		$new_balance = $endorsements->get_endorser_points($results->endorser) + $points;
 		$data = array('points' => $points, 'credit' => 1, 'endorser_id' => $results->endorser, 'new_balance' => $new_balance, 'transaction_on' => date("Y-m-d H:i:s"), 'type' => $type);
 		$endorsements->add_points($data);
+
+		$data['participant_id'] = $_GET['id'];
+		$blog_id = get_active_blog_for_user( $results->endorser )->blog_id;
+		IC_agent_api::track_api('meeting_participants', $blog_id, $results->endorser, $data);
 
 		$ntm_mail->send_gift_mail('get_gift_mail', $results->endorser, $gift_id);
     }

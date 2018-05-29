@@ -1258,7 +1258,7 @@ class IC_agent_api{
 			$mailtemplate = '<html><head><style>'.stripslashes(strip_tags(get_option('mail_template_css'))).'</style></head><body>'.$content.'</body></html>';
 
 		$mailtemplate = '<html><head><style>'.stripslashes(strip_tags(get_option('mail_template_css'))).'</style></head><body>'.$content.'</body></html>';
-		$landingPageContent = $wpdb->get_results("select landing_page from wp_".$blog_id."_campaigns where id=".$campaign);
+		//$landingPageContent = $wpdb->get_results("select landing_page from wp_".$blog_id."_campaigns where id=".$campaign);
 
 		if(!is_wp_error($current_user)) {
 			$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
@@ -1273,7 +1273,7 @@ class IC_agent_api{
 
 			$templates = $wpdb->get_row("select * from wp_".$blog_id."_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
 
-			
+			$landingPageContent = get_user_meta($current_user->ID, 'landing_page_content', true);
 
 			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
 			$endorsement_settings = get_user_meta($agent_id, 'endorsement_settings', true);
@@ -1295,7 +1295,7 @@ class IC_agent_api{
 					'agent_avatar' => get_avatar_url($agent_id),
 					'point_settings' => $endorsement_settings,
 					'campaign' => $campaign,
-					'landing_page' => $landingPageContent[0]->landing_page
+					'landing_page' => $landingPageContent
 
 				);
 			$response = array('status' => 'Success', 'data' => $data);
@@ -1922,6 +1922,7 @@ class IC_agent_api{
 				update_user_meta($user_id, 'endorsement_letter', $user['endorsement_letter']);
 				update_user_meta($user_id, 'campaign', $user['campaign']);
 				update_user_meta($user_id, 'social_campaign', $user['social_campaign']);
+				update_user_meta($user_id, 'landing_page_content', $user['social_campaign']);
 				if( isset($user['video']) ){
 					$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass'], $user['video']);
 				} else {

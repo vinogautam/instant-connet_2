@@ -28,7 +28,8 @@ class IC_agent_api{
 			'ic_video_message_by_id', 'ic_message_with_video', 'ic_endorser_register', 'ic_get_tmp_user', 'ic_update_user_status',
 			'ic_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands', 'ic_send_giftbit_campaign',
 			'ic_follow_up_email', 'ic_get_predefined_notes', 'ic_notes_action', 'ic_forgot_password', 'ic_change_email',
-			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation', 'ic_blog_info'
+			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation', 'ic_blog_info',
+			'ic_get_points_by_type'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -882,6 +883,7 @@ class IC_agent_api{
 					//'is_default' => $_POST['is_default'],
 					'is_main_site' => is_main_site(),
 					'strategy' => $_POST['strategy'],
+					'landing_page' => $_POST['landing_page'],
 					'completed' => $complete
 				));
 		
@@ -906,6 +908,7 @@ class IC_agent_api{
 					$res = $wpdb->insert("wp_".$value1."_campaigns", array(
 						'title' => $_POST['title'],
 						'type' => $_POST['type'],
+						'landing_page' => $_POST['landing_page'],
 						'strategy' => $_POST['strategy']
 					));
 
@@ -955,6 +958,7 @@ class IC_agent_api{
 					'title' => $_POST['title'],
 					'type' => $_POST['type'],
 					'strategy' => $_POST['strategy'],
+					'landing_page' => $_POST['landing_page'],
 					'completed' => $complete,
 				), array('id' => $_POST['id']));
 		
@@ -1254,6 +1258,7 @@ class IC_agent_api{
 			$mailtemplate = '<html><head><style>'.stripslashes(strip_tags(get_option('mail_template_css'))).'</style></head><body>'.$content.'</body></html>';
 
 		$mailtemplate = '<html><head><style>'.stripslashes(strip_tags(get_option('mail_template_css'))).'</style></head><body>'.$content.'</body></html>';
+		$landingPageContent = $wpdb->get_results("select landing_page from wp_".$blog_id."_campaigns where id=".$campaign);
 
 		if(!is_wp_error($current_user)) {
 			$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
@@ -1267,6 +1272,8 @@ class IC_agent_api{
 	        restore_current_blog();
 
 			$templates = $wpdb->get_row("select * from wp_".$blog_id."_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
+
+			
 
 			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
 			$endorsement_settings = get_user_meta($agent_id, 'endorsement_settings', true);
@@ -1287,7 +1294,8 @@ class IC_agent_api{
 					'li_text' => $dcampaign->linkedin,
 					'agent_avatar' => get_avatar_url($agent_id),
 					'point_settings' => $endorsement_settings,
-					'campaign' => $campaign
+					'campaign' => $campaign,
+					'landing_page' => $landingPageContent[0]->landing_page
 
 				);
 			$response = array('status' => 'Success', 'data' => $data);

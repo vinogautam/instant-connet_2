@@ -1554,6 +1554,18 @@ class IC_agent_api{
 		die(0);
 	}
 
+	function ic_get_points_by_type(){
+		global $wpdb;
+
+		$blog_id = get_active_blog_for_user( $_GET['endorser_id'] )->blog_id;
+
+		$response = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where type = '".$_GET['type']."' and endorser_id=".$_GET['endorser_id']);
+
+		$response = array('status' => 'Success', 'points' => $response->points ? $response->points : 0, 'allowance' => $endorser_points);
+		echo json_encode($response);
+		die(0);
+	}
+
 	function ic_add_points(){
 		global $wpdb;
 
@@ -1565,7 +1577,7 @@ class IC_agent_api{
 			
 			$agent_id = get_blog_option($blog_id, 'agent_id');
 			$settings = get_user_meta($agent_id, 'endorsement_settings', true);
-			$points = $_POST['type'] == 'fbShare' ? $settings['fb_point_value'] : $settings['linked_point_value'] ;
+			$points = isset($_POST['points']) ? $_POST['points'] : ($_POST['type'] == 'fbShare' ? $settings['fb_point_value'] : $settings['linked_point_value']) ;
 
 			$monthly_invitation_allowance = $settings['monthly_invitation_allowance'];
 			$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and endorser_id='".$_POST['endorser_id']."'");

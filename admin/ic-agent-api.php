@@ -1191,6 +1191,9 @@ class IC_agent_api{
 			$content = str_replace("<br />", "", stripslashes(stripslashes($templates->template)));
 			//$splittemplate = explode('[ENDORSERS NOTES]', $mailtemplate);
 			$templates = $wpdb->get_row("select * from wp_".$blog_id."_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
+
+			$landingPageContent = get_user_meta($current_user->ID, 'landing_page_content', true);
+
 			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
 			$endorsement_settings = get_user_meta($agent_id, 'endorsement_settings', true);
 			$data = array(
@@ -1210,7 +1213,8 @@ class IC_agent_api{
 					'li_text' => $dcampaign->linkedin,
 					'agent_avatar' => get_avatar_url($agent_id),
 					'point_settings' =>  $endorsement_settings,
-					'campaign' => $campaign
+					'campaign' => $campaign,
+					'landing_page' => $landingPageContent
 				);
 			$response = array('status' => 'Success', 'data' => $data);
 		} else {
@@ -2018,6 +2022,7 @@ class IC_agent_api{
 				$item['video'] = get_user_meta($item['ID'], 'video', true);
 				$item['campaign'] = $campaign;
 				$item['social_campaign'] = $social_campaign;
+				$item['landing_page'] = get_user_meta($item['ID'], 'landing_page_content', true);
 
 				$item['endorser_letter_name'] = ($result->name ? $result->name : 'Default') ;
 				$item['endorsement_letter_name'] = ($result2->name ? $result2->name : 'Default') ;

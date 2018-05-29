@@ -26,7 +26,7 @@ if(!class_exists('Stripe'))
  include 'includes.php';
  include 'pusher/pusher.php';
  
- global $endorsements, $ntmadmin, $ntm_mail, $ic_blog_info;
+ global $endorsements, $ntmadmin, $ntm_mail;
  $endorsements = new Instant_Connect();
  //$ntm_mail = new IC_mail_template();
  
@@ -62,11 +62,6 @@ if(!class_exists('Stripe'))
 		new IC_ajax();
 		new IC_front();
 		new IC_agent_api();
-
-
-		if(!is_main_site()){
-			$ic_blog_info = get_option('ic_blog_info');
-		}
 	}
 	
 	function on_create_blog( $blog_id, $user_id, $domain, $path, $site_id, $meta ) {
@@ -384,23 +379,6 @@ if(!class_exists('Stripe'))
 			  content tinytext NOT NULL,
 			  status int(1),
 			  created datetime,
-			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
-
-			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-			dbDelta($sql_one);
-		}
-
-		$mailtemplates = "tracking_log";
-
-		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){
-			$sql_one = "CREATE TABLE " . $mailtemplates . "(
-			  id int(11) NOT NULL AUTO_INCREMENT,
-			  api tinytext NOT NULL,
-			  blog_id int(11),
-			  track_time datetime,
-			  user_id int(11),
-			  input_data text,
-			  output_data text,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

@@ -65,8 +65,8 @@
       </div>
       
 
-      <div class="add-video-container">
-        <div class="video-close">&times;</div>
+      <div ng-init="togglevideo=false;" ng-show="togglevideo" class="add-video-container">
+        <div class="video-close" ng-click="togglevideo=false;">&times;</div>
         <form class="form-horizontal ic-video-form">
         <div class="form-group">
                   <label for="videoURL" class="col-sm-3 control-label">Video URL:</label>
@@ -94,7 +94,7 @@
 
       <div class="modal-footer">
           
-          <div class="col-xs-4 no-pad"><button type="button" class="btn btn-red add-video-btn">Add Video</button></div>
+          <div class="col-xs-4 no-pad"><button type="button" ng-click="togglevideo=true;" class="btn btn-red add-video-btn">Add Video</button></div>
           <div class="col-xs-4 col-xs-push-4 close-btn"><button type="button" class="btn btn-default no-margin-right" data-dismiss="modal">Close</button></div>
         
       </div>

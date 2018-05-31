@@ -19,6 +19,8 @@ class IC_ajax{
 		add_action( 'wp_ajax_delete_presentation_file', array( &$this, 'delete_presentation_file'));
 		add_action( 'wp_ajax_save_ppt', array( &$this, 'save_ppt'));
 		add_action( 'wp_ajax_nopriv_save_ppt', array( &$this, 'save_ppt'));
+		add_action( 'wp_ajax_save_ppt2', array( &$this, 'save_ppt2'));
+		add_action( 'wp_ajax_nopriv_save_ppt2', array( &$this, 'save_ppt2'));
 		add_action( 'wp_ajax_new_user_to_meeting', array( &$this, 'new_user_to_meeting'));
 		add_action( 'wp_ajax_usercontrol', array( &$this, 'usercontrol'));
 		add_action( 'wp_ajax_addnew_video', array( &$this, 'addnew_video'));
@@ -231,6 +233,60 @@ class IC_ajax{
 
 	    imagejpeg($dst,$file);
 	}
+
+	function save_ppt2()
+	{
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		
+		$data = $_POST['data'];
+		$file = $_POST['id'];
+
+		$files = array();
+
+		mkdir(IC_PLUGIN_DIR."/extract/$file/");
+		foreach ($data as $key => $value) {
+			$filee = $value->FileName;
+			$files[] = $filee;
+			file_put_contents(IC_PLUGIN_DIR."/extract/$file/".$filee, base64_decode($value->FileData));
+
+			$w = 1600; $h = 1200;
+			list($width, $height) = getimagesize(IC_PLUGIN_DIR."/extract/$file/".$filee);
+		    $r = $width / $height;
+		    if ($crop) {
+		        if ($width > $height) {
+		            $width = ceil($width-($width*abs($r-$w/$h)));
+		        } else {
+		            $height = ceil($height-($height*abs($r-$w/$h)));
+		        }
+		        $newwidth = $w;
+		        $newheight = $h;
+		    } else {
+		        if ($w/$h > $r) {
+		            $newwidth = $h*$r;
+		            $newheight = $h;
+		        } else {
+		            $newheight = $w/$r;
+		            $newwidth = $w;
+		        }
+		    }
+		    $src = imagecreatefromjpeg(IC_PLUGIN_DIR."/extract/$file/".$filee);
+		    $dst = imagecreatetruecolor($newwidth, $newheight);
+		    imagecopyresampled($dst, $src, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+
+		    imagejpeg($dst,IC_PLUGIN_DIR."/extract/$file/".$filee);
+		}
+
+		$option = get_option('ic_presentations');
+		$option = is_array($option) ? $option : [];
+		$option[] = array('folder' => $file, 'files' => $files, 'name' => $_GET['name']);
+		update_option('ic_presentations', $option);
+
+		echo json_encode(array('folder' => $file, 'files' => $files));
+
+		die(0);
+		exit;
+	}
+
 
 	function save_ppt()
 	{

@@ -124,7 +124,7 @@ if (scope.$last === true) {
 		});
 	}, 300000);
 
-	<?php }?>
+	<?php }}?>
 
 	$interval(function(){
 		$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=ic_update_active_time&id=<?php echo $_GET['id'];?>').then(function(){
@@ -942,13 +942,14 @@ if (scope.$last === true) {
 				var filename = f.name;
 				var formData = formdata ? new FormData() : null;
 				formData.append('File', files[i]);
-				formData.append('OutputFormat', 'jpg');
+				/*formData.append('OutputFormat', 'jpg');
 				formData.append('StoreFile', 'true');
 				formData.append('ApiKey', '938074523');
 				formData.append('JpgQuality', 100);
-				formData.append('AlternativeParser', 'false');
+				formData.append('AlternativeParser', 'false');*/
 
 				file_convert_to_jpg(formData, filename);
+
 			} else {
 				progress_status(random_id, 0, "Invalid File Format...");
 			}
@@ -963,7 +964,7 @@ if (scope.$last === true) {
 		$(".upload-preload").removeClass("hide");
 
 		$.ajax({
-			url: "https://do.convertapi.com/PowerPoint2Image",
+			url: "https://v2.convertapi.com/pptx/to/jpg?Secret=udmPipTGn5qkvI6O",
 			type: "POST",
 			data: formData,
 			processData: false,
@@ -972,13 +973,13 @@ if (scope.$last === true) {
 
 				$(".upload-preload .upload_percentage").text("50%");
 				$(".upload-preload .progress-bar").width("50%");
-
-				$http.post("<?php echo site_url();?>/wp-admin/admin-ajax.php?action=save_ppt&name="+filename, {data:request.getResponseHeader('FileUrl')}).then(function(data){
+				var ranid = $scope.randomid();
+				$http.post("<?php echo site_url();?>/wp-admin/admin-ajax.php?action=save_ppt2&name="+filename, {id:ranid, data:response.Files}).then(function(data){
 					if(data['data'] != 'error')
 					{	
 						new_data = data['data'];
 						new_data.name = filename;
-						new_data.id = $scope.randomid();
+						new_data.id = ranid;
 						$scope.presentation_files.push(new_data);
 						$scope.add_tab('presentation', new_data.name, new_data);
 
@@ -995,6 +996,7 @@ if (scope.$last === true) {
 				alert("Error in file conversion");
 			}
 		});
+
 	}
 }])
 .value({

@@ -100,6 +100,7 @@ Instant Connect UI
     .img_wh100{width: auto;height: auto;max-width: 100%;max-height: 100%;}
     .admin_view.user_have_admin_control ot-whiteboard{height: calc(100% - 40px);bottom: auto;}
     .pos-relative{position: relative;}
+    .instant-connect .ICModalWindow .add-video-container{display: block;}
   </style>
 
 

@@ -39,7 +39,14 @@ class IC_agent_api{
 	    
 	}
 
-	function ic_blog_info(){
+	function ic_get_bio(){
+		$response = array('status' => 'Success', 'data' => get_option('ic_blog_info'));
+		
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_save_bio(){
 		$response = array('status' => 'Success', 'data' => get_option('ic_blog_info'));
 		
 		echo json_encode($response);
@@ -1192,7 +1199,7 @@ class IC_agent_api{
 			//$splittemplate = explode('[ENDORSERS NOTES]', $mailtemplate);
 			$templates = $wpdb->get_row("select * from wp_".$blog_id."_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
 
-			$landingPageContent = get_user_meta($current_user->ID, 'landing_page_content', true);
+			$landingPageContent = get_user_meta($current_user->ID, 'landingPageContent', true);
 
 			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
 			$endorsement_settings = get_user_meta($agent_id, 'endorsement_settings', true);
@@ -1214,7 +1221,9 @@ class IC_agent_api{
 					'agent_avatar' => get_avatar_url($agent_id),
 					'point_settings' =>  $endorsement_settings,
 					'campaign' => $campaign,
-					'landing_page' => $landingPageContent
+					'landing_page' => $landingPageContent,
+					'strategy_link' => $pagelink,
+					'video' => $video
 				);
 			$response = array('status' => 'Success', 'data' => $data);
 		} else {
@@ -1277,7 +1286,7 @@ class IC_agent_api{
 
 			$templates = $wpdb->get_row("select * from wp_".$blog_id."_campaign_templates where name = 'Endorser Letter' and campaign_id=".$campaign);
 
-			$landingPageContent = get_user_meta($current_user->ID, 'landing_page_content', true);
+			$landingPageContent = get_user_meta($current_user->ID, 'landingPageContent', true);
 
 			$video = $templates->media ? $templates->media : get_user_meta($current_user->ID, 'video', true) ;
 			$endorsement_settings = get_user_meta($agent_id, 'endorsement_settings', true);
@@ -1299,7 +1308,9 @@ class IC_agent_api{
 					'agent_avatar' => get_avatar_url($agent_id),
 					'point_settings' => $endorsement_settings,
 					'campaign' => $campaign,
-					'landing_page' => $landingPageContent
+					'landing_page' => $landingPageContent,
+					'strategy_link' => $pagelink,
+					'video' => $video
 
 				);
 			$response = array('status' => 'Success', 'data' => $data);
@@ -1598,7 +1609,7 @@ class IC_agent_api{
 
 			$agent_id = get_blog_option($blog_id, 'agent_id');
 			$settings = get_user_meta($agent_id, 'endorsement_settings', true);
-			$points = $settings[$type]) ;
+			$points = $settings[$type] ;
 
 			$monthly_invitation_allowance = $settings['monthly_invitation_allowance'];
 			$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and endorser_id='".$_POST['endorser_id']."'");
@@ -1935,7 +1946,7 @@ class IC_agent_api{
 				update_user_meta($user_id, 'endorsement_letter', $user['endorsement_letter']);
 				update_user_meta($user_id, 'campaign', $user['campaign']);
 				update_user_meta($user_id, 'social_campaign', $user['social_campaign']);
-				update_user_meta($user_id, 'landing_page_content', $user['social_campaign']);
+				update_user_meta($user_id, 'landingPageContent', $user['landingPageContent']);
 				if( isset($user['video']) ){
 					$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass'], $user['video']);
 				} else {
@@ -2031,7 +2042,7 @@ class IC_agent_api{
 				$item['video'] = get_user_meta($item['ID'], 'video', true);
 				$item['campaign'] = $campaign;
 				$item['social_campaign'] = $social_campaign;
-				$item['landing_page'] = get_user_meta($item['ID'], 'landing_page_content', true);
+				$item['landing_page'] = get_user_meta($item['ID'], 'landingPageContent', true);
 
 				$item['endorser_letter_name'] = ($result->name ? $result->name : 'Default') ;
 				$item['endorsement_letter_name'] = ($result2->name ? $result2->name : 'Default') ;

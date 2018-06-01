@@ -33,7 +33,7 @@
               <table class="table table-hover">
                 
                 <tr ng-repeat="p in presentation_files | filter:psearch | startFrom:currentPage*5 | limitTo:5  track by $index">
-                  <td><img width='100' ng-src="{{'<?= IC_PLUGIN_URL;?>/extract/'+p.folder+'/'+p.files[0]}}"></td>
+                  <td><img width='100' ng-src="{{'<?= IC_PLUGIN_URL;?>extract/'+p.folder+'/'+p.files[0]}}"></td>
                   <td>{{p.name}}</td>
                 
                   <td>

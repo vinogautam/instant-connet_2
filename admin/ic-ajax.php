@@ -245,7 +245,7 @@ class IC_ajax{
 
 		mkdir(IC_PLUGIN_DIR."/extract/$file/");
 		foreach ($data as $key => $value) {
-			$filee = $value->FileName;
+			$filee = 'file-page'.($key+1).'.jpg';
 			$files[] = $filee;
 			file_put_contents(IC_PLUGIN_DIR."/extract/$file/".$filee, base64_decode($value->FileData));
 

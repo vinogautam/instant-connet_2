@@ -368,7 +368,7 @@ Instant Connect UI
 <div class="col-xs-12 col-sm-9 meeting-panel-container" ng-init="tabindex=0">
     <div class="meeting-panel row">
         
-        <div class="col-xs-12 panel-header no-pad" ng-show="(is_admin && !user_have_admin_control()) || full_control">
+        <div class="col-xs-12 panel-header hide no-pad" ng-show="(is_admin && !user_have_admin_control()) || full_control">
         <div ng-click="set_tab(-1);" class="home-label"><i class="fa fa-home" aria-hidden="true"></i>
  Start</div>
         <ul>

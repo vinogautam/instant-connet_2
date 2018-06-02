@@ -420,7 +420,7 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                     client.uuid = false;
                 }
             });
-
+            var last_change = 0;
             if (OTSession.session) {
                 if (OTSession.session.isConnected()) {
                   requestHistory();
@@ -461,20 +461,21 @@ var OpenTokWhiteboard = ng.module('opentok-whiteboard', ['opentok'])
                         // We will receive these from everyone in the room, only listen to the first
                         // person. Also the data is chunked together so we need all of that person's
                         
-                        if((scope.is_admin && !scope.user_have_admin_control()) || (!scope.is_admin && scope.full_control)) return;
+                        if((scope.is_admin && !scope.user_have_admin_control()) || 
+                            (!scope.is_admin && scope.full_control) ||
+                            (last_change!=0 && new Date().getTime() - last_change > 1000)) return;
 
-                        //if (!drawHistoryReceivedFrom || drawHistoryReceivedFrom === event.from.connectionId) {
+                        if (!drawHistoryReceivedFrom || drawHistoryReceivedFrom === event.from.connectionId) {
                             var parseddata = JSON.parse(event.data);
 
-                            if(parseddata[parseddata.length-1].event == 'end')
-                                drawHistoryReceivedFrom = true;
-                            else
-                                drawHistoryReceivedFrom = event.from.connectionId;
+                            drawHistoryReceivedFrom = event.from.connectionId;
 
-                            console.log(parseddata[0]);
+                            
                             drawUpdates(parseddata);
                             scope.$emit('otWhiteboardUpdate');
-                        //}
+                            last_change = new Date().getTime();
+
+                        }
                     },
                     'signal:otWhiteboard_clear': function (event) {
                         if (event.from.connectionId !== OTSession.session.connection.connectionId) {

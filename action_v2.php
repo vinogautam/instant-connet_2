@@ -158,8 +158,11 @@ if (scope.$last === true) {
 	$scope.add_tab = function(type, name, data, notify)
 	{
 		$scope.preloader = true;
-		$scope.tabs.push({type:type, name:name, data:data});
-		$scope.current_tab = $scope.tabs.length-1;
+
+		$scope.tabs[0] = {type:type, name:name, data:data};
+		$scope.current_tab = 0;
+		//$scope.tabs.push({type:type, name:name, data:data});
+		//$scope.current_tab = $scope.tabs.length-1;
 
 		$scope.initiatescripts();
 		
@@ -825,7 +828,7 @@ if (scope.$last === true) {
 		}
 		else if(event.data.type == 'add_tab')
 		{
-			if(($scope.is_admin && !$scope.user_have_admin_control()) || $scope.full_control)
+			if(($scope.is_admin && !$scope.user_have_admin_control()) || $scope.full_control || (typeof event.data.from !== 'undefined' && event.data.from !== event.target.connection.id))
 				return;
 			console.log(event.data);
 			$scope.$apply(function(){
@@ -895,10 +898,10 @@ if (scope.$last === true) {
 	    	angular.forEach($scope.tabs, function(v,k){
 	    		$timeout(function(){
 	    			console.log("send", v);
-	    			$scope.send_noti({type:'add_tab', data:v});
+	    			$scope.send_noti({type:'add_tab', data:v, from: event.from.id});
 
 	    			if($scope.tabs.length-1 == k)
-	    			$scope.send_noti({type:'set_tab', id:$scope.current_tab, pid:$scope.tabs[$scope.current_tab].currentpresentationindex});
+	    			$scope.send_noti({type:'set_tab', id:$scope.current_tab, pid:$scope.tabs[$scope.current_tab].currentpresentationindex, from: event.from.id});
 	    		}, 100);
 	    	});
 	    	

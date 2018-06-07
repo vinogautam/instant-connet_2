@@ -29,7 +29,7 @@ class IC_agent_api{
 			'ic_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands', 'ic_send_giftbit_campaign',
 			'ic_follow_up_email', 'ic_get_predefined_notes', 'ic_notes_action', 'ic_forgot_password', 'ic_change_email',
 			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation', 'ic_blog_info',
-			'ic_get_points_by_type'
+			'ic_get_points_by_type', 'ic_endorser_profile'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -37,6 +37,45 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+
+	function ic_endorser_profile(){
+		global $wpdb;
+
+		$blog_id = get_active_blog_for_user( $_GET['id'] )->blog_id;
+
+		$total_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_endorsements where type!='Redeem Point' and endorser_id = ".$_GET['id']);
+
+		$redeem_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_endorsements where type='Redeem Point' and endorser_id = ".$_GET['id']);
+
+		$invitations = $wpdb->get_row("select count(*) as count from wp_".$blog_id."_endorsements where endorser_id = ".$_GET['id']);
+
+		$open = $wpdb->get_row("select count(*) as count from wp_".$blog_id."_endorsements where open_status=1 and endorser_id = ".$_GET['id']);
+
+		$clicked = $wpdb->get_row("select count(*) as count from wp_".$blog_id."_endorsements where track_status=1 and endorser_id = ".$_GET['id']);
+
+		$fb_invitation = get_user_meta($_GET['id'], "tracked_fb_invitation", true);
+
+		$tw_invitation = get_user_meta($_GET['id'], "tracked_tw_invitation", true);
+
+		$leads = $wpdb->get_results("select * from wp_leads where endorser_id = ".$_GET['id']);
+
+		$data = array(
+			'total_points' => $total_points->points ? $total_points->points : 0,
+			'redeem_points' => $redeem_points->points ? $redeem_points->points : 0,
+			'invitation_sent' => $invitations->count ? $invitations->count : 0,
+			'invitation_open' => $open->count ? $open->count : 0,
+			'invitation_clicked' => $clicked->count ? $clicked->count : 0,
+			'fb_invitation' => $fb_invitation ? $fb_invitation : 0,
+			'tw_invitation' => $tw_invitation ? $tw_invitation : 0,
+			'leads' => $leads
+		);
+
+		$response = array('status' => 'Success', 'data' => $data);
+		
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_get_bio(){

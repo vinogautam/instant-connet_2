@@ -1214,6 +1214,8 @@ class IC_agent_api{
 			$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
 			$agent_id = get_blog_option($blog_id, 'agent_id');
 
+    		update_user_meta( $current_user->ID, 'last_login', time() );
+
 
 			$points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id=".$current_user->ID);
 			$invitation_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and endorser_id='".$current_user->ID."'");
@@ -1313,6 +1315,7 @@ class IC_agent_api{
 		//$landingPageContent = $wpdb->get_results("select landing_page from wp_".$blog_id."_campaigns where id=".$campaign);
 
 		if(!is_wp_error($current_user)) {
+			update_user_meta( $current_user->ID, 'last_login', time() );
 			$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
 			$agent_id = get_blog_option($blog_id, 'agent_id');
 
@@ -2015,6 +2018,7 @@ class IC_agent_api{
 				update_user_meta($user_id, 'campaign', $user['campaign']);
 				update_user_meta($user_id, 'social_campaign', $user['social_campaign']);
 				update_user_meta($user_id, 'landingPageContent', $user['landingPageContent']);
+
 				if( isset($user['video']) ){
 					$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass'], $user['video']);
 				} else {
@@ -2088,8 +2092,9 @@ class IC_agent_api{
 			$item = (array)$v['data'];
 			$item['id'] = $item['ID'];
 			if(!get_user_meta($v['ID'], 'imcomplete_profile', true)){
-				$last_login = get_the_author_meta('last_login', $item['ID']);
-				$item['last_login'] = $last_login; //$the_login_date = human_time_diff($last_login);
+				$last_login = get_user_meta($item['ID'], 'last_login', true);
+    			$the_login_date = human_time_diff($last_login);
+				$item['last_login'] = $the_login_date;
 				
 				
 				

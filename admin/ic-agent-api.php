@@ -10,7 +10,7 @@ class IC_agent_api{
 
 	    
 	    $functions = array('ic_all_letter_list', 'ic_agent_login', 'ic_site_pages', 'ic_add_endorser', 'ic_send_invitation',
-	    	'ic_send_endorsement_invitation', 'ic_update_endorser', 'ic_endorser_list', 'ic_add_create_email_template',
+	    	'ic_send_endorsement_invitation', 'ic_update_endorser', 'ic_endorser_list', 'ic_get_endorser_list', 'ic_add_create_email_template',
 	    	'ic_update_email_template', 'ic_endorser_letter_list', 'ic_endorsement_letter_list',
 	    	'ic_delete_endorser', 'ic_delete_letter', 'ic_new_lead', 'ic_new_lead_nomail', 'ic_update_lead', 
 	    	'ic_noti_to_agent', 'ic_noti_to_user', 'ic_resend_gift', 'ic_send_gift', 'ic_get_sites', 
@@ -1370,16 +1370,45 @@ class IC_agent_api{
 		$endorser = get_userdata($endorser_id);
 		$agent_id = get_blog_option($blog_id, 'agent_id');
 
-		$response = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id=".$endorser_id);
+		//$response = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id=".$endorser_id);
+		$total_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_endorsements where type!='Redeem Point' and endorser_id = ".$endorser_id);
 
-		$res = array(
+		$redeem_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_endorsements where type='Redeem Point' and endorser_id = ".$endorser_id);
+
+		$invitations = $wpdb->get_row("select count(*) as count from wp_".$blog_id."_endorsements where endorser_id = ".$endorser_id);
+
+		$open = $wpdb->get_row("select count(*) as count from wp_".$blog_id."_endorsements where open_status=1 and endorser_id = ".$endorser_id);
+
+		$clicked = $wpdb->get_row("select count(*) as count from wp_".$blog_id."_endorsements where track_status=1 and endorser_id = ".$endorser_id);
+
+		$fb_invitation = get_user_meta($endorser_id, "tracked_fb_invitation", true);
+
+		$tw_invitation = get_user_meta($endorser_id, "tracked_tw_invitation", true);
+
+		$leads = $wpdb->get_results("select * from wp_leads where endorser_id = ".$endorser_id);
+
+		$data = array(
+			'total_points' => $total_points->points ? $total_points->points : 0,
+			'redeem_points' => $redeem_points->points ? $redeem_points->points : 0,
+			'invitation_sent' => $invitations->count ? $invitations->count : 0,
+			'invitation_open' => $open->count ? $open->count : 0,
+			'invitation_clicked' => $clicked->count ? $clicked->count : 0,
+			'fb_invitation' => $fb_invitation ? $fb_invitation : 0,
+			'tw_invitation' => $tw_invitation ? $tw_invitation : 0,
+			'leads' => $leads,
 			'name' => get_user_meta($endorser_id, 'first_name', true). ' '. get_user_meta($endorser_id, 'last_name', true),
 			'email' => $endorser->user_email,
-			'points' => $response->points,
+			'phone' => get_user_meta($endorser_id, 'phone', true),
+			'agent_id' => $agent_id,
 			'site_id' => $blog_id,
-			'agent_id' => $agent_id
+			'campaign' => $campaign = get_user_meta($endorser_id, 'campaign', true)
 		);
-		echo json_encode($res);
+
+		
+
+		$response = array('status' => 'Success', 'data' => $data);
+
+		echo json_encode($response);
 		die(0);
 		exit;
 	}
@@ -2029,6 +2058,49 @@ class IC_agent_api{
 		else {
 			return $d;
 		}
+	}
+
+	function ic_get_endorser_list() {
+		
+		global $wpdb;
+		$arr = array('role'=>'endorser');
+		$arr['order'] = $_GET['columns'][$_GET['order'][0]['column']]['data'];
+		$arr['orderby'] = $_GET['order'][0]['dir'];
+		$data = (array)get_users();
+		
+		$recordsTotal = $wpdb->get_results("select * from tmp_user where status = 0");
+		$start = $_GET['start'];
+		$length = $_GET['length'];
+		$offset = $start * $length;
+		$order = 
+		
+		$recordsFiltered = $wpdb->get_results("select * from tmp_user where status = 0 order by $order $orderby limit $offset, $length ");
+		$response = array('status' => 'Success', 
+							'data' => $recordsFiltered,
+						  	'recordsTotal' => count($recordsTotal),
+						  	'recordsFiltered' => count($recordsFiltered),
+						);
+
+
+		$newdat = array();
+		foreach($data as $v){
+			$v = (array)$v;
+			$item = (array)$v['data'];
+			$item['id'] = $item['ID'];
+			if(!get_user_meta($v['ID'], 'imcomplete_profile', true)){
+				$last_login = get_the_author_meta('last_login', $item['ID']);
+				$item['last_login'] = $last_login; //$the_login_date = human_time_diff($last_login);
+				
+				
+				
+				$newdat[] = $item;
+			}
+		}
+		$response = array('status' => 'Success', 'data' => $newdat);
+		echo json_encode($response);
+		die(0);
+
+
 	}
 
 	function ic_endorser_list(){

@@ -1389,7 +1389,8 @@ class IC_agent_api{
 		$tw_invitation = get_user_meta($endorser_id, "tracked_tw_invitation", true);
 
 		$leads = $wpdb->get_results("select * from wp_leads where endorser_id = ".$endorser_id);
-
+		$last_login = get_user_meta($endorser_id, 'last_login', true);
+		$the_login_date = human_time_diff($last_login);
 		$data = array(
 			'total_points' => $total_points->points ? $total_points->points : 0,
 			'redeem_points' => $redeem_points->points ? $redeem_points->points : 0,
@@ -1404,7 +1405,8 @@ class IC_agent_api{
 			'phone' => get_user_meta($endorser_id, 'phone', true),
 			'agent_id' => $agent_id,
 			'site_id' => $blog_id,
-			'campaign' => $campaign = get_user_meta($endorser_id, 'campaign', true)
+			'campaign' => get_user_meta($endorser_id, 'campaign', true),
+			'last_login' => $the_login_date
 		);
 
 		

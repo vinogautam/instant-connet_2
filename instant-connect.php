@@ -386,6 +386,23 @@ if(!class_exists('Stripe'))
 			dbDelta($sql_one);
 		}
 
+		$mailtemplates = $wpdb->prefix ."notes";
+
+		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){
+			$sql_one = "CREATE TABLE " . $mailtemplates . "(
+			  id int(11) NOT NULL AUTO_INCREMENT,
+			  agent_id int(11),
+			  lead_id int(11),
+			  endorser_id int(11),
+			  notes tinytext NOT NULL,
+			  events tinytext NOT NULL,
+			  created datetime,
+			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
+
+			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+			dbDelta($sql_one);
+		}
+
 		$check_already_exist = !get_blog_option(get_current_blog_id(), 'strategy_link_created');
 
 		if($check_already_exist){

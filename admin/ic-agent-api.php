@@ -29,7 +29,7 @@ class IC_agent_api{
 			'ic_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands', 'ic_send_giftbit_campaign',
 			'ic_follow_up_email', 'ic_get_predefined_notes', 'ic_notes_action', 'ic_forgot_password', 'ic_change_email',
 			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation', 'ic_blog_info',
-			'ic_get_points_by_type', 'ic_endorser_profile'
+			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -37,6 +37,47 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_add_timeline_notes(){
+		global $wpdb;
+
+		$wpdb->insert($wpdb->prefix ."notes", 
+				array(
+					'agent_id' => $_POST['agent_id']
+			  		'lead_id' => $_POST['lead_id'] ? $_POST['lead_id'] : 0,
+			  		'endorser_id' => $_POST['endorser_id'] ? $_POST['endorser_id'] : 0,
+			  		'notes' => $_POST['noted'],
+			  		'events' => $_POST['events'],
+			  		'created' => date('Y-m-d H-i-s')
+				)
+		);
+
+		$this->track_api('notes_added', $blog_id, $_POST['endorser_id'] ? $_POST['endorser_id'] : $_POST['lead_id'], array('notes_id' => $wpdb->insert_id, 'is_lead' => !!$_POST['lead_id'] ))
+
+		$response = array('status' => 'Success');
+		
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_timeline_notes(){
+		global $wpdb;
+		$blog_id = get_active_blog_for_user( $_GET['id'] )->blog_id;
+
+		$group = $wpdb->get_results("SELECT created, month(created) as mn, YEAR(created) as yr FROM wp_".$blog_id."_notes where endorser_id = ".$_GET['id']." GROUP by month(created), YEAR(created)");
+
+		$data = array();
+
+		foreach ($group as $key => $value) {
+			$data[date("F, Y", strtotime($value))] = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_notes where endorser_id = ".$_GET['id']." and month(created) = ".$value->mn.", YEAR(created)= ".$value->yr." order by id desc");
+		}
+
+
+		$response = array('status' => 'Success', 'data' => $data);
+		
+		echo json_encode($response);
+		die(0);
 	}
 
 

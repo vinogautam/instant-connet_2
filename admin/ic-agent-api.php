@@ -40,6 +40,21 @@ class IC_agent_api{
 	    
 	}
 
+	function ic_resend_autologin_link(){
+		global $ntm_mail;
+
+		$userpass = wp_generate_password( $length=12, $include_standard_special_chars=false );
+		$user_info = get_userdata($_GET['id']);
+		$username = $user_info->user_login;
+		wp_set_password( $userpass, $_GET['resend_welcome_email'] );
+		$ntm_mail->send_welcome_mail($user_info->user_email, $_GET['id'], $username.'#'.$userpass);
+
+		$response = array('status' => 'Success');
+		
+		echo json_encode($response);
+		die(0);
+	}
+
 	function ic_endorser_redeemed_list(){
 		global $wpdb;
 

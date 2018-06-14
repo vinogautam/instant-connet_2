@@ -29,7 +29,8 @@ class IC_agent_api{
 			'ic_reset_password', 'ic_get_giftbit_region', 'ic_get_giftbit_brands', 'ic_send_giftbit_campaign',
 			'ic_follow_up_email', 'ic_get_predefined_notes', 'ic_notes_action', 'ic_forgot_password', 'ic_change_email',
 			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation', 'ic_blog_info',
-			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes'
+			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes',
+			'ic_endorser_redeemed_list'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -39,21 +40,42 @@ class IC_agent_api{
 	    
 	}
 
+	function ic_endorser_redeemed_list(){
+		global $wpdb;
+
+		$blog_id = get_active_blog_for_user( $_GET['id'] )->blog_id;
+
+		$res = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_points_transaction where type = 'Redeem Point' and endorser_id = ".$_GET['id']." order by id desc");
+
+		$data = array();
+		foreach ($res as $key => $value) {
+			$value = (array)$value;
+			$value['notes'] = unserialize($value);
+			$value['points'] = abs($value['points']);
+			$data[] = $value;
+		}
+
+		$response = array('status' => 'Success', 'data' => $data);
+		
+		echo json_encode($response);
+		die(0);
+	}
+
 	function ic_add_timeline_notes(){
 		global $wpdb;
 
 		$wpdb->insert($wpdb->prefix ."notes", 
 				array(
-					'agent_id' => $_POST['agent_id']
+					'agent_id' => $_POST['agent_id'],
 			  		'lead_id' => $_POST['lead_id'] ? $_POST['lead_id'] : 0,
 			  		'endorser_id' => $_POST['endorser_id'] ? $_POST['endorser_id'] : 0,
-			  		'notes' => $_POST['noted'],
+			  		'notes' => $_POST['notes'],
 			  		'events' => $_POST['events'],
 			  		'created' => date('Y-m-d H-i-s')
 				)
 		);
 
-		$this->track_api('notes_added', $blog_id, $_POST['endorser_id'] ? $_POST['endorser_id'] : $_POST['lead_id'], array('notes_id' => $wpdb->insert_id, 'is_lead' => !!$_POST['lead_id'] ))
+		$this->track_api('notes_added', $blog_id, $_POST['endorser_id'] ? $_POST['endorser_id'] : $_POST['lead_id'], array('notes_id' => $wpdb->insert_id, 'is_lead' => !!$_POST['lead_id'] ));
 
 		$response = array('status' => 'Success');
 		
@@ -383,12 +405,14 @@ class IC_agent_api{
 				$option['amount'] = $option['amount'] - $amount;
 				update_option("giftbit", $option);
 
+				$data_string['uuid'] = $gift_response['campaign']->uuid;
+
 				$data = array(
 								'endorser_id' =>$user_id,
 								'agent_id' => $agent_id,
 								'points' => -$points,
 								'type' => 'Redeem Point',
-								'notes' => $gift_response['campaign']->uuid,
+								'notes' => unserialize($data_string),
 								'created'	=> date("Y-m-d H:i:s")
 								);
 				$wpdb->insert("wp_".$blog_id."_points_transaction", $data);

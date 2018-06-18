@@ -30,7 +30,7 @@ class IC_agent_api{
 			'ic_follow_up_email', 'ic_get_predefined_notes', 'ic_notes_action', 'ic_forgot_password', 'ic_change_email',
 			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation', 'ic_blog_info',
 			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes',
-			'ic_endorser_redeemed_list'
+			'ic_endorser_redeemed_list', 'ic_resend_autologin_link'
 	    );
 		
 		foreach ($functions as $key => $value) {

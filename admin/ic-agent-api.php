@@ -84,8 +84,8 @@ class IC_agent_api{
 					'agent_id' => $_POST['agent_id'],
 			  		'lead_id' => $_POST['lead_id'] ? $_POST['lead_id'] : 0,
 			  		'endorser_id' => $_POST['endorser_id'] ? $_POST['endorser_id'] : 0,
-			  		'notes' => $_POST['notes'],
-			  		'events' => $_POST['events'],
+			  		'notes' => isset($_POST['notes']) ? $_POST['notes'] : '',
+			  		'events' => isset($_POST['events']) ? $_POST['events'] : '',
 			  		'created' => date('Y-m-d H-i-s')
 				)
 		);
@@ -107,7 +107,7 @@ class IC_agent_api{
 		$data = array();
 
 		foreach ($group as $key => $value) {
-			$data[date("F, Y", strtotime($value))] = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_notes where endorser_id = ".$_GET['id']." and month(created) = ".$value->mn.", YEAR(created)= ".$value->yr." order by id desc");
+			$data[date("F, Y", strtotime($value->created))] = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_notes where endorser_id = ".$_GET['id']." and month(created) = ".$value->mn." and YEAR(created)= ".$value->yr." order by id desc");
 		}
 
 

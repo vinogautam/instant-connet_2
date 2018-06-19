@@ -255,6 +255,7 @@ if(!class_exists('Stripe'))
 			   agent_id int(11),
 			   points int(11),
 			   notes text,
+			   queue int(1),
 			   type tinytext NOT NULL,
 			   created datetime,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
@@ -396,6 +397,23 @@ if(!class_exists('Stripe'))
 			  endorser_id int(11),
 			  notes tinytext NOT NULL,
 			  events tinytext NOT NULL,
+			  created datetime,
+			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
+
+			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+			dbDelta($sql_one);
+		}
+
+		$mailtemplates = $wpdb->prefix ."agent_wallet";
+
+		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){
+			$sql_one = "CREATE TABLE " . $mailtemplates . "(
+			  id int(11) NOT NULL AUTO_INCREMENT,
+			  agent_id int(11),
+			  transaction_id int(11),
+			  points int(11),
+			  balance int(11),
+			  notes tinytext NOT NULL,
 			  created datetime,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 

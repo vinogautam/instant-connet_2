@@ -30,7 +30,7 @@ class IC_agent_api{
 			'ic_follow_up_email', 'ic_get_predefined_notes', 'ic_notes_action', 'ic_forgot_password', 'ic_change_email',
 			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation', 'ic_blog_info',
 			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes',
-			'ic_endorser_redeemed_list', 'ic_resend_autologin_link'
+			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -38,6 +38,28 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_save_offline_msg(){
+
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		update_user_meta($_POST['agent_id'], 'offline_data', 
+			array(
+				'offline_video' => $_POST['offline_video'],
+				'offline_msg' => $_POST['offline_msg'],
+			)
+		);
+
+		$response = array('status' => 'Success', get_user_meta($_POST['agent_id'], 'offline_data', true));
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_get_offline_msg(){
+		$response = array('status' => 'Success', get_user_meta($_GET['agent_id'], 'offline_data', true));
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_agent_balance($id){
@@ -50,6 +72,9 @@ class IC_agent_api{
 
 	function ic_add_agent_wallet(){
 		global $wpdb;
+
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
 		$blog_id = get_active_blog_for_user( $_POST['id'] )->blog_id;
 
 		$balance = $this->ic_agent_balance($_POST['id']);
@@ -113,7 +138,7 @@ class IC_agent_api{
 		$data = array();
 		foreach ($res as $key => $value) {
 			$value = (array)$value;
-			$value['notes'] = unserialize($value);
+			$value['notes'] = unserialize($value['notes']);
 			$value['points'] = abs($value['points']);
 			$data[] = $value;
 		}
@@ -126,6 +151,8 @@ class IC_agent_api{
 
 	function ic_add_timeline_notes(){
 		global $wpdb;
+
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
 		$wpdb->insert($wpdb->prefix ."notes", 
 				array(
@@ -475,7 +502,7 @@ class IC_agent_api{
 								'agent_id' => $agent_id,
 								'points' => -$points,
 								'type' => 'Redeem Point',
-								'notes' => unserialize($data_string),
+								'notes' => serialize($data_string),
 								'created'	=> date("Y-m-d H:i:s")
 								);
 				$wpdb->insert("wp_".$blog_id."_points_transaction", $data);

@@ -30,7 +30,8 @@ class IC_agent_api{
 			'ic_follow_up_email', 'ic_get_predefined_notes', 'ic_notes_action', 'ic_forgot_password', 'ic_change_email',
 			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation', 'ic_blog_info',
 			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes',
-			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg'
+			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg',
+			'ic_update_agent_status', 'ic_agent_status'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -40,24 +41,56 @@ class IC_agent_api{
 	    
 	}
 
+	function ic_agent_status()
+	{
+		$arr = array(1 => 'Online', 2 => 'Offline', 3 => 'Meeting', 4 => 'Away');
+		
+
+		$lst_login_time = get_user_meta($_GET['agent'], 'last_seen_time', true);
+		$user_current_status = get_user_meta($_GET['agent'], 'agent_status', true);
+		$response = array('status' => 'Success', 'status_text'=>$arr[$user_current_status], 'agent_status' => $user_current_status, 'last_seen_time' => $lst_login_time);
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_update_agent_status() {
+
+			$arr = array(1 => 'Online', 2 => 'Offline', 3 => 'Meeting', 4 => 'Away');
+
+			$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+			
+
+			update_user_meta($_POST['agent'], 'agent_status', $_POST['status']);
+
+			update_user_meta($_POST['agent'], 'last_seen_time', date("Y-m-d H:i:s"));
+			
+			$lst_login_time = get_user_meta($_POST['agent'], 'last_seen_time', true);
+			$user_current_status = get_user_meta($_POST['agent'], 'agent_status', true);
+			$response = array('status' => 'Success', 'status_text'=>$arr[$user_current_status], 'agent_status' => $user_current_status, 'last_seen_time' => $lst_login_time);
+			echo json_encode($response);
+			die(0);
+			exit;
+	}
+
 	function ic_save_offline_msg(){
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		update_user_meta($_POST['agent_id'], 'offline_data', 
+		update_user_meta($_POST['agent_id'], 'offline_data_'.$_POST['type'], 
 			array(
 				'offline_video' => $_POST['offline_video'],
 				'offline_msg' => $_POST['offline_msg'],
 			)
 		);
 
-		$response = array('status' => 'Success', get_user_meta($_POST['agent_id'], 'offline_data', true));
+		$response = array('status' => 'Success', 'data'=>get_user_meta($_POST['agent_id'], 'offline_data_'.$_POST['type'], true));
 		echo json_encode($response);
 		die(0);
 	}
 
 	function ic_get_offline_msg(){
-		$response = array('status' => 'Success', get_user_meta($_GET['agent_id'], 'offline_data', true));
+		$response = array('status' => 'Success', 'data'=>get_user_meta($_GET['agent_id'], 'offline_data_'.$GET['type'], true));
 		echo json_encode($response);
 		die(0);
 	}

@@ -224,6 +224,9 @@ if(!class_exists('Stripe'))
 			   is_mobile int(1),
 			   complete_device_name tinytext NOT NULL,
 			   form_factor tinytext NOT NULL,
+			   ip_address tinytext NOT NULL,
+			   chat_conversion int(1),
+			   meeting_conversion int(1),
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

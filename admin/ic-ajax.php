@@ -62,14 +62,21 @@ class IC_ajax{
 
     	$results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$_GET['id']);
 
-    	$points = 25;
-		$type = 'Instant connect Chat';
-		$new_balance = $endorsements->get_endorser_points($results->endorser) + $points;
-		$data = array('points' => $points, 'credit' => 1, 'endorser_id' => $results->endorser, 'new_balance' => $new_balance, 'transaction_on' => date("Y-m-d H:i:s"), 'type' => $type);
-		$endorsements->add_points($data);
-		$data['participant_id'] = $_GET['id'];
-		$blog_id = get_active_blog_for_user( $results->endorser )->blog_id;
-		IC_agent_api::track_api('chat_participants', $blog_id, $results->endorser, $data);
+    	$results2 = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (email='".$results->email."' or ip_address '".$results->ip_address."') and chat_conversion = 1");
+
+    	if(count($results2)==0){
+
+    		$blog_id = get_active_blog_for_user($results->endorser)->blog_id;
+    		$agent_id = get_blog_option($blog_id, 'agent_id');
+			$points = get_user_meta($agent_id, 'endorsement_settings', true)['chat_point_value'];
+			$type = 'Instant connect Chat';
+			$new_balance = $endorsements->get_endorser_points($results->endorser) + $points;
+			$data = array('points' => $points, 'credit' => 1, 'endorser_id' => $results->endorser, 'new_balance' => $new_balance, 'transaction_on' => date("Y-m-d H:i:s"), 'type' => $type);
+			$endorsements->add_points($data);
+			$wpdb->update($wpdb->prefix . "meeting_participants", array('chat_conversion' => 1), array('id' => $_GET['id']))
+			$data['participant_id'] = $_GET['id'];
+			IC_agent_api::track_api('chat_participants', $blog_id, $results->endorser, $data);
+		}
     }
 
     function send_ic_gift()
@@ -91,15 +98,21 @@ class IC_ajax{
 		
 		$wpdb->update($wpdb->prefix . "meeting_participants", array('gift_status' => 1), array('id' => $_GET['id']));
 
-		$points = 125;
-		$type = 'Instant connect success meeting';
-		$new_balance = $endorsements->get_endorser_points($results->endorser) + $points;
-		$data = array('points' => $points, 'credit' => 1, 'endorser_id' => $results->endorser, 'new_balance' => $new_balance, 'transaction_on' => date("Y-m-d H:i:s"), 'type' => $type);
-		$endorsements->add_points($data);
+		$results2 = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (email='".$results->email."' or ip_address '".$results->ip_address."') and chat_conversion = 1");
 
-		$data['participant_id'] = $_GET['id'];
-		$blog_id = get_active_blog_for_user( $results->endorser )->blog_id;
-		IC_agent_api::track_api('meeting_participants', $blog_id, $results->endorser, $data);
+    	if(count($results2)==0){
+
+    		$blog_id = get_active_blog_for_user($results->endorser)->blog_id;
+    		$agent_id = get_blog_option($blog_id, 'agent_id');
+			$points = get_user_meta($agent_id, 'endorsement_settings', true)['meeting_point_value'];
+			$type = 'Instant connect success meeting';
+			$new_balance = $endorsements->get_endorser_points($results->endorser) + $points;
+			$data = array('points' => $points, 'credit' => 1, 'endorser_id' => $results->endorser, 'new_balance' => $new_balance, 'transaction_on' => date("Y-m-d H:i:s"), 'type' => $type);
+			$endorsements->add_points($data);
+			$wpdb->update($wpdb->prefix . "meeting_participants", array('meeting_conversion' => 1), array('id' => $_GET['id']));
+			$data['participant_id'] = $_GET['id'];
+			IC_agent_api::track_api('meeting_participants', $blog_id, $results->endorser, $data);
+		}
 
 		$ntm_mail->send_gift_mail('get_gift_mail', $results->endorser, $gift_id);
     }

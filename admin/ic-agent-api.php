@@ -15,7 +15,7 @@ class IC_agent_api{
 	    	'ic_delete_endorser', 'ic_delete_letter', 'ic_new_lead', 'ic_new_lead_nomail', 'ic_update_lead', 
 	    	'ic_noti_to_agent', 'ic_noti_to_user', 'ic_resend_gift', 'ic_send_gift', 'ic_get_sites', 
 	    	'ic_add_points', 'ic_get_points', 'ic_update_fb_id', 'ic_get_fb_id', 'ic_instant_meeting', 
-	    	'ic_appointment_meeting', 'ic_update_meeting_date', 'ic_update_meeting_eventid', 'ic_new_lead_nomail',
+	    	'ic_appointment_meeting', 'ic_update_meeting_date', 'ic_update_meeting_eventid',
 	    	'ic_update_lead', 'ic_get_active_meeting_list', 'ic_generate_token', 'ic_update_active_time', 
 	    	'ic_update_meeting_data', 'ic_get_endorser_info', 'ic_auto_login', 'ic_new_campaign', 
 	    	'ic_update_campaign', 'ic_delete_campaign', 'ic_delete_campaign_letter', 'ic_campaigns', 
@@ -77,20 +77,20 @@ class IC_agent_api{
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		update_user_meta($_POST['agent_id'], 'offline_data_'.$_POST['type'], 
+		update_user_meta($_POST['agent_id'], 'status_data_'.$_POST['type'], 
 			array(
-				'offline_video' => $_POST['offline_video'],
-				'offline_msg' => $_POST['offline_msg'],
+				'video' => $_POST['offline_video'],
+				'msg' => $_POST['offline_msg'],
 			)
 		);
 
-		$response = array('status' => 'Success', 'data'=>get_user_meta($_POST['agent_id'], 'offline_data_'.$_POST['type'], true));
+		$response = array('status' => 'Success', 'data'=>get_user_meta($_POST['agent_id'], 'status_data_'.$_POST['type'], true));
 		echo json_encode($response);
 		die(0);
 	}
 
 	function ic_get_offline_msg(){
-		$response = array('status' => 'Success', 'data'=>get_user_meta($_GET['agent_id'], 'offline_data_'.$GET['type'], true));
+		$response = array('status' => 'Success', 'data'=>get_user_meta($_GET['agent_id'], 'status_data_'.$GET['type'], true));
 		echo json_encode($response);
 		die(0);
 	}
@@ -1682,7 +1682,7 @@ class IC_agent_api{
 
 		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		
-		$resuts = $wpdb->get_results('select * from wp_leads where email = "'. $lead['email'] .'"');
+		$resuts = $wpdb->get_results('select * from wp_leads where email = "'. $lead['email'] .'" or ip_address = "'. $lead['email'] .'"');
 		if(count($resuts)){
 			$wpdb->update("wp_leads", $lead, array('email' => $lead['email']));
 			$lead_id = $resuts[0]->id;

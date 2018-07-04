@@ -90,7 +90,7 @@ class IC_agent_api{
 	}
 
 	function ic_get_offline_msg(){
-		$response = array('status' => 'Success', 'data'=>get_user_meta($_GET['agent_id'], 'status_data_'.$GET['type'], true));
+		$response = array('status' => 'Success', 'data'=>get_user_meta($_GET['agent_id'], 'status_data_'.$_GET['type'], true));
 		echo json_encode($response);
 		die(0);
 	}

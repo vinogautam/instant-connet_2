@@ -561,7 +561,7 @@ class IC_admin{
              
             add_menu_page( 'Instant Connect', 'Instant Connect', 'manage_options', 'instant_connect', array( $this, 'settingsPage' ));
             add_submenu_page( 'instant_connect', 'Endorsements', 'Endorser Waiting for approval',  9, 'waiting_endorsers', array( &$this, 'waiting_endorsers'));
-
+            add_submenu_page( 'instant_connect', 'Endorsements', 'Add Agent Wallet',  9, 'agent_wallet', array( &$this, 'agent_wallet'));
         
         }
 
@@ -689,6 +689,93 @@ class IC_admin{
         </div>
     	<?php
     }
+
+    function agent_wallet(){
+    	$error = '';
+		$success = '';
+    	if ($_POST) {
+		  Stripe::setApiKey("sk_test_ptIh1KjZKyzPthKwE4szUeDE");
+		  
+		  try {
+		    if (!isset($_POST['stripeToken']))
+		      throw new Exception("The Stripe Token was not generated correctly");
+		    Stripe_Charge::create(array("amount" => 1000,
+		                                "currency" => "usd",
+		                                "card" => $_POST['stripeToken']));
+		    $success = 'Your payment was successful.';
+		  }
+		  catch (Exception $e) {
+		    $error = $e->getMessage();
+		  }
+		}
+    	?>
+    	<script type="text/javascript" src="https://js.stripe.com/v1/"></script>
+    	<script type="text/javascript">
+            // this identifies your website in the createToken call below
+            Stripe.setPublishableKey('pk_test_xCkmeFmXW9ku2pjLVAnbnRWc');
+            function stripeResponseHandler(status, response) {
+                if (response.error) {
+                    // re-enable the submit button
+                    $('.submit-button').removeAttr("disabled");
+                    // show the errors on the form
+                    $(".payment-errors").html(response.error.message);
+                } else {
+                    var form$ = $("#payment-form");
+                    // token contains id, last4, and card type
+                    var token = response['id'];
+                    // insert the token into the form so it gets submitted to the server
+                    form$.append("<input type='hidden' name='stripeToken' value='" + token + "' />");
+                    // and submit
+                    form$.get(0).submit();
+                }
+            }
+            $(document).ready(function() {
+                $("#payment-form").submit(function(event) {
+                    // disable the submit button to prevent repeated clicks
+                    $('.submit-button').attr("disabled", "disabled");
+                    // createToken returns immediately - the supplied callback submits the form if there are no errors
+                    Stripe.createToken({
+                        number: $('.card-number').val(),
+                        cvc: $('.card-cvc').val(),
+                        exp_month: $('.card-expiry-month').val(),
+                        exp_year: $('.card-expiry-year').val()
+                    }, stripeResponseHandler);
+                    return false; // submit from callback
+                });
+            });
+        </script>
+    	<div class="wrap">
+            <h2><?php echo $current_page;?></h2>   
+            <span class="payment-errors"><?= $error ?></span>
+	        <span class="payment-success"><?= $success ?></span>        
+            <form method="post">
+				<table class="form-table">
+					<tbody>
+						<tr>
+							<th scope="row"><label for="blogname">Card Number</label></th>
+							<td><input type="text" class="regular-text"  class="card-number" name="name"></td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="blogname">Cvv</label></th>
+							<td><input type="text" class="regular-text"  class="card-cvc" name="email"></td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="blogname">Expiration (MM/YYYY)</label></th>
+							<td>
+								<input type="text" size="2" class="card-expiry-month"/>
+				                <span> / </span>
+				                <input type="text" size="4" class="card-expiry-year"/>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<?php submit_button('Save ', 'primary', 'send_auto_meeting_link_save');?>
+			</form>
+			
+        </div>
+    	<?php
+    }
+
     
     //our admin tabs navigation
     public function adminTabs($tabs, $default, $page){

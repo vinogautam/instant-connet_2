@@ -73,7 +73,7 @@ class IC_ajax{
 			$new_balance = $endorsements->get_endorser_points($results->endorser) + $points;
 			$data = array('points' => $points, 'credit' => 1, 'endorser_id' => $results->endorser, 'new_balance' => $new_balance, 'transaction_on' => date("Y-m-d H:i:s"), 'type' => $type);
 			$endorsements->add_points($data);
-			$wpdb->update($wpdb->prefix . "meeting_participants", array('chat_conversion' => 1), array('id' => $_GET['id']))
+			$wpdb->update($wpdb->prefix . "meeting_participants", array('chat_conversion' => 1), array('id' => $_GET['id']));
 			$data['participant_id'] = $_GET['id'];
 			IC_agent_api::track_api('chat_participants', $blog_id, $results->endorser, $data);
 		}

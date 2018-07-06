@@ -90,7 +90,18 @@ class IC_agent_api{
 	}
 
 	function ic_get_offline_msg(){
-		$response = array('status' => 'Success', 'data'=>get_user_meta($_GET['agent_id'], 'status_data_'.$_GET['type'], true));
+		
+		if(isset($_GET['type'])){
+			$data = array(
+				'Online' => get_user_meta($_GET['agent_id'], 'status_data_Online', true),
+				'Offline' => get_user_meta($_GET['agent_id'], 'status_data_Offline', true),
+				'Away' => get_user_meta($_GET['agent_id'], 'status_data_Away', true),
+			);
+		} else {
+			$data = get_user_meta($_GET['agent_id'], 'status_data_'.$_GET['type'], true);
+		}
+
+		$response = array('status' => 'Success', 'data'=>$data);
 		echo json_encode($response);
 		die(0);
 	}

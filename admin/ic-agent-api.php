@@ -91,7 +91,7 @@ class IC_agent_api{
 
 	function ic_get_offline_msg(){
 		
-		if(isset($_GET['type'])){
+		if(!isset($_GET['type'])){
 			$data = array(
 				'Online' => get_user_meta($_GET['agent_id'], 'status_data_Online', true),
 				'Offline' => get_user_meta($_GET['agent_id'], 'status_data_Offline', true),

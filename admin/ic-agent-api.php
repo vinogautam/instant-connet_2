@@ -156,7 +156,7 @@ class IC_agent_api{
 	function ic_charge_current_customer() {
 		$_POST = (array) json_decode(file_get_contents('php://input'));
 			
-			if(isset($_POST['customer_id']) && $_POST['amount_cents']){
+			if( isset($_POST['customer_id']) && isset($_POST['amount_cents'])){
 			
 			Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
 			Stripe\Stripe::setAPIVersion("2017-08-15");
@@ -168,7 +168,7 @@ class IC_agent_api{
 	  		"currency" => "CAD",
 	  		"customer" => $_POST['customer_id'],
 	  		"source" => $_POST['card_id'],
-	  		"description" = 'Point Purchase'
+	  		"description" => 'Point Purchase'
 			));
 			//VINO PLEASE ADD THE CODE FOR AGENT WALLET HERE.
 
@@ -207,6 +207,7 @@ class IC_agent_api{
 			$agentInfo = get_userdata( $_POST['agent_id'] );
 			Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
 			Stripe\Stripe::setAPIVersion("2017-08-15");
+			
 			try
 				{
 					$customer = Stripe_Customer::create(array(							 

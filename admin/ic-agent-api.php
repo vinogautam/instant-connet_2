@@ -171,6 +171,8 @@ class IC_agent_api{
 	  		"description" = 'Point Purchase'
 			));
 			//VINO PLEASE ADD THE CODE FOR AGENT WALLET HERE.
+
+			$this->ic_add_agent_wallet($_POST['customer_id'], $_POST['amount_cents']);
 			
 
 			$response = array('status' => 'Success', 'data' =>  $charge);
@@ -355,34 +357,34 @@ class IC_agent_api{
 		return $res->balance;
 	}
 
-	function ic_add_agent_wallet(){
+	function ic_add_agent_wallet($user, $amt){
 		global $wpdb;
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		
 
-		$blog_id = get_active_blog_for_user( $_POST['id'] )->blog_id;
+		$blog_id = get_active_blog_for_user($user)->blog_id;
 
-		$balance = $this->ic_agent_balance($_POST['id']);
+		$balance = $this->ic_agent_balance($user);
 
 		$wpdb->insert("wp_". $blog_id ."_agent_wallet", 
 				array(
 					'agent_id' => $_POST['id'],
-			  		'points' => $_POST['points'],
-			  		'balance' => $balance+$_POST['points'],
+			  		'points' => $amt,
+			  		'balance' => $balance+$amt,
 			  		'notes' => 'Payment added',
 			  		'created' => date('Y-m-d H-i-s')
 				)
 		);
 
 		/* Checking queue transaction*/
-		$res = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_points_transaction where queue = 1 and agent_id = ".$_POST['id']." order by id desc");
+		$res = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_points_transaction where queue = 1 and agent_id = ".$user." order by id desc");
 		if(count($res)){
 			foreach ($res as $key => $value) {
 				$balance = $this->ic_agent_balance($_POST['id']);
 				$wpdb->insert("wp_". $blog_id ."_agent_wallet", 
 						array(
-							'agent_id' => $_POST['id'],
+							'agent_id' => $user,
 					  		'points' => $value->points,
 					  		'balance' => $balance-$value->points,
 					  		'notes' => 'Debited - Queue Transaction',
@@ -392,11 +394,6 @@ class IC_agent_api{
 				);
 			}
 		}
-
-		$response = array('status' => 'Success');
-		
-		echo json_encode($response);
-		die(0);
 	}
 
 	function ic_resend_autologin_link(){

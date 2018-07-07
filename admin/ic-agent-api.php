@@ -210,6 +210,7 @@ class IC_agent_api{
 							  "description" => $agentInfo->user_nicename . " (" .  $agentInfo->user_email . ")",
 							  "card" => $_POST['stripe_token']
 							));
+
 					
 				}
 				catch (Exception $e)
@@ -248,6 +249,7 @@ class IC_agent_api{
 				//VINO ADD THIS TRANSACTION ID TO OUR DB RECORDS FOR THE PURCHASE $response["id"];
 				//SAVE THIS IN OUR AGENT WALLET HERE
 				$response = array('status' => 'Success', 'data' =>  $charge);
+				update_user_meta($user_id, "pmpro_stripe_customerid", $customer->id);
 				json_encode($response);
 				die(0);
 				
@@ -262,7 +264,7 @@ class IC_agent_api{
 			}
 
 
-					update_user_meta($user_id, "pmpro_stripe_customerid", $this->customer->id);
+					
 
 
 		} else {

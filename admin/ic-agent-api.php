@@ -1,5 +1,10 @@
 <?php
 use OpenTok\OpenTok;
+use Stripe\Customer as Stripe_Customer;
+use Stripe\Invoice as Stripe_Invoice;
+use Stripe\Plan as Stripe_Plan;
+use Stripe\Charge as Stripe_Charge;
+
 class IC_agent_api{
 
 	function __construct() {
@@ -31,7 +36,7 @@ class IC_agent_api{
 			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation', 'ic_blog_info',
 			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes',
 			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg',
-			'ic_update_agent_status', 'ic_agent_status'
+			'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -39,6 +44,22 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_get_stripe_customer() {
+
+		$stripeCustomerId = $_GET['customer_id'];
+		//Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
+		//Stripe::setAPIVersion("2015-07-13");
+		Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
+		Stripe\Stripe::setAPIVersion("2017-08-15");
+		
+		$customer = Stripe_Customer::retrieve($stripeCustomerId);
+
+		$response = array('status' => 'Success', 'data' =>  $customer);
+		echo json_encode($response);
+
+		die(0);
 	}
 
 	function ic_agent_status()
@@ -2234,6 +2255,7 @@ class IC_agent_api{
 		$timekitGmail = get_user_meta((int)$user->data->ID, 'timekits_gmail_email', true);
 		$timekitTimeZone = get_user_meta((int)$user->data->ID, 'timekits_time_zone', true);
 		$siteUrl = get_site_url(get_user_meta((int)$user->data->ID, 'primary_blog', true));
+		$stripeCustomerId = get_user_meta((int)$user->data->ID, "pmpro_stripe_customerid");
 		if ( is_wp_error($user) ) {
 			$response = array('status' => 'Error', 'msg' => 'Invalid Credentials');
 		}
@@ -2243,6 +2265,7 @@ class IC_agent_api{
 			$data['membership'] = isset($membership->membership_id) ? $membership->membership_id : 0;
 			$data['timekit_gmail'] = $timekitGmail;
             $data['timekit_time_zone'] = $timekitTimeZone;
+            $data['stripe_customer_id'] = $stripeCustomerId;
 			$response = array('status' => 'Success', 'data' => $data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl);
 		}
 		echo json_encode($response);

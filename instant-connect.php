@@ -13,11 +13,20 @@
 
  define("API_KEY", "45426652");
  define("API_SECRET", "ff71053e07be2f36ec4c1a6f1351fdc340285b81");
+ //define("STRIPE_KEY", pmpro_getOption("stripe_secretkey");
  
-if(!class_exists('Stripe'))
+ //if(!class_exists("Stripe\Stripe"))
+ //{
+	 
+ 	// require_once( ABSPATH . '/wp-content/plugins/paid-memberships-pro/includes/lib/Stripe/lib/init.php');
+	 
+// }
+
+  if(!class_exists("Stripe\Stripe"))
  {
 	 
- 	 require_once( ABSPATH . '/wp-content/plugins/paid-memberships-pro/includes/lib/Stripe/lib/Stripe.php');
+ 	 require_once( ABSPATH . '/wp-content/plugins/paid-memberships-pro/includes/lib/Stripe/init.php');
+ 	 //Had to change the stripe location.
 	 
  }
 

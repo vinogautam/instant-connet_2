@@ -167,7 +167,8 @@ class IC_agent_api{
 	  		"amount" => $_POST['amount_cents'],
 	  		"currency" => "CAD",
 	  		"customer" => $_POST['customer_id'],
-	  		"source" => $_POST['card_id']
+	  		"source" => $_POST['card_id'],
+	  		"description" = 'Point Purchase'
 			));
 			//VINO PLEASE ADD THE CODE FOR AGENT WALLET HERE.
 			

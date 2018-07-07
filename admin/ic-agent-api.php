@@ -172,7 +172,7 @@ class IC_agent_api{
 			));
 			//VINO PLEASE ADD THE CODE FOR AGENT WALLET HERE.
 
-			$this->ic_add_agent_wallet($_POST['customer_id'], $_POST['amount_cents']);
+			$this->ic_add_agent_wallet($_POST['agent_id'], $_POST['amount_cents']);
 			
 
 			$response = array('status' => 'Success', 'data' =>  $charge);
@@ -215,7 +215,7 @@ class IC_agent_api{
 							  "card" => $_POST['stripe_token']
 							));
 
-					
+					update_user_meta($user_id, "pmpro_stripe_customerid", $customer->id);
 				}
 				catch (Exception $e)
 				{
@@ -237,6 +237,8 @@ class IC_agent_api{
 				  "description" => "Point Purchase"
 				  )
 				);
+
+				$this->ic_add_agent_wallet($_POST['agent_id'], $_POST['amount_cents']);
 			}
 			catch (Exception $e)
 			{
@@ -253,7 +255,7 @@ class IC_agent_api{
 				//VINO ADD THIS TRANSACTION ID TO OUR DB RECORDS FOR THE PURCHASE $response["id"];
 				//SAVE THIS IN OUR AGENT WALLET HERE
 				$response = array('status' => 'Success', 'data' =>  $charge);
-				update_user_meta($user_id, "pmpro_stripe_customerid", $customer->id);
+				
 				json_encode($response);
 				die(0);
 				

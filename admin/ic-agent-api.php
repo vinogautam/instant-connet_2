@@ -47,18 +47,21 @@ class IC_agent_api{
 	}
 
 	function ic_get_stripe_customer() {
-
-		$stripeCustomerId = $_GET['customer_id'];
-		//Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
-		//Stripe::setAPIVersion("2015-07-13");
-		Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
-		Stripe\Stripe::setAPIVersion("2017-08-15");
 		
-		$customer = Stripe_Customer::retrieve($stripeCustomerId);
+		
+		if(isset($_GET['customer_id'])){
+			$stripeCustomerId = $_GET['customer_id'];
+			Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
+			Stripe\Stripe::setAPIVersion("2017-08-15");
 
-		$response = array('status' => 'Success', 'data' =>  $customer);
+			$customer = Stripe_Customer::retrieve($stripeCustomerId);
+
+			$response = array('status' => 'Success', 'data' =>  $customer);
+		} else {
+			$response = array('status' => 'Fail', 'msg' =>  'NO CUSTOMER ID SENT');
+		}
 		echo json_encode($response);
-
+		
 		die(0);
 	}
 

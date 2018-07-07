@@ -36,7 +36,7 @@ class IC_agent_api{
 			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation', 'ic_blog_info',
 			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes',
 			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg',
-			'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer'
+			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -45,6 +45,9 @@ class IC_agent_api{
 		}
 	    
 	}
+
+
+	
 
 	function ic_get_stripe_customer_cards() {	
 		
@@ -152,7 +155,9 @@ class IC_agent_api{
 
 	function ic_charge_current_customer() {
 		$_POST = (array) json_decode(file_get_contents('php://input'));
-			if(isset($_POST['customer_id']) && isset($_POST['card_id']) && isset($_POST['amount_cents'])){
+			
+			if(isset($_POST['customer_id']) && $_POST['amount_cents']){
+			
 			Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
 			Stripe\Stripe::setAPIVersion("2017-08-15");
 			
@@ -182,7 +187,7 @@ class IC_agent_api{
 
 		} else {
 			
-			$response = array('status' => 'Fail', 'msg' =>  'Invalid Parameters');
+			$response = array('status' => 'Fail', 'msg' =>  $_POST['customer_id']);
 
 		}
 
@@ -192,7 +197,7 @@ class IC_agent_api{
 	}
 
 	function ic_create_stripe_customer_charge() {
-		$_POST = (array) json_decode(file_get_contents('php://input'));
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
 		if(isset($_POST['agent_id']) && isset($_POST['stripe_token']) && isset($_POST['amount_cents']))  {
 			
@@ -303,9 +308,12 @@ class IC_agent_api{
 
 	}
 
+	
+
 	function ic_save_offline_msg(){
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+	
 
 		update_user_meta($_POST['agent_id'], 'status_data_'.$_POST['type'], 
 			array(
@@ -348,6 +356,7 @@ class IC_agent_api{
 		global $wpdb;
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		
 
 		$blog_id = get_active_blog_for_user( $_POST['id'] )->blog_id;
 
@@ -2459,6 +2468,7 @@ class IC_agent_api{
 	function ic_agent_login(){
 		global $wpdb;
 		$creds = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		
 		$user = wp_signon( $creds, false );
 		$userBlogs = get_blogs_of_user((int)$user->data->ID);
 		$timekitGmail = get_user_meta((int)$user->data->ID, 'timekits_gmail_email', true);

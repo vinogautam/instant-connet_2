@@ -36,7 +36,7 @@ class IC_agent_api{
 			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation', 'ic_blog_info',
 			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes',
 			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg',
-			'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards'
+			'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -53,11 +53,21 @@ class IC_agent_api{
 			$stripeCustomerId = $_GET['customer_id'];
 			Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
 			Stripe\Stripe::setAPIVersion("2017-08-15");
+			try{
+			$cards = Stripe_Customer::retrieve($stripeCustomerId)->sources->all(array(
+  'limit'=>3, 'object' => 'card'));
+			
+			$response = array('status' => 'Success', 'data' =>  $cards);
+		
+		}
+		catch (Exception $e)
+				{
+					
+					$errorResponse = array('status' => 'Fail', 'msg' =>  $e->getMessage());
+					json_encode($errorResponse);
+					die(0);
 
-			$customer = Stripe_Customer::retrieve($stripeCustomerId);
-			$card = $customer->email;
-			$response = array('status' => 'Success', 'data' =>  $customer['sources']);
-
+				}
 		} else {
 			
 			$response = array('status' => 'Fail', 'msg' =>  'NO CUSTOMER ID SENT');
@@ -69,6 +79,198 @@ class IC_agent_api{
 		die(0);
 	
 	}
+
+	function ic_create_customer_card() {
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+		if(isset($_POST['customer_id'])){
+			
+			try
+				{
+			Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
+			Stripe\Stripe::setAPIVersion("2017-08-15");
+
+
+			$customer = Stripe_Customer::retrieve($_POST['customer_id']);
+			$card = $customer->sources->create(array("source" => $_POST['stripe_token']));
+			
+			$response = array('status' => 'Success', 'data' =>  $card);
+
+		}
+
+		catch (Exception $e)
+				{
+					
+					$errorResponse = array('status' => 'Fail', 'msg' =>  $e->getMessage());
+					json_encode($errorResponse);
+					die(0);
+
+				}
+
+
+		} else {
+			
+			$response = array('status' => 'Fail', 'msg' =>  'Invalid Parameters');
+			
+		}
+		
+		echo json_encode($response);
+		die(0);
+		
+	}
+
+	function ic_delete_customer_card() {
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+		if(isset($_POST['customer_id']) && isset($_POST['card_id'])){
+			
+			Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
+			Stripe\Stripe::setAPIVersion("2017-08-15");
+			
+
+			try
+				{
+				$customer = Stripe_Customer::retrieve($_POST['customer_id']);
+				$card = $customer->sources->retrieve($_POST['card_id'])->delete();
+				$response = array('status' => 'Success', 'data' =>  $card);
+			}
+
+			catch (Exception $e)
+				{
+					
+					$errorResponse = array('status' => 'Fail', 'msg' =>  $e->getMessage());
+					json_encode($errorResponse);
+					die(0);
+
+				}
+
+
+		} else {
+			$response = array('status' => 'Fail', 'msg' =>  'Invalid Parameters');
+		}
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_charge_current_customer() {
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+			if(isset($_POST['customer_id']) && isset($_POST['card_id']) && isset($_POST['amount_cents'])){
+			Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
+			Stripe\Stripe::setAPIVersion("2017-08-15");
+			
+			try
+				{
+			$charge = Stripe_Charge::create(array(
+	  		"amount" => $_POST['amount_cents'],
+	  		"currency" => "CAD",
+	  		"customer" => $_POST['customer_id'],
+	  		"source" => $_POST['card_id']
+			));
+			//VINO PLEASE ADD THE CODE FOR AGENT WALLET HERE.
+			
+
+			$response = array('status' => 'Success', 'data' =>  $charge);
+			
+			}
+
+			catch (Exception $e)
+				{
+					
+					$errorResponse = array('status' => 'Fail', 'msg' =>  $e->getMessage());
+					json_encode($errorResponse);
+					die(0);
+
+				}
+
+		} else {
+			
+			$response = array('status' => 'Fail', 'msg' =>  'Invalid Parameters');
+
+		}
+
+		echo json_encode($response);
+		die(0);
+
+	}
+
+	function ic_create_stripe_customer_charge() {
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+
+		if(isset($_POST['agent_id']) && isset($_POST['stripe_token']) && isset($_POST['amount_cents']))  {
+			
+			$agentInfo = get_userdata( $_POST['agent_id'] );
+			Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
+			Stripe\Stripe::setAPIVersion("2017-08-15");
+			try
+				{
+					$customer = Stripe_Customer::create(array(							 
+							  "description" => $agentInfo->user_nicename . " (" .  $agentInfo->user_email . ")",
+							  "card" => $_POST['stripe_token']
+							));
+					
+				}
+				catch (Exception $e)
+				{
+					
+					$errorResponse = array('status' => 'Fail', 'msg' =>  $e->getMessage());
+					json_encode($errorResponse);
+					die(0);
+
+				}
+					
+				
+
+			try
+			{
+				$charge = Stripe_Charge::create(array(
+				  "amount" => $_POST['amount_cents'],
+				  "currency" => 'CAD',
+				  "customer" => $customer->id,
+				  "description" => "Point Purchase"
+				  )
+				);
+			}
+			catch (Exception $e)
+			{
+				
+				
+				$errorResponse = array('status' => 'Fail', 'msg' =>  $e->getMessage());
+				json_encode($errorResponse);
+				die(0);
+			}
+
+			if(empty($charge["failure_message"]))
+			{
+				//successful charge
+				//VINO ADD THIS TRANSACTION ID TO OUR DB RECORDS FOR THE PURCHASE $response["id"];
+				//SAVE THIS IN OUR AGENT WALLET HERE
+				$response = array('status' => 'Success', 'data' =>  $charge);
+				json_encode($response);
+				die(0);
+				
+			}
+			else
+			{
+				//FAILED CHARGE 
+				
+				$response = array('status' => 'Fail', 'msg' =>  $e->getMessage());
+				json_encode($response);
+				die(0);
+			}
+
+
+					update_user_meta($user_id, "pmpro_stripe_customerid", $this->customer->id);
+
+
+		} else {
+
+			$response = array('status' => 'Fail', 'msg' =>  'Invalid Parameters');
+			json_encode($response);
+			die(0);
+
+		}
+
+	}
+
+
 
 
 	function ic_agent_status()

@@ -103,7 +103,7 @@ if (scope.$last === true) {
 
 	$scope.tabs = [];
 	$scope.current_tab = -1;
-	$scope.is_admin = <?= isset($_GET['admin']) ? 1 : 0;?>;
+	$scope.is_admin = <?= $pid == 0 ? 1 : 0;?>;
 	$scope.preloader = true;
 	$scope.isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
 
@@ -113,13 +113,13 @@ if (scope.$last === true) {
 		});
 	});
 
-	<?php if(!isset($_GET['admin'])){
+	<?php if($pid == 0){
 
-	global $wpdb; $results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$_GET['pid']);?>
+	global $wpdb; $results = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$pid);?>
 
 	<?php if($results->endorser && $results->gift_status == 0){?>
 	setTimeout(function(){
-		$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=send_ic_gift&id=$_GET['pid']').then(function(res){
+		$http.get('<?= site_url();?>/wp-admin/admin-ajax.php?action=send_ic_gift&id=<?= $pid;?>').then(function(res){
 
 		});
 	}, 300000);
@@ -127,7 +127,7 @@ if (scope.$last === true) {
 	<?php }}?>
 
 	$interval(function(){
-		$http.get('<?php echo site_url();?>/wp-admin/admin-ajax.php?action=ic_update_active_time&id=<?php echo $_GET['id'];?>').then(function(){
+		$http.get('<?= site_url();?>/wp-admin/admin-ajax.php?action=ic_update_active_time&id=<?= $meeting_id;?>').then(function(){
 
 			});
 	}, 10000);
@@ -587,8 +587,8 @@ if (scope.$last === true) {
 		}
 	};
 	
-	<?php if(isset($participants) && $_GET['pid']) {?>
-		$id = <?php echo $_GET['pid'];?>;
+	<?php if(isset($participants) && $pid) {?>
+		$id = <?php echo $pid;?>;
 		$scope.data2 = {id:$id, name: $scope.is_admin ? 'Agent' : '<?= $participants->name ?>', email: '<?= $participants->email ?>', msg:'', streamid:'', whiteboard:0,presentation:0,chair:0,video:0};
 	<?php } else {?>
 		$id = Math.round(Math.random()*100000)+''+new Date().getTime();

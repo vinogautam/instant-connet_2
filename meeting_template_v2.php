@@ -19,14 +19,16 @@ elseif(isset($_GET['sessionId']))
 }
 else
 {
-  $meeting_id = $_GET['id'];
+  $decode=explode('#', base64_decode(base64_decode($_GET['id'])));
+  $meeting_id = $decode[0];
+  $pid = $decode[1];
 
   global $wpdb; $results = $meeting = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting where id=".$meeting_id);
   $sessionId = $meeting->session_id; 
   $token = $meeting->token;
 
-  if(isset($_GET['pid'])){
-    $participants = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$_GET['pid']);
+  if($pid != 0){
+    $participants = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$pid);
   }
 
   /*if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GET['finonce'], 'finonce'))) {
@@ -106,7 +108,7 @@ Instant Connect UI
 
 </head>
 
-<body class="hold-transition skin-blue sidebar-collapse sidebar-mini instant-connect <?= isset($_GET['admin']) ? 'admin_view' : 'client_view'; ?>" ng-class="{whiteboard_control:whiteboard_control, video_control:video_control, full_control:full_control, user_have_control: user_have_control(), user_have_admin_control: user_have_admin_control()}" ng-controller="MyCtrl">
+<body class="hold-transition skin-blue sidebar-collapse sidebar-mini instant-connect <?= $pid == 0 ? 'admin_view' : 'client_view'; ?>" ng-class="{whiteboard_control:whiteboard_control, video_control:video_control, full_control:full_control, user_have_control: user_have_control(), user_have_admin_control: user_have_admin_control()}" ng-controller="MyCtrl">
 <div class="preloader" ng-if="preloader">
   <span><i class="fa fa-spinner fa-pulse fa-3x fa-fw margin-bottom"></i></span>
 </div>

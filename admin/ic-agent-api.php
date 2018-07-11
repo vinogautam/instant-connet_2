@@ -2021,8 +2021,12 @@ class IC_agent_api{
 		$d['status'] = $status;
 
 		$wpdb->insert($wpdb->prefix . "meeting_participants", $d);
+		$pid = $wpdb->insert_id;
+
+		$admin_id = base64_encode(base64_encode($meeting_id.'#0'));
+		$user_id = base64_encode(base64_encode($meeting_id.'#'.$pid));
 		
-		echo json_encode(array('meeting_id' => $meeting_id, 'pid' => $wpdb->insert_id));
+		echo json_encode(array('admin_id' => $admin_id, 'user_id' => $user_id));
 		
 		die(0);
 		exit;

@@ -1,4 +1,9 @@
 <?php
+$ip = $_SERVER['REMOTE_ADDR'];
+$ipInfo = file_get_contents('http://ip-api.com/json/' . $ip);
+$ipInfo = json_decode($ipInfo);
+$timezone = $ipInfo->timezone;
+date_default_timezone_set($timezone);
 
 if(isset($_GET['only_video']))
 {
@@ -25,10 +30,10 @@ else
 
   global $wpdb; $results = $meeting = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting where id=".$meeting_id);
 
-  if(strtotime('now') < strtotime($meeting->meeting_date)){
+  if(strtotime('now') < strtotime($meeting->meeting_date) && count($decode)==2){
 
     $fa_lead_settings = get_option('fa_lead_settings');
-    wp_redirect(get_permalink($fa_lead_settings['waiting_page']).'?app='.$_GET['id']);
+    wp_redirect(get_permalink($fa_lead_settings['waiting_page']).'?waitinghall='.$_GET['id']);
     exit;
   }
 
@@ -37,6 +42,10 @@ else
 
   if($pid != 0){
     $participants = $wpdb->get_row("select * from ".$wpdb->prefix . "meeting_participants where id=".$pid);
+  }
+
+  if (!is_numeric($meeting_id) || !is_numeric($pid)) {
+    die("Invalid meeting url");
   }
 
   /*if (!isset($_GET['admin']) && (!isset($_GET['finonce']) || !wp_verify_nonce($_GET['finonce'], 'finonce'))) {
@@ -148,7 +157,7 @@ Instant Connect UI
 
           <li ng-show="show_video" ng-click="show_video=false;send_noti({type:'show_video', data:show_video})"><a>Disable video</a></li>
           <li ng-hide="show_video" ng-click="show_video=true;send_noti({type:'show_video', data:show_video})"><a>Enable video</a></li>
-          <li><a target="_blank" href="?user&sessionId=<?= $sessionId?>&token=<?= $token?>">Test user link</a></li>
+          <!--<li><a target="_blank" href="?user&sessionId=<?= $sessionId?>&token=<?= $token?>">Test user link</a></li>-->
           <li class="dropdown messages-menu">
             <!-- Menu toggle button -->
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">

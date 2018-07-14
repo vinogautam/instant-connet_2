@@ -180,7 +180,7 @@
 
 	function wpa3396_page_template( $page_template )
 	{
-		if ( is_page( 'meeting' ) ) {
+		if ( is_page( 'meeting' ) && !isset($_GET['waitinghall'])) {
 			$version = isset($_GET['version']) ? $_GET['version'] : 2;
 			$page_template = dirname( __FILE__ ) . '/meeting_template_v'.$version.'.php';
 		}

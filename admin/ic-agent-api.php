@@ -49,12 +49,23 @@ class IC_agent_api{
 
 
 	function ic_lead_list(){
+		global $wpdb;
 		$blog_id = get_current_blog_id();
 		$agent_id = get_blog_option($blog_id, 'agent_id');
 
-		$leads = $wpdb->get_results("select * from wp_leads where agent_id = ".$agent_id);
-		
-		$response = array('status' => 'Success', 'data'=>$leads);
+		$recordsTotal = $wpdb->get_results("select * from wp_leads where agent_id = ".$agent_id);
+		$start = $_GET['start'];
+		$length = $_GET['length'];
+		$offset = $start * $length;
+		$order = $_GET['columns'][$_GET['order'][0]['column']]['data'];
+		$orderby = $_GET['order'][0]['dir'];
+		$recordsFiltered = $wpdb->get_results("select * from wp_leads where agent_id = $agent_id order by $order $orderby limit $offset, $length ");
+
+		$response = array('status' => 'Success', 
+							'data' => $recordsFiltered,
+						  	'recordsTotal' => count($recordsTotal),
+						  	'recordsFiltered' => count($recordsFiltered),
+						);
 		echo json_encode($response);
 		die(0);
 	}

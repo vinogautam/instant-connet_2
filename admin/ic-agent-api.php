@@ -36,7 +36,8 @@ class IC_agent_api{
 			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation', 'ic_blog_info',
 			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes',
 			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg',
-			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer'
+			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer',
+			'ic_lead_list'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -47,7 +48,16 @@ class IC_agent_api{
 	}
 
 
-	
+	function ic_lead_list(){
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+
+		$leads = $wpdb->get_results("select * from wp_leads where agent_id = ".$agent_id);
+		
+		$response = array('status' => 'Success', 'data'=>$leads);
+		echo json_encode($response);
+		die(0);
+	}
 
 	function ic_get_stripe_customer_cards() {	
 		

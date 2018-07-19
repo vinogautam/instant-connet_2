@@ -20,7 +20,7 @@ class IC_agent_api{
 	    	'ic_delete_endorser', 'ic_delete_letter', 'ic_new_lead', 'ic_new_lead_nomail', 'ic_update_lead', 
 	    	'ic_noti_to_agent', 'ic_noti_to_user', 'ic_resend_gift', 'ic_send_gift', 'ic_get_sites', 
 	    	'ic_add_points', 'ic_get_points', 'ic_update_fb_id', 'ic_get_fb_id', 'ic_instant_meeting', 
-	    	'ic_appointment_meeting', 'ic_update_meeting_date', 'ic_update_meeting_eventid',
+	    	'ic_appointment_meeting', 'ic_update_meeting_date', 'ic_update_meeting_eventid', 'ic_update_meeting_timekit',
 	    	'ic_update_lead', 'ic_get_active_meeting_list', 'ic_generate_token', 'ic_update_active_time', 
 	    	'ic_update_meeting_data', 'ic_get_endorser_info', 'ic_auto_login', 'ic_new_campaign', 
 	    	'ic_update_campaign', 'ic_delete_campaign', 'ic_delete_campaign_letter', 'ic_campaigns', 
@@ -2001,7 +2001,19 @@ class IC_agent_api{
 		
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		$wpdb->update($wpdb->prefix . "meeting", array('meeting_date' => $_POST['meeting_date']), array('id' => $_POST['id']));
+		$wpdb->update($wpdb->prefix . "meeting", array('meeting_date' => $_POST['meeting_date'], 'timekit_meeting_id' => $_POST['timekit_meeting_id']), array('id' => $_POST['id']));
+
+		die(0);
+		exit;
+	}
+
+	function ic_update_meeting_timekit()
+	{
+		global $wpdb;
+		
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$wpdb->update($wpdb->prefix . "meeting", array('timekit_meeting_id' => $_POST['timekit_meeting_id']), array('id' => $_POST['id']));
 
 		die(0);
 		exit;

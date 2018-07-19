@@ -206,6 +206,7 @@
 			   agent_id text NOT NULL,
 			   meeting_date datetime NOT NULL,
 			   event_id text NOT NULL,
+			   timekit_meeting_id text NOT NULL,
 			   active_time tinytext NOT NULL,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 

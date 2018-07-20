@@ -2059,7 +2059,7 @@ class IC_agent_api{
 		$admin_id = base64_encode(base64_encode($meeting_id.'#0'));
 		$user_id = base64_encode(base64_encode($meeting_id.'#'.$pid));
 		
-		echo json_encode(array('admin_id' => $admin_id, 'user_id' => $user_id));
+		echo json_encode(array('admin_id' => $admin_id, 'user_id' => $user_id, 'main_id' => $meeting_id));
 		
 		die(0);
 		exit;

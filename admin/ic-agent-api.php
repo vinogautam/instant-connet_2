@@ -1956,18 +1956,21 @@ class IC_agent_api{
 
 		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		
-		$resuts = $wpdb->get_results('select * from wp_leads where email = "'. $lead['email'] .'" or ip_address = "'. $lead['email'] .'"');
+		$resuts = $wpdb->get_results('select * from wp_leads where email = "'. $lead['email']);
+		
+		
+
+
 		if(count($resuts)){
 			$wpdb->update("wp_leads", $lead, array('email' => $lead['email']));
 			$lead_id = $resuts[0]->id;
 			$msg = 'Lead already exist, data updated';
 		} else {
-			$wpdb->insert("wp_leads", $lead);
+			$leadtoinsert = array(, 'first_name' => $lead['first_name'], 'last_name' => $lead['last_name'], 'agent_id' => $lead['agent_id'], 'created' => date("Y-m-d H:i:s"));
+			$wpdb->insert("wp_leads", $leadtoinsert);
+			$msg = 'Lead created successfully asdasd';
 			$lead_id = $wpdb->insert_id;
-			$msg = 'Lead created successfully';
 		}
-
-		
 
 		
 
@@ -1995,6 +1998,11 @@ class IC_agent_api{
 					$user_id = $instantMeeting['user_id'];
 					break;
 
+					default:
+					$type = "lead";
+					$msg = "inputed lead but no action taken";
+					break;
+
 				}
 				$response = array('status' => 'Success', 'id' => $lead_id, 'msg' => $msg, 'type' => $type, 'meeting_user_id' => $user_id, 'meeting_admin_id' => $admin_id);
 			
@@ -2008,7 +2016,7 @@ class IC_agent_api{
 		} else {
 			
 
-			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+			$response = array('status' => 'Error', 'msg' => 'Try again later!!', 'type' => $type);
 		}
 
 

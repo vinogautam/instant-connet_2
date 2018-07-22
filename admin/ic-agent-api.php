@@ -37,7 +37,7 @@ class IC_agent_api{
 			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes',
 			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg',
 			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer',
-			'ic_lead_list'
+			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -59,7 +59,12 @@ class IC_agent_api{
 		$offset = $start * $length;
 		$order = $_GET['columns'][$_GET['order'][0]['column']]['data'];
 		$orderby = $_GET['order'][0]['dir'];
-		$recordsFiltered = $wpdb->get_results("select * from wp_leads where agent_id = $agent_id order by $order $orderby limit $offset, $length ");
+		
+		//print_r("select * from wp_leads where agent_id = " . $agent_id ." order by ". $order ." ". $orderby." limit " .$offset.", ".$length);
+
+		$recordsFiltered = $wpdb->get_results("select * from wp_leads where agent_id = " . $agent_id ." order by ". $order ." ". $orderby." limit " .$offset.", ".$length."");
+		
+		//echo $recordsFiltered;
 
 		$response = array('status' => 'Success', 
 							'data' => $recordsFiltered,
@@ -1892,6 +1897,25 @@ class IC_agent_api{
 		exit;
 	}
 
+	function ic_get_lead_info(){
+		global $wpdb;
+
+		$lead_id = $_GET['id'];
+		
+
+
+		$lead_info = $wpdb->get_results("select * from wp_leads where id = ".$lead_id);
+		
+
+		
+
+		$response = array('status' => 'Success', 'data' => $lead_info[0]);
+
+		echo json_encode($response);
+		die(0);
+		exit;
+	}
+
 	function ic_update_meeting_data() {
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
@@ -1951,10 +1975,52 @@ class IC_agent_api{
 		die(0);
 	}
 	
+	function ic_lead_meeting() {
+		global $wpdb;
+		$params = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		//$params = (array)json_decode(file_get_contents('php://input'));
+		
+
+		$lead = $wpdb->get_results('select * from wp_leads where id = "'. $params['lead_id'].'"');
+		$type = $params['type'];
+		if(count($lead)){
+			$agent_id = $lead[0]->agent_id;
+
+			switch($type) {
+
+					case "appointment":
+					$msg = "Appointment Meeting Created";
+					$appointmentMeeting = $this->ic_appointment_meeting($agent_id, $params['lead_id']);
+					
+					$admin_id = $appointmentMeeting['admin_id'];
+					$user_id = $appointmentMeeting['user_id'];
+
+					break;
+
+					case "instant":
+					$msg = "Instant Meeting Created";
+					$instantMeeting = $this->ic_instant_meeting($agent_id, $params['lead_id']);
+					$emailSuccess  = $instantMeeting['email_msg'];
+					$admin_id = $instantMeeting['admin_id'];
+					$user_id = $instantMeeting['user_id'];
+					break;
+				}
+				$response = array('status' => 'Success', 'msg' => $msg, 'type' => $type, 'meeting_user_id' => $user_id, 'meeting_admin_id' => $admin_id, 'email_success'=> $emailSuccess);
+
+
+		} else {
+			$response = array('status' => 'Fail', 'msg' => "No meeting was created", 'type' => $type);
+
+		}
+
+		echo json_encode($response);
+		die(0);
+	}
+
 	function ic_new_lead_nomail() {
 		global $wpdb;
-
-		$lead = (array)json_decode(file_get_contents('php://input'));
+		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		//$lead = (array)json_decode(file_get_contents('php://input'));
 		
 		$resuts = $wpdb->get_results('select * from wp_leads where email = "'. $lead['email'].'"');
 		
@@ -2183,14 +2249,30 @@ class IC_agent_api{
 
 		$admin_id = base64_encode(base64_encode($meeting_id.'#0'));
 		$user_id = base64_encode(base64_encode($meeting_id.'#'.$pid)); // I did it here.
-		if($email) {
+		if($id) {
+			$headers[] = 'From: Financial Insiders <info@financialinsiders.ca>';
 
-			$message = 'Here is your meeting link. <a href="'.site_url().'/meeting?action=update_lead_status&id='.$user_id.'">Click here to start your meeting</a>';
+ 			$message = 'Here is your meeting link.<br><br> <a href="'.site_url().'/meeting?id='.$user_id.'>Click here to start your meeting</a>';
+			$subject = "Financial Insiders Meeting Link";
+			if(wp_mail( $lead['email'], $subject, $message, $headers )) {
+				$emailMsg = "Email Sent";
+				//echo is_wp_error();
+				//die(0);
+			} else {
+				$emailMsg = "Email Failed ";
+			}
+
+		//	$message = 'Here is your meeting link.<br><br> <a href="'.site_url().'/meeting?id='.$user_id.'>Click here to start your meeting</a>';
 		
-			NTM_mail_template::send_mail($lead['email'], 'Meeting Link.', $message);
+			//NTM_mail_template::send_mail($lead['email'], 'Meeting Link.', $message);
+
+		//	if(NTM_mail_template::send_mail($lead['email'], 'Financial Insiders Meeting Link', $message))
+		//	$emailMsg = "Sent Email";
+	//	else
+	//		$emailMsg = "Failed";
 		}
 
-		$response = array('user_id' => $user_id, 'admin_id' => $admin_id, 'finonce' => $finonce, 'pid' => $wpdb->insert_id, 'status' => $nm);
+		$response = array('user_id' => $user_id, 'admin_id' => $admin_id, 'finonce' => $finonce, 'pid' => $wpdb->insert_id, 'status' => $nm, 'email_msg' => $emailMsg);
 		if(isset($_POST['agent_id'])) {
 			echo json_encode($response);
 			

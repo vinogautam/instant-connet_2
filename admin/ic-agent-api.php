@@ -37,7 +37,7 @@ class IC_agent_api{
 			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes',
 			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg',
 			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer',
-			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info'
+			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -47,6 +47,25 @@ class IC_agent_api{
 	    
 	}
 
+	function ic_delete_lead() {
+
+		//$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		global $wpdb;
+		$results = $wpdb->delete("wp_leads", array('id' => $_GET['lead_id']));
+		if($results) {
+
+			$response = array('status' => 'Success', 
+							'msg' => 'Lead Deleted',					  	
+						);
+		} else {
+
+			$response = array('status' => 'Fail', 'msg' =>'Failed to delete lead');
+		}
+
+		echo json_encode($response);
+		die(0);
+
+	}
 
 	function ic_lead_list(){
 		global $wpdb;
@@ -368,6 +387,7 @@ class IC_agent_api{
 				'Online' => get_user_meta($_GET['agent_id'], 'status_data_Online', true),
 				'Offline' => get_user_meta($_GET['agent_id'], 'status_data_Offline', true),
 				'Away' => get_user_meta($_GET['agent_id'], 'status_data_Away', true),
+				'Waiting' => get_user_meta($_GET['agent_id'], 'status_data_Waiting', true),
 			);
 		} else {
 			$data = get_user_meta($_GET['agent_id'], 'status_data_'.$_GET['type'], true);

@@ -1,4 +1,10 @@
 <?php
+$ip = $_SERVER['REMOTE_ADDR'];
+$ipInfo = file_get_contents('http://ip-api.com/json/' . $ip);
+$ipInfo = json_decode($ipInfo);
+$timezone = $ipInfo->timezone;
+date_default_timezone_set($timezone);
+
 use OpenTok\OpenTok;
 use Stripe\Customer as Stripe_Customer;
 use Stripe\Invoice as Stripe_Invoice;
@@ -1945,7 +1951,8 @@ class IC_agent_api{
 	function ic_get_active_meeting_list() {
 		global $wpdb;
 
-		$response = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting a left join ".$wpdb->prefix . "meeting_participants b on a.id = b.meeting_id where a.meeting_date > '".date("Y-m-d H:i:s")."'");
+		$response = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting a left join ".$wpdb->prefix . "meeting_participants b on a.id = b.meeting_id left join wp_leads l on a.email = l.email
+			where a.meeting_date > '".date("Y-m-d H:i:s")."'");
 
 		echo json_encode($response);
 		die(0);

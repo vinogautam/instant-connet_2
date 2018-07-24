@@ -2005,7 +2005,7 @@ class IC_agent_api{
 					$user_id = $instantMeeting['user_id'];
 					break;
 				}
-				$response = array('status' => 'Success', 'msg' => $msg, 'type' => $type, 'meeting_user_id' => $user_id, 'meeting_admin_id' => $admin_id, 'email_success'=> $emailSuccess);
+				$response = array('status' => 'Success', 'msg' => $msg, 'type' => $type, 'meeting_user_id' => $user_id, 'meeting_admin_id' => $admin_id, 'email_success'=> $emailSuccess, ' test' => $params['lead_id']);
 
 
 		} else {
@@ -2019,6 +2019,7 @@ class IC_agent_api{
 
 	function ic_new_lead_nomail() {
 		global $wpdb;
+		
 		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		//$lead = (array)json_decode(file_get_contents('php://input'));
 		
@@ -2027,6 +2028,7 @@ class IC_agent_api{
 		$leadtoinsert = array('email' => $lead['email'], 'first_name' => $lead['first_name'], 'last_name' => $lead['last_name'], 'agent_id' => $lead['agent_id'], 'created' => date("Y-m-d H:i:s"));
 		
 		if(count($resuts)){
+			
 			$wpdb->update("wp_leads", $leadtoinsert, array('email' => $lead['email'])); //need to update the date here
 			$lead_id = $resuts[0]->id;
 			$msg = 'Lead already exist, data updated';
@@ -2035,8 +2037,11 @@ class IC_agent_api{
 			$ress = $wpdb->insert("wp_leads", $leadtoinsert);
 			//is_wp_error();
 			//print_r($ress);
+
 			$msg = 'Lead created successfully asdasd';
 			$lead_id = $wpdb->insert_id;
+
+
 
 		}
 
@@ -2063,6 +2068,7 @@ class IC_agent_api{
 					
 					$admin_id = $instantMeeting['admin_id'];
 					$user_id = $instantMeeting['user_id'];
+
 					break;
 
 					default:
@@ -2192,8 +2198,9 @@ class IC_agent_api{
 	
 	function ic_instant_meeting($agent_id, $id)
 	{
-		global $wpdb;
+		global $wpdb, $ntm_mail;
 		
+
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
 		$meetingId = time();
@@ -2222,7 +2229,7 @@ class IC_agent_api{
 		$opentok['id'] = $meeting_id;
 		$status = $_GET['st'] ? 3 : 2;
 
-		if(isset($_POST['agent_id'])) {
+		if(!$id) {
 			foreach($_POST['participants'] as $d){
 			$d = (array)$d;
 			$d['meeting_id'] = $meeting_id;
@@ -2233,7 +2240,7 @@ class IC_agent_api{
 			$pid = $wpdb->insert_id;
 		}
 		} else{
-			$lead = $wpdb->get_row('select  from wp_leads where id = '.$id);
+			$lead = $wpdb->get_row('select * from wp_leads where id = '.$id);
 			$d['meeting_id'] = $meeting_id;
 			$d['meeting_date'] = date("Y-m-d H:i:s");
 			$d['status'] = $status;
@@ -2241,6 +2248,7 @@ class IC_agent_api{
 			$d['name'] = $lead->first_name.' '.$lead->last_name;
 			$wpdb->insert($wpdb->prefix . "meeting_participants", $d);
 			$pid = $wpdb->insert_id;
+			
 		}
 		
 		
@@ -2250,17 +2258,13 @@ class IC_agent_api{
 		$admin_id = base64_encode(base64_encode($meeting_id.'#0'));
 		$user_id = base64_encode(base64_encode($meeting_id.'#'.$pid)); // I did it here.
 		if($id) {
-			$headers[] = 'From: Financial Insiders <info@financialinsiders.ca>';
-
- 			$message = 'Here is your meeting link.<br><br> <a href="'.site_url().'/meeting?id='.$user_id.'>Click here to start your meeting</a>';
-			$subject = "Financial Insiders Meeting Link";
-			if(wp_mail( $lead['email'], $subject, $message, $headers )) {
+			
+ 			$message = 'Here is your meeting link. <br><br><a href="'.site_url().'/meeting?id='.$user_id.'">Click here to start your meeting</a>';
+				$subject = "Financial Insiders Meeting Link";
+		
 				$emailMsg = "Email Sent";
-				//echo is_wp_error();
-				//die(0);
-			} else {
-				$emailMsg = "Email Failed ";
-			}
+				$ntm_mail->send_mail($lead->email, 'Meeting Link', $message);
+			//}
 
 		//	$message = 'Here is your meeting link.<br><br> <a href="'.site_url().'/meeting?id='.$user_id.'>Click here to start your meeting</a>';
 		
@@ -2272,14 +2276,16 @@ class IC_agent_api{
 	//		$emailMsg = "Failed";
 		}
 
-		$response = array('user_id' => $user_id, 'admin_id' => $admin_id, 'finonce' => $finonce, 'pid' => $wpdb->insert_id, 'status' => $nm, 'email_msg' => $emailMsg);
-		if(isset($_POST['agent_id'])) {
+		$response = array('user_id' => $user_id, 'admin_id' => $admin_id, 'finonce' => $finonce, 'pid' => $wpdb->insert_id, 'status' => $nm, 'email_msg' => $emailMsg, 'test' => $lead);
+		if($id) {
+			return $response;
+		} else {
+			
+
 			echo json_encode($response);
 			
 			die(0);
 			exit;
-		} else {
-			return $response;
 		}
 	}
 

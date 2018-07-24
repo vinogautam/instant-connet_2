@@ -43,7 +43,7 @@ class IC_agent_api{
 			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes',
 			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg',
 			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer',
-			'ic_lead_list'
+			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -53,6 +53,25 @@ class IC_agent_api{
 	    
 	}
 
+	function ic_delete_lead() {
+
+		//$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		global $wpdb;
+		$results = $wpdb->delete("wp_leads", array('id' => $_GET['lead_id']));
+		if($results) {
+
+			$response = array('status' => 'Success', 
+							'msg' => 'Lead Deleted',					  	
+						);
+		} else {
+
+			$response = array('status' => 'Fail', 'msg' =>'Failed to delete lead');
+		}
+
+		echo json_encode($response);
+		die(0);
+
+	}
 
 	function ic_lead_list(){
 		global $wpdb;
@@ -65,7 +84,12 @@ class IC_agent_api{
 		$offset = $start * $length;
 		$order = $_GET['columns'][$_GET['order'][0]['column']]['data'];
 		$orderby = $_GET['order'][0]['dir'];
-		$recordsFiltered = $wpdb->get_results("select * from wp_leads where agent_id = $agent_id order by $order $orderby limit $offset, $length ");
+		
+		//print_r("select * from wp_leads where agent_id = " . $agent_id ." order by ". $order ." ". $orderby." limit " .$offset.", ".$length);
+
+		$recordsFiltered = $wpdb->get_results("select * from wp_leads where agent_id = " . $agent_id ." order by ". $order ." ". $orderby." limit " .$offset.", ".$length."");
+		
+		//echo $recordsFiltered;
 
 		$response = array('status' => 'Success', 
 							'data' => $recordsFiltered,
@@ -369,6 +393,7 @@ class IC_agent_api{
 				'Online' => get_user_meta($_GET['agent_id'], 'status_data_Online', true),
 				'Offline' => get_user_meta($_GET['agent_id'], 'status_data_Offline', true),
 				'Away' => get_user_meta($_GET['agent_id'], 'status_data_Away', true),
+				'Waiting' => get_user_meta($_GET['agent_id'], 'status_data_Waiting', true),
 			);
 		} else {
 			$data = get_user_meta($_GET['agent_id'], 'status_data_'.$_GET['type'], true);
@@ -1898,6 +1923,25 @@ class IC_agent_api{
 		exit;
 	}
 
+	function ic_get_lead_info(){
+		global $wpdb;
+
+		$lead_id = $_GET['id'];
+		
+
+
+		$lead_info = $wpdb->get_results("select * from wp_leads where id = ".$lead_id);
+		
+
+		
+
+		$response = array('status' => 'Success', 'data' => $lead_info[0]);
+
+		echo json_encode($response);
+		die(0);
+		exit;
+	}
+
 	function ic_update_meeting_data() {
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
@@ -1957,28 +2001,125 @@ class IC_agent_api{
 		echo json_encode($response);
 		die(0);
 	}
+	
+	function ic_lead_meeting() {
+		global $wpdb;
+		$params = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		//$params = (array)json_decode(file_get_contents('php://input'));
+		
+
+		$lead = $wpdb->get_results('select * from wp_leads where id = "'. $params['lead_id'].'"');
+		$type = $params['type'];
+		if(count($lead)){
+			$agent_id = $lead[0]->agent_id;
+
+			switch($type) {
+
+					case "appointment":
+					$msg = "Appointment Meeting Created";
+					$appointmentMeeting = $this->ic_appointment_meeting($agent_id, $params['lead_id']);
+					
+					$admin_id = $appointmentMeeting['admin_id'];
+					$user_id = $appointmentMeeting['user_id'];
+
+					break;
+
+					case "instant":
+					$msg = "Instant Meeting Created";
+					$instantMeeting = $this->ic_instant_meeting($agent_id, $params['lead_id']);
+					$emailSuccess  = $instantMeeting['email_msg'];
+					$admin_id = $instantMeeting['admin_id'];
+					$user_id = $instantMeeting['user_id'];
+					break;
+				}
+				$response = array('status' => 'Success', 'msg' => $msg, 'type' => $type, 'meeting_user_id' => $user_id, 'meeting_admin_id' => $admin_id, 'email_success'=> $emailSuccess, ' test' => $params['lead_id']);
+
+
+		} else {
+			$response = array('status' => 'Fail', 'msg' => "No meeting was created", 'type' => $type);
+
+		}
+
+		echo json_encode($response);
+		die(0);
+	}
 
 	function ic_new_lead_nomail() {
 		global $wpdb;
-
-		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		
-		$resuts = $wpdb->get_results('select * from wp_leads where email = "'. $lead['email'] .'" or ip_address = "'. $lead['email'] .'"');
+		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		//$lead = (array)json_decode(file_get_contents('php://input'));
+		
+		$resuts = $wpdb->get_results('select * from wp_leads where email = "'. $lead['email'].'"');
+		
+		$leadtoinsert = array('email' => $lead['email'], 'first_name' => $lead['first_name'], 'last_name' => $lead['last_name'], 'agent_id' => $lead['agent_id'], 'created' => date("Y-m-d H:i:s"));
+		
 		if(count($resuts)){
-			$wpdb->update("wp_leads", $lead, array('email' => $lead['email']));
+			
+			$wpdb->update("wp_leads", $leadtoinsert, array('email' => $lead['email'])); //need to update the date here
 			$lead_id = $resuts[0]->id;
 			$msg = 'Lead already exist, data updated';
 		} else {
-			$wpdb->insert("wp_leads", $lead);
+			
+			$ress = $wpdb->insert("wp_leads", $leadtoinsert);
+			//is_wp_error();
+			//print_r($ress);
+
+			$msg = 'Lead created successfully asdasd';
 			$lead_id = $wpdb->insert_id;
-			$msg = 'Lead created successfully';
+
+
+
 		}
 
+
 		if($lead_id) {
-			$response = array('status' => 'Success', 'id' => $lead_id, 'msg' => $msg);
+			
+			
+			if(isset($lead['type'])){ 
+				$type = $lead['type'];
+
+				switch($type) {
+
+					case "appointment":
+					$msg = "Appointment Meeting Created";
+					$appointmentMeeting = $this->ic_appointment_meeting($lead['agent_id']);
+					
+					$admin_id = $appointmentMeeting['admin_id'];
+					$user_id = $appointmentMeeting['user_id'];
+
+					break;
+
+					case "instant":
+					$instantMeeting = $this->ic_instant_meeting($lead['agent_id'], $lead_id);
+					
+					$admin_id = $instantMeeting['admin_id'];
+					$user_id = $instantMeeting['user_id'];
+
+					break;
+
+					default:
+					$type = "lead";
+					$msg = "inputed lead but no action taken";
+					break;
+
+				}
+				$response = array('status' => 'Success', 'id' => $lead_id, 'msg' => $msg, 'type' => $type, 'meeting_user_id' => $user_id, 'meeting_admin_id' => $admin_id);
+			
+			} else {
+
+				$response = array('status' => 'Success', 'id' => $lead_id, 'msg' => $msg);
+			}
+
+			
+			
 		} else {
-			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+			
+
+			$response = array('status' => 'Error', 'msg' => 'Try again later!!', 'type' => $type);
 		}
+
+
 		
 		echo json_encode($response);
 		die(0);
@@ -2007,8 +2148,10 @@ class IC_agent_api{
 		global $wpdb;
 		
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		
+		$encd = base6_decode(base6_decode($_POST['id']));
 
-		$wpdb->update($wpdb->prefix . "meeting", array('meeting_date' => $_POST['meeting_date'], 'timekit_meeting_id' => $_POST['timekit_meeting_id']), array('id' => $_POST['id']));
+		$wpdb->update($wpdb->prefix . "meeting", array('meeting_date' => $_POST['meeting_date'], 'timekit_meeting_id' => $_POST['timekit_meeting_id']), array('id' => $encd[0]));
 
 		die(0);
 		exit;
@@ -2038,17 +2181,19 @@ class IC_agent_api{
 		exit;
 	}
 
-	function ic_appointment_meeting()
+	function ic_appointment_meeting($agent_id)
 	{
 		global $wpdb;
 		
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-
+		if(isset($_POST['agent_id'])) {
+			$agent_id = $_POST['agent_id'];
+		}
 		$meetingId = time();
 		
 		$opentok = opentok_token();
 		
-		$wpdb->insert($wpdb->prefix . "meeting", array('agent_id' => $_POST['agent_id'], 'created' => date("Y-m-d H:i:s"), 'session_id' => $opentok['sessionId'], 'token' => $opentok['token']));
+		$wpdb->insert($wpdb->prefix . "meeting", array('agent_id' => $agent_id, 'created' => date("Y-m-d H:i:s"), 'session_id' => $opentok['sessionId'], 'token' => $opentok['token']));
 		$meeting_id = $wpdb->insert_id;
 		
 		$opentok['id'] = $meeting_id;
@@ -2066,52 +2211,113 @@ class IC_agent_api{
 		$admin_id = base64_encode(base64_encode($meeting_id.'#0'));
 		$user_id = base64_encode(base64_encode($meeting_id.'#'.$pid));
 		
-		echo json_encode(array('admin_id' => $admin_id, 'user_id' => $user_id));
+		$response = array('admin_id' => $admin_id, 'user_id' => $user_id, 'main_id' => $meeting_id);
 		
-		die(0);
-		exit;
+		if(isset($_POST['agent_id'])){
+			echo json_encode($response);
+		
+			die(0);
+			exit;
+		} else {
+			return $response;
+		}
 	}
 	
-	function ic_instant_meeting()
+	function ic_instant_meeting($agent_id, $id)
 	{
-		global $wpdb;
+		global $wpdb, $ntm_mail;
 		
+
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
 		$meetingId = time();
 		
 		$meeting = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting where (".strtotime("now")." - active_time) < 15 ");
 
+		if(isset($_POST['agent_id'])) {
+			$agent_id = $_POST['agent_id'];
+		}
+		
+
 		if(count($meeting)){
 			$nm = 'existing';
 			$meeting_id = $meeting[0]->id;
 		} else {
+			
 			$opentok = opentok_token();
-			$wpdb->insert($wpdb->prefix . "meeting", array('agent_id' => $_POST['agent_id'], 'meeting_date' => date("Y-m-d H:i:s"), 'created' => date("Y-m-d H:i:s"), 'session_id' => $opentok['sessionId'], 'token' => $opentok['token']));
+			//$wpdb->insert($wpdb->prefix . "meeting", array('agent_id' => $_POST['agent_id'], 'meeting_date' => date("Y-m-d H:i:s"), 'created' => date("Y-m-d H:i:s"), 'session_id' => $opentok['sessionId'], 'token' => $opentok['token']));
+			
+			$wpdb->insert($wpdb->prefix . "meeting", array('agent_id' => $agent_id, 'created' => date("Y-m-d H:i:s"), 'session_id' => $opentok['sessionId'], 'token' => $opentok['token']));
 			$nm = 'new';
 			$meeting_id = $wpdb->insert_id;
+			
 		}
 		
 		$opentok['id'] = $meeting_id;
 		$status = $_GET['st'] ? 3 : 2;
 
-		foreach($_POST['participants'] as $d){
+		if(!$id) {
+			foreach($_POST['participants'] as $d){
 			$d = (array)$d;
 			$d['meeting_id'] = $meeting_id;
 			$d['meeting_date'] = date("Y-m-d H:i:s");
 			$d['status'] = $status;
 
 			$wpdb->insert($wpdb->prefix . "meeting_participants", $d);
+			$pid = $wpdb->insert_id;
 		}
+		} else{
+			$lead = $wpdb->get_row('select * from wp_leads where id = '.$id);
+			$d['meeting_id'] = $meeting_id;
+			$d['meeting_date'] = date("Y-m-d H:i:s");
+			$d['status'] = $status;
+			$d['email'] = $lead->email;
+			$d['name'] = $lead->first_name.' '.$lead->last_name;
+			$wpdb->insert($wpdb->prefix . "meeting_participants", $d);
+			$pid = $wpdb->insert_id;
+			
+		}
+		
 		
 		$finonce = time().rand(11111,99999);
 		setcookie('finonce', $finonce);
 
-		echo json_encode(array('meeting_id' => $meeting_id, 'finonce' => $finonce, 'pid' => $wpdb->insert_id, 'status' => $nm));
+		$admin_id = base64_encode(base64_encode($meeting_id.'#0'));
+		$user_id = base64_encode(base64_encode($meeting_id.'#'.$pid)); // I did it here.
+		if($id) {
+			
+ 			$message = 'Here is your meeting link. <br><br><a href="'.site_url().'/meeting?id='.$user_id.'">Click here to start your meeting</a>';
+				$subject = "Financial Insiders Meeting Link";
 		
-		die(0);
-		exit;
+				$emailMsg = "Email Sent";
+				$ntm_mail->send_mail($lead->email, 'Meeting Link', $message);
+			//}
+
+		//	$message = 'Here is your meeting link.<br><br> <a href="'.site_url().'/meeting?id='.$user_id.'>Click here to start your meeting</a>';
+		
+			//NTM_mail_template::send_mail($lead['email'], 'Meeting Link.', $message);
+
+		//	if(NTM_mail_template::send_mail($lead['email'], 'Financial Insiders Meeting Link', $message))
+		//	$emailMsg = "Sent Email";
+	//	else
+	//		$emailMsg = "Failed";
+		}
+
+		$response = array('user_id' => $user_id, 'admin_id' => $admin_id, 'finonce' => $finonce, 'pid' => $wpdb->insert_id, 'status' => $nm, 'email_msg' => $emailMsg, 'test' => $lead);
+		if($id) {
+			return $response;
+		} else {
+			
+
+			echo json_encode($response);
+			
+			die(0);
+			exit;
+		}
 	}
+
+
+
 
 	function ic_update_fb_id(){
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));

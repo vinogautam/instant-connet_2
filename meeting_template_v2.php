@@ -16,11 +16,13 @@ if(isset($_GET['dev']))
   $ot = opentok_token();
   $sessionId = $ot['sessionId']; 
   $token = $ot['token'];
+  $pid = 0;
 }
 elseif(isset($_GET['sessionId']))
 {
   $sessionId = $_GET['sessionId']; 
   $token = $_GET['token'];
+  $pid = 1;
 }
 else
 {
@@ -157,7 +159,9 @@ Instant Connect UI
 
           <li ng-show="show_video" ng-click="show_video=false;send_noti({type:'show_video', data:show_video})"><a>Disable video</a></li>
           <li ng-hide="show_video" ng-click="show_video=true;send_noti({type:'show_video', data:show_video})"><a>Enable video</a></li>
-          <!--<li><a target="_blank" href="?user&sessionId=<?= $sessionId?>&token=<?= $token?>">Test user link</a></li>-->
+          <?php if(isset($_GET['dev'])){?>
+            <li><a target="_blank" href="?user&sessionId=<?= $sessionId?>&token=<?= $token?>">Test user link</a></li>
+          <?php }?>
           <li class="dropdown messages-menu">
             <!-- Menu toggle button -->
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">

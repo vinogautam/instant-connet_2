@@ -43,7 +43,7 @@ class IC_agent_api{
 			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes',
 			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg',
 			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer',
-			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead'
+			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead', 'ic_get_presentations', 'ic_get_videos'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -51,6 +51,22 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_get_presentations(){
+		$option = get_option('ic_presentations');
+    	$option = is_array($option) ? $option : [];
+
+		echo json_encode($option);
+    	die(0);
+	}
+
+	function ic_get_videos(){
+		$option = get_option('youtube_videos');
+    	$option = is_array($option) ? $option : [];
+
+		echo json_encode($option);
+    	die(0);
 	}
 
 	function ic_delete_lead() {
@@ -77,17 +93,26 @@ class IC_agent_api{
 		global $wpdb;
 		$blog_id = get_current_blog_id();
 		$agent_id = get_blog_option($blog_id, 'agent_id');
+		$search = $_GET['search']['value'];
+		$ss = '';
+		if($search){
+			$ss = "(email like '%$search%' or first_name like '%$search%' or last_name like '%$search%' or phone like '%$search%') and ";
+		}
 
-		$recordsTotal = $wpdb->get_results("select * from wp_leads where agent_id = ".$agent_id);
+		$recordsTotal = $wpdb->get_results("select * from wp_leads where $ss agent_id = ".$agent_id);
 		$start = $_GET['start'];
 		$length = $_GET['length'];
 		$offset = $start * $length;
 		$order = $_GET['columns'][$_GET['order'][0]['column']]['data'];
 		$orderby = $_GET['order'][0]['dir'];
+
+		
+
+
 		
 		//print_r("select * from wp_leads where agent_id = " . $agent_id ." order by ". $order ." ". $orderby." limit " .$offset.", ".$length);
 
-		$recordsFiltered = $wpdb->get_results("select * from wp_leads where agent_id = " . $agent_id ." order by ". $order ." ". $orderby." limit " .$offset.", ".$length."");
+		$recordsFiltered = $wpdb->get_results("select * from wp_leads where $ss agent_id = " . $agent_id ." order by ". $order ." ". $orderby." limit " .$offset.", ".$length."");
 		
 		//echo $recordsFiltered;
 
@@ -2824,13 +2849,19 @@ class IC_agent_api{
 		$arr['orderby'] = $_GET['order'][0]['dir'];
 		$data = (array)get_users();
 		
-		$recordsTotal = $wpdb->get_results("select * from tmp_user where status = 0");
+		$search = $_GET['search']['value'];
+		$ss = '';
+		if($search){
+			$ss = "(email like '%$search%' or firstname like '%$search%' or lastname like '%$search%') and ";
+		}
+
+		$recordsTotal = $wpdb->get_results("select * from tmp_user where $ss status = 0");
 		$start = $_GET['start'];
 		$length = $_GET['length'];
 		$offset = $start * $length;
 		$order = 
 		
-		$recordsFiltered = $wpdb->get_results("select * from tmp_user where status = 0 order by $order $orderby limit $offset, $length ");
+		$recordsFiltered = $wpdb->get_results("select * from tmp_user where $ss status = 0 order by $order $orderby limit $offset, $length ");
 		$response = array('status' => 'Success', 
 							'data' => $recordsFiltered,
 						  	'recordsTotal' => count($recordsTotal),

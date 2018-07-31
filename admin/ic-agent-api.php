@@ -16,8 +16,10 @@ class IC_agent_api{
 	function __construct() {
 
 	    header('Access-Control-Allow-Origin: *');
-	    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+	    header('Access-Control-Allow-Methods: POST, GET, PUT, DELETE, OPTIONS');
 	    header("Access-Control-Allow-Headers: X-Requested-With");
+	   
+
 
 	    
 	    $functions = array('ic_all_letter_list', 'ic_agent_login', 'ic_site_pages', 'ic_add_endorser', 'ic_send_invitation',
@@ -43,7 +45,8 @@ class IC_agent_api{
 			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes',
 			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg',
 			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer',
-			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead', 'ic_get_presentations', 'ic_get_videos'
+			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead', 'ic_get_presentations', 'ic_get_videos', 
+			'ic_save_ppt'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -51,6 +54,62 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_save_ppt()
+	{
+		
+		
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		
+		
+		$data = $_POST['data'];
+		$file = $_POST['id'];
+
+		$files = array();
+
+		mkdir(IC_PLUGIN_DIR."/extract/$file/");
+		foreach ($data as $key => $value) {
+			$filee = 'file-page'.($key+1).'.jpg';
+			$files[] = $filee;
+			file_put_contents(IC_PLUGIN_DIR."/extract/$file/".$filee, base64_decode($value->FileData));
+
+			$w = 1600; $h = 1200;
+			list($width, $height) = getimagesize(IC_PLUGIN_DIR."/extract/$file/".$filee);
+		    $r = $width / $height;
+		    if ($crop) {
+		        if ($width > $height) {
+		            $width = ceil($width-($width*abs($r-$w/$h)));
+		        } else {
+		            $height = ceil($height-($height*abs($r-$w/$h)));
+		        }
+		        $newwidth = $w;
+		        $newheight = $h;
+		    } else {
+		        if ($w/$h > $r) {
+		            $newwidth = $h*$r;
+		            $newheight = $h;
+		        } else {
+		            $newheight = $w/$r;
+		            $newwidth = $w;
+		        }
+		    }
+		    $src = imagecreatefromjpeg(IC_PLUGIN_DIR."/extract/$file/".$filee);
+		    $dst = imagecreatetruecolor($newwidth, $newheight);
+		    imagecopyresampled($dst, $src, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+
+		    imagejpeg($dst,IC_PLUGIN_DIR."/extract/$file/".$filee);
+		}
+
+		$option = get_option('ic_presentations');
+		$option = is_array($option) ? $option : [];
+		$option[] = array('folder' => $file, 'files' => $files, 'name' => $_GET['name']);
+		update_option('ic_presentations', $option);
+
+		echo json_encode(array('folder' => $file, 'files' => $files));
+
+		die(0);
+		exit;
 	}
 
 	function ic_get_presentations(){
@@ -418,7 +477,7 @@ class IC_agent_api{
 				'Online' => get_user_meta($_GET['agent_id'], 'status_data_Online', true),
 				'Offline' => get_user_meta($_GET['agent_id'], 'status_data_Offline', true),
 				'Away' => get_user_meta($_GET['agent_id'], 'status_data_Away', true),
-				'Waiting' => get_user_meta($_GET['agent_id'], 'status_data_Waiting', true),
+				'Wait60' => get_user_meta($_GET['agent_id'], 'status_data_Wait60', true),
 			);
 		} else {
 			$data = get_user_meta($_GET['agent_id'], 'status_data_'.$_GET['type'], true);

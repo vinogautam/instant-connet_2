@@ -1,8 +1,12 @@
 <?php
 use OpenTok\OpenTok;
+
 class IC_ajax{
     
     function __construct() {
+        
+
+        
         add_action( 'wp_ajax_join_chat', array( &$this, 'join_chat') );
 		add_action( 'wp_ajax_nopriv_join_chat', array( &$this, 'join_chat') );
 		add_action( 'wp_ajax_waiting_participants', array( &$this, 'waiting_participants') );
@@ -25,7 +29,11 @@ class IC_ajax{
 		add_action( 'wp_ajax_usercontrol', array( &$this, 'usercontrol'));
 		add_action( 'wp_ajax_addnew_video', array( &$this, 'addnew_video'));
 		add_action( 'wp_ajax_nopriv_addnew_video', array( &$this, 'addnew_video'));
+
+		add_action( 'wp_ajax_addnew_video1', array( &$this, 'addnew_video1'));
+		add_action( 'wp_ajax_nopriv_addnew_video1', array( &$this, 'addnew_video1'));
 		add_action( 'wp_ajax_delete_video', array( &$this, 'delete_video'));
+		add_action( 'wp_ajax_nopriv_delete_video', array( &$this, 'delete_video'));
 		add_action( 'wp_ajax_delete_presentation', array( &$this, 'delete_presentation'));
 		add_action( 'wp_ajax_nopriv_delete_presentation', array( &$this, 'delete_presentation'));
 		add_action( 'wp_ajax_send_ic_gift', array( &$this, 'send_ic_gift') );
@@ -140,6 +148,7 @@ class IC_ajax{
 
     function delete_presentation()
     {
+    	
     	$option = get_option('ic_presentations');
     	$option = is_array($option) ? $option : [];
 
@@ -163,6 +172,25 @@ class IC_ajax{
     function addnew_video()
     {
     	$_POST = (array) json_decode(file_get_contents('php://input'));
+    	
+    	$option = get_option('youtube_videos');
+
+		if(isset($_POST['url']))
+		{	
+			$option = is_array($option) ? $option : [];
+			$option[] = $_POST;
+			update_option('youtube_videos', $option);
+		}
+		echo json_encode(get_option('youtube_videos'));
+    	die(0);
+		exit;
+    }
+
+
+    function addnew_video1()
+    {
+    	$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+    	
     	$option = get_option('youtube_videos');
 
 		if(isset($_POST['url']))
@@ -249,7 +277,10 @@ class IC_ajax{
 
 	function save_ppt2()
 	{
+		
+		
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		
 		
 		$data = $_POST['data'];
 		$file = $_POST['id'];

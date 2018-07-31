@@ -151,7 +151,7 @@
 <div ng-if="tab.type == 'youtube'" class="clearfix col-xs-12 no-pad  meeting-pane ">
     <div class="col-sm-12 col-xs-12 no-pad wh100 tab-inner-div">
       <script src="https://www.youtube.com/iframe_api"></script>
-      <iframe class="wh100" <?php if(!isset($_GET['admin'])){?>style="pointer-events:none;"<?php }?> id="youtube-player" width="640" height="360" ng-src="{{'//www.youtube.com/embed/'+getvideobyID(tab.data.url)+'?enablejsapi=1&version=3&playerapiid=ytplayer' | trustAsResourceUrl}}" frameborder="0" allowfullscreen="true" allowscriptaccess="always"></iframe>
+      <iframe class="wh100" <?php if($pid != 0){?>style="pointer-events:none;"<?php }?> id="youtube-player" width="640" height="360" ng-src="{{'//www.youtube.com/embed/'+getvideobyID(tab.data.url)+'?enablejsapi=1&version=3&playerapiid=ytplayer' | trustAsResourceUrl}}" frameborder="0" allowfullscreen="true" allow="autoplay" allowscriptaccess="always"></iframe>
     </div>
      <div class="pane-footer whiteboard-tools col-xs-12" ng-show="is_admin || full_control">
         <div class="col-sm-3 no-pad"> 

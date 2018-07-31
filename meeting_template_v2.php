@@ -122,6 +122,7 @@ Instant Connect UI
     .admin_view.user_have_admin_control ot-whiteboard{height: calc(100% - 40px);bottom: auto;}
     .pos-relative{position: relative;}
     .instant-connect .ICModalWindow .add-video-container{display: block;}
+    .fullwidthvideo .video_container{position: fixed;width: 100%;top:0;left:0;height: 100%;z-index:1000;margin-left: 0;}
   </style>
 
 

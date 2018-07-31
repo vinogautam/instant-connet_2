@@ -176,6 +176,7 @@ class IC_agent_api{
 		//echo $recordsFiltered;
 
 		$response = array('status' => 'Success', 
+							'draw' => $_GET['draw'],
 							'data' => $recordsFiltered,
 						  	'recordsTotal' => count($recordsTotal),
 						  	'recordsFiltered' => count($recordsFiltered),

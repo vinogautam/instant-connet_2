@@ -122,7 +122,21 @@ Instant Connect UI
     .admin_view.user_have_admin_control ot-whiteboard{height: calc(100% - 40px);bottom: auto;}
     .pos-relative{position: relative;}
     .instant-connect .ICModalWindow .add-video-container{display: block;}
-    .fullwidthvideo .video_container{position: fixed;width: 100%;top:0;left:0;height: 100%;z-index:1000;margin-left: 0;}
+    .fullwidthvideo ot-layout{position: fixed;z-index:1000;margin-left: 0;}
+    .fullwidthvideo .OT_publisher, .fullwidthvideo  .OT_subscriber {
+        height: 100% !important;
+        position: relative !important;
+        width: 100% !important;
+        left:0 !important;
+      }
+      .fullwidthvideo .video-container ot-layout .video2 .OT_publisher, .fullwidthvideo .video-container ot-layout .video2 .OT_subscriber {
+        height: 50% !important;
+        left: 0 !important;
+          margin: 0 1% !important;
+          position: relative !important;
+          top: 0 !important;
+          width: 45% !important;
+      }
   </style>
 
 

@@ -106,6 +106,7 @@ if (scope.$last === true) {
 	$scope.is_admin = <?= $pid == 0 ? 1 : 0;?>;
 	$scope.preloader = true;
 	$scope.isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+	$scope.fullwidthvideo = false;
 
 	$(window).load(function(){
 		$scope.$apply(function(){
@@ -880,6 +881,12 @@ if (scope.$last === true) {
 		else if(event.data.type == 'close_chat')
 		{
 			$(".control-sidebar-dark").removeClass("control-sidebar-open");
+		}
+		else if(event.data.type == 'fullwidthvideo')
+		{
+			if($scope.is_admin)
+				return;
+			$scope.fullwidthvideo = event.data.data;
 		}
 	});
 

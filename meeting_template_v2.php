@@ -231,6 +231,10 @@ Instant Connect UI
           <li ng-click="check_chat_opened()">
             <a href="#" data-toggle="control-sidebar"><i class="fa fa-comments"></i></a>
           </li>
+
+          <li class="dropdown">
+            <a><i class="fa fa-sign-out" ng-click="exit_user = 'all'" data-toggle="modal" data-target="#Exitmodal"></i></a>
+          </li>
         </ul>
       </div>
     </nav>

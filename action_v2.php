@@ -801,10 +801,16 @@ if (scope.$last === true) {
 		}
 		else if(event.data.type == 'exit_user')
 		{
-			if(event.data.data.id != $scope.data2.id)
-				return;
+			if(event.data.data.id === 'all'){
+				window.location.assign(event.data.data.val);
 
-			window.location.assign(event.data.data.val);
+				//exit hook here
+			}
+			else if (event.data.data.id == $scope.data2.id){
+				window.location.assign(event.data.data.val);
+
+				//individual user hook here
+			}
 		}
 		else if(event.data.type == 'set_tab')
 		{

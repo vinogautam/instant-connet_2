@@ -176,7 +176,7 @@ class IC_agent_api{
 		//echo $recordsFiltered;
 
 		$response = array('status' => 'Success', 
-							'draw' => $_GET['draw'],
+							'draw' => (int)$_GET['draw'],
 							'data' => $recordsFiltered,
 						  	'recordsTotal' => count($recordsTotal),
 						  	'recordsFiltered' => count($recordsFiltered),
@@ -186,21 +186,25 @@ class IC_agent_api{
 	}
 
 	function ic_get_stripe_customer_cards() {	
+	
+		
 		
 		if(isset($_GET['customer_id'])){
 			
 			$stripeCustomerId = $_GET['customer_id'];
-			Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
-			Stripe\Stripe::setAPIVersion("2017-08-15");
-			try{
-			$cards = Stripe_Customer::retrieve($stripeCustomerId)->sources->all(array(
-  'limit'=>3, 'object' => 'card'));
 			
-			$response = array('status' => 'Success', 'data' =>  $cards);
-		
-		}
-		catch (Exception $e)
-				{
+			try{
+				//switch_to_blog(1);
+				Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
+				Stripe\Stripe::setAPIVersion("2017-08-15");
+				
+				$cards = Stripe_Customer::retrieve($stripeCustomerId)->sources->all(array('limit'=>3, 'object' => 'card'));
+				//restore_current_blog();
+				$response = array('status' => 'Success', 'data' =>  $cards);
+			
+			}
+			catch (Exception $e)
+					{
 					
 					$errorResponse = array('status' => 'Fail', 'msg' =>  $e->getMessage());
 					json_encode($errorResponse);
@@ -496,6 +500,8 @@ class IC_agent_api{
 
 		return $res->balance;
 	}
+	
+	
 
 	function ic_add_agent_wallet($user, $amt){
 		global $wpdb;
@@ -536,7 +542,8 @@ class IC_agent_api{
 		}
 	}
 
-	function ic_resend_autologin_link(){
+	function ic_resend_auto
+	_link(){
 		global $ntm_mail;
 
 		$userpass = wp_generate_password( $length=12, $include_standard_special_chars=false );
@@ -2806,7 +2813,7 @@ class IC_agent_api{
 	function ic_agent_login(){
 		global $wpdb;
 		$creds = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-		
+		$stripeAPI = pmpro_getOption("stripe_publishablekey");
 		$user = wp_signon( $creds, false );
 		$userBlogs = get_blogs_of_user((int)$user->data->ID);
 		$timekitGmail = get_user_meta((int)$user->data->ID, 'timekits_gmail_email', true);
@@ -2821,6 +2828,7 @@ class IC_agent_api{
 			$membership = $wpdb->get_row("select * from wp_pmpro_memberships_users where user_id=".$user->data->ID);
 			$data['membership'] = isset($membership->membership_id) ? $membership->membership_id : 0;
 			$data['timekit_gmail'] = $timekitGmail;
+			$data['stripePublishAPI'] = $stripeAPI;
             $data['timekit_time_zone'] = $timekitTimeZone;
             $data['stripe_customer_id'] = $stripeCustomerId;
 			$response = array('status' => 'Success', 'data' => $data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl);

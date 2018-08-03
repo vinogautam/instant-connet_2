@@ -542,8 +542,7 @@ class IC_agent_api{
 		}
 	}
 
-	function ic_resend_auto
-	_link(){
+	function ic_resend_auto_link(){
 		global $ntm_mail;
 
 		$userpass = wp_generate_password( $length=12, $include_standard_special_chars=false );

@@ -3152,7 +3152,7 @@ class IC_agent_api{
 			$response = array('status' => 'Success', 'msg' => 'Notifications send to agent');
 		else
 			$response = array('status' => 'Error', 'msg' => 'Notifications failed to send');
-		echo json_encode($response);
+		
 		echo json_encode($response);
 		die(0);
 	}

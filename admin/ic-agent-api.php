@@ -46,7 +46,7 @@ class IC_agent_api{
 			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg',
 			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer',
 			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead', 'ic_get_presentations', 'ic_get_videos', 
-			'ic_save_ppt'
+			'ic_save_ppt', 'ic_wallet_purchase_transaction'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -176,7 +176,7 @@ class IC_agent_api{
 		//echo $recordsFiltered;
 
 		$response = array('status' => 'Success', 
-							'draw' => $_GET['draw'],
+							'draw' => (int)$_GET['draw'],
 							'data' => $recordsFiltered,
 						  	'recordsTotal' => count($recordsTotal),
 						  	'recordsFiltered' => count($recordsFiltered),
@@ -190,17 +190,18 @@ class IC_agent_api{
 		if(isset($_GET['customer_id'])){
 			
 			$stripeCustomerId = $_GET['customer_id'];
-			Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
-			Stripe\Stripe::setAPIVersion("2017-08-15");
-			try{
-			$cards = Stripe_Customer::retrieve($stripeCustomerId)->sources->all(array(
-  'limit'=>3, 'object' => 'card'));
 			
-			$response = array('status' => 'Success', 'data' =>  $cards);
-		
-		}
-		catch (Exception $e)
-				{
+			try{
+				Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
+				Stripe\Stripe::setAPIVersion("2017-08-15");
+				$cards = Stripe_Customer::retrieve($stripeCustomerId)->sources->all(array(
+	  'limit'=>3, 'object' => 'card'));
+				
+				$response = array('status' => 'Success', 'data' =>  $cards);
+			
+			}
+			catch (Exception $e)
+					{
 					
 					$errorResponse = array('status' => 'Fail', 'msg' =>  $e->getMessage());
 					json_encode($errorResponse);
@@ -495,6 +496,19 @@ class IC_agent_api{
 		$res = $wpdb->get_row("SELECT * FROM wp_".$blog_id."_agent_wallet where agent_id = ".$id." order by id desc");
 
 		return $res->balance;
+	}
+
+	function ic_wallet_purchase_transaction(){
+		global $wpdb;
+
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+		$res = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_agent_wallet where agent_id = ".$agent_id." order by id desc");
+
+		$response = array('status' => 'Success', 'data' => $res);
+		
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_add_agent_wallet($user, $amt){

@@ -1,4 +1,6 @@
 <?php
+$autoloader = 'vendor/autoload.php';
+
 include 'admin/ic-admin.php';
 include 'admin/ic-mail_class.php';
 include 'admin/ic-metabox.php';
@@ -7,7 +9,7 @@ include 'admin/ic-agent-api.php';
 //include 'phpmailer/PHPMailerAutoload.php';
 
 include 'frontend/ic-frontend.php';
-$autoloader = 'vendor/autoload.php';
+
 //if (!file_exists($autoloader)) {
   //die('You must run `composer install` in the sample app directory');
 //}

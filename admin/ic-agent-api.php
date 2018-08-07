@@ -57,11 +57,9 @@ class IC_agent_api{
 	}
 
 	function ic_get_point_value(){
-
-		switch_to_blog($blog_id);
 	        
 		$points_per_dollar = get_option('points_per_dollar');
-		
+
 		$admin_fee = get_option('admin_fee');
 		
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
@@ -69,8 +67,6 @@ class IC_agent_api{
 		$dollar_per_point = 1/$points_per_dollar;
 
 		$point_value = ($_POST['points']*$dollar_per_point)+$admin_fee;
-
-		restore_current_blog();
 
 		echo json_encode(array('status' => 'Success', 'point_value' => number_format($point_value, 2)));
 

@@ -427,13 +427,14 @@
 			dbDelta($sql_one);
 		}
 
-		$check_already_exist = !get_blog_option(get_current_blog_id(), 'strategy_link_created');
+		$blog_id = get_current_blog_id();
+		$check_already_exist = !get_blog_option($blog_id, 'strategy_link_created');
 
 		if($check_already_exist){
 			$strategy = array('post_title' => 'Online Consultation', 'post_content' => '', 'post_type' => 'strategy', 'post_status' => 'publish');
 			$sid = wp_insert_post( $strategy);
 			update_post_meta($sid, 'strategy_link', site_url());
-			add_blog_option(get_current_blog_id(), 'strategy_link_created', 1 );
+			add_blog_option($blog_id, 'strategy_link_created', 1 );
 
 			$results = $wpdb->get_results("select * from wp_campaigns");
 			foreach ($results as $key => $value) {
@@ -449,6 +450,12 @@
 					$wpdb->insert("wp_campaign_templates", $value2);
 				}
 			}
+
+
+			switch_to_blog(1);
+	        add_blog_option($blog_id, 'points_per_dollar', get_option('points_per_dollar'));
+	        add_blog_option($blog_id, 'admin_fee', get_option('admin_fee'));
+	        restore_current_blog();
 		}
 	}
 	

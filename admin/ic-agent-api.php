@@ -310,8 +310,8 @@ class IC_agent_api{
 	}
 
 	function ic_charge_current_customer() {
-		$_POST = (array) json_decode(file_get_contents('php://input'));
-			
+		
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));	
 			if( isset($_POST['customer_id']) && isset($_POST['amount_cents'])){
 			
 			Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));

@@ -240,7 +240,7 @@ class IC_agent_api{
 	}
 
 	function ic_create_customer_card() {
-		$_POST = (array) json_decode(file_get_contents('php://input'));
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));	
 		if(isset($_POST['customer_id'])){
 			
 			try
@@ -278,7 +278,7 @@ class IC_agent_api{
 	}
 
 	function ic_delete_customer_card() {
-		$_POST = (array) json_decode(file_get_contents('php://input'));
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));	
 		if(isset($_POST['customer_id']) && isset($_POST['card_id'])){
 			
 			Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
@@ -310,8 +310,8 @@ class IC_agent_api{
 	}
 
 	function ic_charge_current_customer() {
-		$_POST = (array) json_decode(file_get_contents('php://input'));
-			
+		
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));	
 			if( isset($_POST['customer_id']) && isset($_POST['amount_cents'])){
 			
 			Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
@@ -357,7 +357,7 @@ class IC_agent_api{
 
 	function ic_create_stripe_customer_charge() {
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-
+		
 		if(isset($_POST['agent_id']) && isset($_POST['stripe_token']) && isset($_POST['amount_cents']))  {
 			
 			$agentInfo = get_userdata( $_POST['agent_id'] );

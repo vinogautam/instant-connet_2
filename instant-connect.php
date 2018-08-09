@@ -419,7 +419,7 @@
 			  transaction_id int(11),
 			  points int(11),
 			  balance int(11),
-			  notes tinytext NOT NULL,
+			  notes text,
 			  created datetime,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 

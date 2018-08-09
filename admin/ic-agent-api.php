@@ -328,7 +328,7 @@ class IC_agent_api{
 			));
 			//VINO PLEASE ADD THE CODE FOR AGENT WALLET HERE.
 
-			$this->ic_add_agent_wallet($_POST['agent_id'], $_POST['amount_cents']);
+			$this->ic_add_agent_wallet($_POST['agent_id'], $_POST['amount_cents'], $charge);
 			
 
 			$response = array('status' => 'Success', 'data' =>  $charge);
@@ -394,7 +394,7 @@ class IC_agent_api{
 				  )
 				);
 
-				$this->ic_add_agent_wallet($_POST['agent_id'], $_POST['amount_cents']);
+				$this->ic_add_agent_wallet($_POST['agent_id'], $_POST['amount_cents'], $charge);
 			}
 			catch (Exception $e)
 			{
@@ -524,15 +524,22 @@ class IC_agent_api{
 
 		$blog_id = get_current_blog_id();
 		$agent_id = get_blog_option($blog_id, 'agent_id');
-		$res = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_agent_wallet where agent_id = ".$agent_id." order by id desc");
+		$res = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_agent_wallet order by id desc");
 
-		$response = array('status' => 'Success', 'data' => $res);
+		$nres = array();
+		foreach ($res as $key => $value) {
+			$value = (array)$value;
+			$value['notes'] = unserialize($value['notes']);
+			$nres[] = $value;
+		}
+
+		$response = array('status' => 'Success', 'data' => $nres);
 		
 		echo json_encode($response);
 		die(0);
 	}
 
-	function ic_add_agent_wallet($user, $amt){
+	function ic_add_agent_wallet($user, $amt, $notes = ''){
 		global $wpdb;
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
@@ -544,10 +551,10 @@ class IC_agent_api{
 
 		$wpdb->insert("wp_". $blog_id ."_agent_wallet", 
 				array(
-					'agent_id' => $_POST['id'],
+					'agent_id' => $user,
 			  		'points' => $amt,
 			  		'balance' => $balance+$amt,
-			  		'notes' => 'Payment added',
+			  		'notes' => serialize($notes),
 			  		'created' => date('Y-m-d H-i-s')
 				)
 		);

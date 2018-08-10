@@ -46,7 +46,7 @@ class IC_agent_api{
 			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg',
 			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer',
 			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead', 'ic_get_presentations', 'ic_get_videos', 
-			'ic_save_ppt', 'ic_wallet_purchase_transaction', 'ic_get_point_value'
+			'ic_save_ppt', 'ic_wallet_purchase_transaction', 'ic_get_point_value', 'ic_add_chat_points'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -54,6 +54,34 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_add_chat_points(){
+		global $wpdb, $endorsements;
+
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$endorser = $_POST['endorser'];
+		$results = $wpdb->get_results("select * from wp_leads where endorser_id = '".$endorser."' (email='".$_POST['email']."' or ip_address '".$_POST['ip_address']."') and chat_conversion = 1");
+
+    	if(count($results)==0){
+			$blog_id = get_active_blog_for_user($endorser)->blog_id;
+			$agent_id = get_blog_option($blog_id, 'agent_id');
+			$points = get_user_meta($agent_id, 'endorsement_settings', true)['chat_point_value'];
+			$type = 'Instant connect Chat';
+			$new_balance = $endorsements->get_endorser_points($endorser) + $points;
+			$data = array('points' => $points, 'credit' => 1, 'endorser_id' => $endorser, 'new_balance' => $new_balance, 'transaction_on' => date("Y-m-d H:i:s"), 'type' => $type);
+			$endorsements->add_points($data);
+			$this->track_api('chat_participants', $blog_id, $endorser, $data);
+			$wpdb->update("wp_leads", array('chat_conversion' => 1), array('id' => $results->id));
+
+			echo json_encode(array('status' => 'Success', 'balance' => $new_balance));
+		} else {
+			echo json_encode(array('status' => 'Error', 'msg' => 'ALread chat point converted.'));
+		}
+
+		die(0);
+		exit;
 	}
 
 	function ic_get_point_value(){
@@ -148,7 +176,6 @@ class IC_agent_api{
 
 	function ic_delete_lead() {
 
-		//$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		global $wpdb;
 		$results = $wpdb->delete("wp_leads", array('id' => $_GET['lead_id']));
 		if($results) {

@@ -36,8 +36,8 @@ class IC_ajax{
 		add_action( 'wp_ajax_nopriv_delete_video', array( &$this, 'delete_video'));
 		add_action( 'wp_ajax_delete_presentation', array( &$this, 'delete_presentation'));
 		add_action( 'wp_ajax_nopriv_delete_presentation', array( &$this, 'delete_presentation'));
-		add_action( 'wp_ajax_send_ic_gift', array( &$this, 'send_ic_gift') );
-		add_action( 'wp_ajax_nopriv_send_ic_gift', array( &$this, 'send_ic_gift') );
+		add_action( 'wp_ajax_ic_add_meeting_points', array( &$this, 'ic_add_meeting_points') );
+		add_action( 'wp_ajax_nopriv_ic_add_meeting_points', array( &$this, 'ic_add_meeting_points') );
 		add_action( 'wp_ajax_send_add_chat_points', array( &$this, 'add_chat_points') );
 		add_action( 'wp_ajax_nopriv_send_add_chat_points', array( &$this, 'add_chat_points') );
 		add_action( 'wp_ajax_heartbeat', array( &$this, 'heartbeat'), 100);
@@ -87,7 +87,7 @@ class IC_ajax{
 		}
     }
 
-    function send_ic_gift()
+    function ic_add_meeting_points()
     {
     	global $wpdb, $ntm_mail, $endorsements;
 

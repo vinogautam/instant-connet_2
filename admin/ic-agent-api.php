@@ -44,7 +44,7 @@ class IC_agent_api{
 			'ic_track_invitation_open', 'get_user_activity', 'get_endorser_invitation', 'ic_blog_info',
 			'ic_get_points_by_type', 'ic_endorser_profile', 'ic_timeline_notes', 'ic_add_timeline_notes',
 			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg',
-			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer',
+			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer','ic_create_stripe_customer_charge',
 			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead', 'ic_get_presentations', 'ic_get_videos', 
 			'ic_save_ppt', 'ic_wallet_purchase_transaction', 'ic_get_point_value'
 	    );
@@ -311,6 +311,7 @@ class IC_agent_api{
 
 	function ic_charge_current_customer() {
 		
+		
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));	
 			if( isset($_POST['customer_id']) && isset($_POST['amount_cents'])){
 			
@@ -356,33 +357,43 @@ class IC_agent_api{
 	}
 
 	function ic_create_stripe_customer_charge() {
+		
+
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		
+		
+
 		if(isset($_POST['agent_id']) && isset($_POST['stripe_token']) && isset($_POST['amount_cents']))  {
 			
 			$agentInfo = get_userdata( $_POST['agent_id'] );
 			Stripe\Stripe::setApiKey(pmpro_getOption("stripe_secretkey"));
 			Stripe\Stripe::setAPIVersion("2017-08-15");
+
+
 			
 			try
 				{
+					
 					$customer = Stripe_Customer::create(array(							 
 							  "description" => $agentInfo->user_nicename . " (" .  $agentInfo->user_email . ")",
 							  "card" => $_POST['stripe_token']
 							));
+					
+					
 
-					update_user_meta($user_id, "pmpro_stripe_customerid", $customer->id);
+					$var = update_user_meta($user_id, "pmpro_stripe_customerid", $customer->id);
+
 				}
+
 				catch (Exception $e)
 				{
 					
-					$errorResponse = array('status' => 'Fail', 'msg' =>  $e->getMessage());
-					json_encode($errorResponse);
-					die(0);
 
+					$errorResponse = array('status' => 'Fail', 'msg' =>  $e->getMessage());
+					echo json_encode($errorResponse);
+					die(0);
 				}
 					
-				
 
 			try
 			{
@@ -401,7 +412,7 @@ class IC_agent_api{
 				
 				
 				$errorResponse = array('status' => 'Fail', 'msg' =>  $e->getMessage());
-				json_encode($errorResponse);
+				echo json_encode($errorResponse);
 				die(0);
 			}
 
@@ -412,7 +423,7 @@ class IC_agent_api{
 				//SAVE THIS IN OUR AGENT WALLET HERE
 				$response = array('status' => 'Success', 'data' =>  $charge);
 				
-				json_encode($response);
+				echo json_encode($response);
 				die(0);
 				
 			}
@@ -421,7 +432,7 @@ class IC_agent_api{
 				//FAILED CHARGE 
 				
 				$response = array('status' => 'Fail', 'msg' =>  $e->getMessage());
-				json_encode($response);
+				echo json_encode($response);
 				die(0);
 			}
 
@@ -432,7 +443,7 @@ class IC_agent_api{
 		} else {
 
 			$response = array('status' => 'Fail', 'msg' =>  'Invalid Parameters');
-			json_encode($response);
+			echo json_encode($response);
 			die(0);
 
 		}

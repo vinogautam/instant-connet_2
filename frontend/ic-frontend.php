@@ -20,19 +20,28 @@ class IC_front{
             $fiApp.welcomeMsg = "<?php echo stripslashes(get_post_meta( get_the_id(), 'chat_welcome_message', true ));?>";
 	    	
 			
-            <?php
-            if(isset($_COOKIE['endorsement_track_link']) && isset($_COOKIE['endorsement_tracked']))
-			{
-				$track_link = explode("#&$#", base64_decode(base64_decode($_COOKIE['endorsement_track_link'])));
-				$endorser_id = $track_link[1];
+            function getCookie(cname) {
+			    var name = cname + "=";
+			    var ca = document.cookie.split(';');
+			    for(var i = 0; i < ca.length; i++) {
+			        var c = ca[i];
+			        while (c.charAt(0) == ' ') {
+			            c = c.substring(1);
+			        }
+			        if (c.indexOf(name) == 0) {
+			            return c.substring(name.length, c.length);
+			        }
+			    }
+			    return "";
 			}
-            ?>
 
-			$fiApp.endorserId = "<?php $endorser_id;?>";
+            var $cookie_track_link = getCookie('endorsement_track_link').split('#&$#');
+
+			$fiApp.endorserId = $cookie_track_link.length ? $cookie_track_link : "";
 			$fiApp.page = window.location.href;
 			$fiApp.siteId = "<?php echo $siteidd;?>";
 			$fiApp.blogUrl = "<?php echo get_site_url($siteidd);?>";
-			$fiApp.visited_page = "<?php echo $_COOKIE['fa_surfing_page'];?>";
+			$fiApp.visited_page = getCookie('fa_surfing_page');
 			$fiApp.introVideo = "<?php if(!empty($_GET['video'])) { echo $_GET['video']; } ?>";
 			
 			if($fiApp.endorserId || $fiApp.siteId){

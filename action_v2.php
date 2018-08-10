@@ -120,7 +120,7 @@ if (scope.$last === true) {
 
 	<?php if($results->endorser && $results->gift_status == 0){?>
 	setTimeout(function(){
-		$http.get('<?= site_url();?>/wp-admin/admin-ajax.php?action=send_ic_gift&id=<?= $pid;?>').then(function(res){
+		$http.get('<?= site_url();?>/wp-admin/admin-ajax.php?action=ic_add_meeting_points&id=<?= $pid;?>').then(function(res){
 
 		});
 	}, 300000);

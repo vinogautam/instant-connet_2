@@ -46,7 +46,7 @@ class IC_agent_api{
 			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg',
 			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer',
 			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead', 'ic_get_presentations', 'ic_get_videos', 
-			'ic_save_ppt', 'ic_wallet_purchase_transaction', 'ic_get_point_value', 'ic_add_chat_points'
+			'ic_save_ppt', 'ic_wallet_purchase_transaction', 'ic_get_point_value', 'ic_add_chat_points', 'ic_agent_balance'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -62,7 +62,7 @@ class IC_agent_api{
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
 		$endorser = $_POST['endorser'];
-		$results = $wpdb->get_results("select * from wp_leads where endorser_id = '".$endorser."' (email='".$_POST['email']."' or ip_address '".$_POST['ip_address']."') and chat_conversion = 1");
+		$results = $wpdb->get_results("select * from wp_leads where endorser_id = '".$endorser."' and (email='".$_POST['email']."' or ip_address '".$_POST['ip_address']."') and chat_conversion = 1");
 
     	if(count($results)==0){
 			$blog_id = get_active_blog_for_user($endorser)->blog_id;
@@ -536,12 +536,34 @@ class IC_agent_api{
 		die(0);
 	}
 
-	function ic_agent_balance($id){
+	function ic_agent_balance($id = ''){
 		global $wpdb;
-		$blog_id = get_active_blog_for_user( $id )->blog_id;
-		$res = $wpdb->get_row("SELECT * FROM wp_".$blog_id."_agent_wallet where agent_id = ".$id." order by id desc");
+		
+		if($id == ''){
+			$blog_id = get_current_blog_id();
+			$uid = get_blog_option($blog_id, 'agent_id');
+		} else {
+			$blog_id = get_active_blog_for_user( $id )->blog_id;
+			$uid = $id;
+		}
 
-		return $res->balance;
+		
+		$res = $wpdb->get_row("SELECT * FROM wp_".$blog_id."_agent_wallet where agent_id = ".$uid." order by id desc");
+
+		$points_per_dollar = get_option('points_per_dollar');
+		
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		
+		$dollar_per_point = 1/$points_per_dollar;
+
+		if($id == ''){
+			$response = array('status' => 'Success', 'avail_points'=>$res->balance, 'dollar_per_point' => $dollar_per_point);
+			echo json_encode($response);
+			die(0);
+		} else {
+			return $res->balance;
+		}
+
 	}
 	
 	

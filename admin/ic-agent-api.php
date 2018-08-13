@@ -700,18 +700,31 @@ class IC_agent_api{
 
 	function ic_timeline_notes(){
 		global $wpdb;
-		$blog_id = get_active_blog_for_user( $_GET['id'] )->blog_id;
+		if(isset($_GET['lead_id'])){
+			$blog_id = get_active_blog_for_user( $_GET['lead_id'] )->blog_id;
+			$group = $wpdb->get_results("SELECT created, month(created) as mn, YEAR(created) as yr FROM wp_".$blog_id."_notes where lead_id = ".$_GET['id']." GROUP by month(created), YEAR(created)");
 
-		$group = $wpdb->get_results("SELECT created, month(created) as mn, YEAR(created) as yr FROM wp_".$blog_id."_notes where endorser_id = ".$_GET['id']." GROUP by month(created), YEAR(created)");
+			$data = array();
 
-		$data = array();
+			foreach ($group as $key => $value) {
+				$data[date("F, Y", strtotime($value->created))] = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_notes where lead_id = ".$_GET['id']." and month(created) = ".$value->mn." and YEAR(created)= ".$value->yr." order by id desc");
+			}
 
-		foreach ($group as $key => $value) {
-			$data[date("F, Y", strtotime($value->created))] = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_notes where endorser_id = ".$_GET['id']." and month(created) = ".$value->mn." and YEAR(created)= ".$value->yr." order by id desc");
+			$response = array('status' => 'Success', 'data' => $data);
+		} elseif(isset($_GET['endorser_id'])){
+			$blog_id = get_active_blog_for_user( $_GET['endorser_id'] )->blog_id;
+			$group = $wpdb->get_results("SELECT created, month(created) as mn, YEAR(created) as yr FROM wp_".$blog_id."_notes where endorser_id = ".$_GET['id']." GROUP by month(created), YEAR(created)");
+
+			$data = array();
+
+			foreach ($group as $key => $value) {
+				$data[date("F, Y", strtotime($value->created))] = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_notes where endorser_id = ".$_GET['id']." and month(created) = ".$value->mn." and YEAR(created)= ".$value->yr." order by id desc");
+			}
+
+			$response = array('status' => 'Success', 'data' => $data);
+		} else{
+			$response = array('status' => 'Error', 'msg' => 'Invalid data');
 		}
-
-
-		$response = array('status' => 'Success', 'data' => $data);
 		
 		echo json_encode($response);
 		die(0);

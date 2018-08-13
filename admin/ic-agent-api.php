@@ -700,8 +700,8 @@ class IC_agent_api{
 
 	function ic_timeline_notes(){
 		global $wpdb;
-		if(isset($_GET['lead_id'])){
-			$blog_id = get_active_blog_for_user( $_GET['lead_id'] )->blog_id;
+		if($_GET['type'] == 'lead'){
+			$blog_id = get_active_blog_for_user( $_GET['id'] )->blog_id;
 			$group = $wpdb->get_results("SELECT created, month(created) as mn, YEAR(created) as yr FROM wp_".$blog_id."_notes where lead_id = ".$_GET['id']." GROUP by month(created), YEAR(created)");
 
 			$data = array();
@@ -711,8 +711,8 @@ class IC_agent_api{
 			}
 
 			$response = array('status' => 'Success', 'data' => $data);
-		} elseif(isset($_GET['endorser_id'])){
-			$blog_id = get_active_blog_for_user( $_GET['endorser_id'] )->blog_id;
+		} elseif($_GET['type'] == 'endorser'){
+			$blog_id = get_active_blog_for_user( $_GET['id'] )->blog_id;
 			$group = $wpdb->get_results("SELECT created, month(created) as mn, YEAR(created) as yr FROM wp_".$blog_id."_notes where endorser_id = ".$_GET['id']." GROUP by month(created), YEAR(created)");
 
 			$data = array();

@@ -106,7 +106,7 @@ class IC_ajax{
 		
 		$wpdb->update($wpdb->prefix . "meeting_participants", array('gift_status' => 1), array('id' => $_GET['id']));
 
-		$results2 = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (email='".$results->email."' or ip_address '".$results->ip_address."') and chat_conversion = 1");
+		$results2 = $wpdb->get_results("select * from ".$wpdb->prefix . "meeting_participants where (email='".$results->email."' or ip_address '".$results->ip_address."') and meeting_conversion = 1");
 
     	if(count($results2)==0){
 
@@ -119,6 +119,20 @@ class IC_ajax{
 			$endorsements->add_points($data);
 			$wpdb->update($wpdb->prefix . "meeting_participants", array('meeting_conversion' => 1), array('id' => $_GET['id']));
 			$data['participant_id'] = $_GET['id'];
+
+			$results3 = $wpdb->get_results("select * from wp_leads where endorser_id = '".$results->endorser."' and (email='".$results->email."' or ip_address '".$results->ip_address."')");
+
+			$wpdb->insert($wpdb->prefix ."notes", 
+				array(
+					'agent_id' => $agent_id,
+			  		'lead_id' => $results3[0]->id,
+			  		'endorser_id' => $results->endorser,
+			  		'notes' => 'Chat Point credited',
+			  		'events' => 'ic_add_meeting_points',
+			  		'created' => date('Y-m-d H-i-s')
+				)
+			);
+
 			IC_agent_api::track_api('meeting_participants', $blog_id, $results->endorser, $data);
 		}
 

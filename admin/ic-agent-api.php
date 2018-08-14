@@ -73,7 +73,18 @@ class IC_agent_api{
 			$data = array('points' => $points, 'credit' => 1, 'endorser_id' => $endorser, 'new_balance' => $new_balance, 'transaction_on' => date("Y-m-d H:i:s"), 'type' => $type);
 			$endorsements->add_points($data);
 			$this->track_api('chat_participants', $blog_id, $endorser, $data);
-			$wpdb->update("wp_leads", array('chat_conversion' => 1), array('id' => $results->id));
+			$wpdb->update("wp_leads", array('chat_conversion' => 1), array('id' => $results[0]->id));
+
+			$wpdb->insert($wpdb->prefix ."notes", 
+				array(
+					'agent_id' => $agent_id,
+			  		'lead_id' => $results[0]->id,
+			  		'endorser_id' => $endorser,
+			  		'notes' => 'Chat Point credited',
+			  		'events' => 'ic_add_chat_points',
+			  		'created' => date('Y-m-d H-i-s')
+				)
+			);
 
 			echo json_encode(array('status' => 'Success', 'balance' => $new_balance));
 		} else {

@@ -2949,7 +2949,7 @@ class IC_agent_api{
 			$data['timekit_gmail'] = $timekitGmail;
 			$data['stripePublishAPI'] = $stripeAPI;
             $data['timekit_time_zone'] = $timekitTimeZone;
-            $data['stripe_customer_id'] = $stripeCustomerId;
+            $data['stripe_customer_id'] = $stripeCustomerId[0];
 			$response = array('status' => 'Success', 'data' => $data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl);
 		}
 		echo json_encode($response);

@@ -46,7 +46,8 @@ class IC_agent_api{
 			'ic_endorser_redeemed_list', 'ic_resend_autologin_link', 'ic_save_offline_msg', 'ic_get_offline_msg',
 			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer','ic_create_stripe_customer_charge',
 			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead', 'ic_get_presentations', 'ic_get_videos', 
-			'ic_save_ppt', 'ic_wallet_purchase_transaction', 'ic_get_point_value', 'ic_add_chat_points', 'ic_agent_balance'
+			'ic_save_ppt', 'ic_wallet_purchase_transaction', 'ic_get_point_value', 'ic_add_chat_points', 'ic_agent_balance',
+			'ic_disable_agent_acc_have_no_wallet', 'ic_agent_account_active'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -54,6 +55,41 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_agent_account_active(){
+		global $wpdb;
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+
+		$disable_agent_app = !get_meta($agent_id, 'disable_agent_app');
+
+		echo json_encode(array('status' => 'Success', 'is_account_active' => $disable_agent_app));
+
+		die(0);
+		exit;
+	}
+
+	function ic_disable_agent_acc_have_no_wallet(){
+		global $wpdb, $ntm_mail;
+
+		$data = (array)get_users(array('role' => 'pmpro_role_2'));
+		foreach ($data as $key => $value) {
+			$agent_id = $value->ID;
+			$blog_id = get_active_blog_for_user($value->ID)->blog_id;
+
+			$res = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_points_transaction where queue = 1 and agent_id = ".$agent_id." order by id asc");
+
+			if(count($res) && (strtotime('now') - strtotime($res[0]->created)) > 86400){
+				update_user_meta($agent_id, 'disable_agent_app', 1);
+
+				$user_info1 = get_userdata($agent_id);
+
+				$template1 = 'Your App Acc disabled. Last 24 hour no purchase made after wallet empty notifiction. Contact your administrator to enable your account';
+
+				$ntm_mail->send_mail($user_info1->user_email, 'Your App Acc disabled', $template1, '', '');
+			}
+		}
 	}
 
 	function ic_add_chat_points(){
@@ -647,6 +683,8 @@ class IC_agent_api{
 				);
 			}
 		}
+
+		update_user_meta($user,'disable_agent_app', 0);
 	}
 
 	function ic_resend_auto_link(){
@@ -712,7 +750,7 @@ class IC_agent_api{
 	function ic_timeline_notes(){
 		global $wpdb;
 		if($_GET['type'] == 'lead'){
-			$blog_id = get_active_blog_for_user( $_GET['id'] )->blog_id;
+			$blog_id = get_current_blog_id();
 			$group = $wpdb->get_results("SELECT created, month(created) as mn, YEAR(created) as yr FROM wp_".$blog_id."_notes where lead_id = ".$_GET['id']." GROUP by month(created), YEAR(created)");
 
 			$data = array();
@@ -727,6 +765,7 @@ class IC_agent_api{
 			$group = $wpdb->get_results("SELECT created, month(created) as mn, YEAR(created) as yr FROM wp_".$blog_id."_notes where endorser_id = ".$_GET['id']." GROUP by month(created), YEAR(created)");
 
 			$data = array();
+
 
 			foreach ($group as $key => $value) {
 				$data[date("F, Y", strtotime($value->created))] = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_notes where endorser_id = ".$_GET['id']." and month(created) = ".$value->mn." and YEAR(created)= ".$value->yr." order by id desc");
@@ -2582,7 +2621,7 @@ class IC_agent_api{
 	}
 
 	function ic_add_points(){
-		global $wpdb;
+		global $wpdb, $ntm_mail;
 
 		$_POST = (array) json_decode(file_get_contents('php://input'));
 
@@ -2642,6 +2681,16 @@ class IC_agent_api{
 						  		'created' => date('Y-m-d H-i-s')
 							)
 					);
+				} else {
+					// noti mail to agent and endorser
+					$user_info1 = get_userdata($_POST['id']);
+					$user_info2 = get_userdata($_POST['endorser_id']);
+
+					$template1 = 'Your Wallet is empty, Please purchase';
+					$template2 = 'Agent Wallet is empty, Your points are in queue it will release once your agent purchase wallet points';
+
+					$ntm_mail->send_mail($user_info1->user_email, 'Wallet is empty', $template1, '', '');
+					$ntm_mail->send_mail($user_info2->user_email, 'Agent Wallet is empty', $template2, '', '');
 				}
 
 				$track = array('type' => $_POST['type'],  'points_earned' => $points

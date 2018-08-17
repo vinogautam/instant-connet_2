@@ -1188,15 +1188,16 @@ class IC_agent_api{
 	function ic_get_tmp_user(){
 		global $wpdb;
 
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
 
-
-		$recordsTotal = $wpdb->get_results("select * from tmp_user where status = 0");
+		$recordsTotal = $wpdb->get_results("select * from tmp_user where agent_id=$agent_id and status = 0");
 		$start = $_GET['start'];
 		$length = $_GET['length'];
 		$offset = $start * $length;
 		$order = $_GET['columns'][$_GET['order'][0]['column']]['data'];
 		$orderby = $_GET['order'][0]['dir'];
-		$recordsFiltered = $wpdb->get_results("select * from tmp_user where status = 0 order by $order $orderby limit $offset, $length ");
+		$recordsFiltered = $wpdb->get_results("select * from tmp_user where agent_id=$agent_id and status = 0 order by $order $orderby limit $offset, $length ");
 
 		$response = array('status' => 'Success', 
 							'data' => $recordsFiltered,

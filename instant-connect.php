@@ -451,11 +451,13 @@
 				}
 			}
 
+			$default_site_settings = ['points_per_dollar', 'admin_fee', 'twitter_text', 'endorser_app', 'mail_template_css', 'cloudsponge', 'sendgrid', 'giftbit'];
 
-			switch_to_blog(1);
-	        add_blog_option($blog_id, 'points_per_dollar', get_option('points_per_dollar'));
-	        add_blog_option($blog_id, 'admin_fee', get_option('admin_fee'));
-	        restore_current_blog();
+			foreach ($default_site_settings as $key => $value) {
+				add_blog_option($blog_id, $value, get_blog_option(1, $value));
+			}
+	        
+
 		}
 	}
 	

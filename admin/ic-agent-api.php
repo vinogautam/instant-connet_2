@@ -608,14 +608,33 @@ class IC_agent_api{
 		
 		$res = $wpdb->get_row("SELECT * FROM wp_".$blog_id."_agent_wallet where agent_id = ".$uid." order by id desc");
 
-		$points_per_dollar = get_option('points_per_dollar');
-		
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-		
+		$points_per_dollar = get_option('points_per_dollar');
 		$dollar_per_point = 1/$points_per_dollar;
 
+
+		$endorserr = [];
+
+		$res2 = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_points_transaction where queue = 1 and agent_id = ".$user." order by id desc");
+		if(count($res2)){
+			foreach ($res2 as $key => $value) {
+				$value = (array)$value;
+				$value['notes'] = unserialize($value['notes']);
+				$value['points'] = abs($value['points']);
+				$endorserr[$value->endorser_id] = $value;
+			}
+		}
+
+		$res3 = $wpdb->get_results("SELECT sum(points) as tp FROM wp_".$blog_id."_points_transaction where queue = 1 and agent_id = ".$user." order by id desc");
+
 		if($id == ''){
-			$response = array('status' => 'Success', 'avail_points'=>$res->balance, 'dollar_per_point' => $dollar_per_point);
+			$response = array('status' => 'Success', 
+				'avail_points'=>$res->balance, 
+				'points_per_dollar' => $points_per_dollar,
+				'dollar_per_point' => $dollar_per_point,
+				'queue_point_details' => $endorserr,
+				'total_queue_points' => $res3->tp ? $res3->tp : 0
+			);
 			echo json_encode($response);
 			die(0);
 		} else {
@@ -3000,6 +3019,9 @@ class IC_agent_api{
 			$data['stripePublishAPI'] = $stripeAPI;
             $data['timekit_time_zone'] = $timekitTimeZone;
             $data['stripe_customer_id'] = $stripeCustomerId[0];
+            $data['points_per_dollar'] = get_option('points_per_dollar');
+            $data['admin_fee'] = get_option('admin_fee');
+			$data['dollar_per_point'] = 1/$points_per_dollar;
 			$response = array('status' => 'Success', 'data' => $data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl);
 		}
 		echo json_encode($response);

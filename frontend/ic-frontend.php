@@ -35,9 +35,9 @@ class IC_front{
 			    return "";
 			}
 
-            var $cookie_track_link = getCookie('endorsement_track_link').split('#&$#');
+            var $cookie_track_link = atob(atob(getCookie('endorsement_track_link'))).split('#&$#');
 
-			$fiApp.endorserId = $cookie_track_link.length ? $cookie_track_link : "";
+			$fiApp.endorserId = $cookie_track_link.length ? $cookie_track_link[1] : "";
 			$fiApp.page = window.location.href;
 			$fiApp.siteId = "<?php echo $siteidd;?>";
 			$fiApp.blogUrl = "<?php echo get_site_url($siteidd);?>";

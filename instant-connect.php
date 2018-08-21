@@ -68,7 +68,7 @@
 	
 	function on_create_blog( $blog_id, $user_id, $domain, $path, $site_id, $meta ) {
         	switch_to_blog( $blog_id );
-        	$this->Endorsement_install();
+        	$this->Endorsement_install($blog_id, $user_id, $domain, $path, $site_id, $meta);
         	restore_current_blog();
 	}
 
@@ -430,6 +430,8 @@
 		$blog_id = get_current_blog_id();
 		$check_already_exist = !get_blog_option($blog_id, 'strategy_link_created');
 
+		$clone_from = isset($_GET['clone']) ? $_GET['clone'] : 1;
+
 		if($check_already_exist){
 			$strategy = array('post_title' => 'Online Consultation', 'post_content' => '', 'post_type' => 'strategy', 'post_status' => 'publish');
 			$sid = wp_insert_post( $strategy);
@@ -454,10 +456,18 @@
 			$default_site_settings = ['points_per_dollar', 'admin_fee', 'twitter_text', 'endorser_app', 'mail_template_css', 'cloudsponge', 'sendgrid', 'giftbit'];
 
 			foreach ($default_site_settings as $key => $value) {
-				add_blog_option($blog_id, $value, get_blog_option(1, $value));
+				add_blog_option($blog_id, $value, get_blog_option($clone_from, $value));
 			}
 	        
+			if($clone_from != 1){
+				require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+				$campaigns = 'Insert in to wp_'.$blog_id.'_campaigns select * from wp_'.$clone_from.'_campaigns';
+				dbDelta($campaigns);
 
+				$campaign_templates = 'Insert in to wp_'.$blog_id.'_campaign_templates select * from wp_'.$clone_from.'_campaign_templates';
+				dbDelta($campaign_templates);
+
+			}
 		}
 	}
 	

@@ -625,7 +625,7 @@ class IC_agent_api{
 			}
 		}
 
-		$res3 = $wpdb->get_results("SELECT sum(points) as tp FROM wp_".$blog_id."_points_transaction where queue = 1 and agent_id = ".$user." order by id desc");
+		$res3 = $wpdb->get_row("SELECT sum(points) as tp FROM wp_".$blog_id."_points_transaction where queue = 1 and agent_id = ".$user." order by id desc");
 
 		if($id == ''){
 			$response = array('status' => 'Success', 
@@ -643,7 +643,32 @@ class IC_agent_api{
 
 	}
 	
-	
+	ic_endorser_points_details(){
+		$user_id = $_GET['endorser_id'];
+		$blog_id = get_active_blog_for_user( $_GET['endorser_id'] )->blog_id;
+
+		$results1 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and queue = 0 and endorser_id='".$user_id."'");
+		$results2 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where queue = 0 and endorser_id='".$user_id."'");
+		$results3 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where queue = 1 and endorser_id='".$user_id."'");
+
+		$results4 = $wpdb->get_row("select * from wp_".$blog_id."_points_transaction where queue = 1 and endorser_id='".$user_id."'");
+
+		$endorser_points1 = $results1->points ? $results1->points : 0;
+		$endorser_points2 = $results2->points ? $results2->points : 0;
+		$endorser_points3 = $results3->points ? $results3->points : 0;
+
+
+		$response = array('status' => 'Success', 
+							'msg' => 'Gift coupon request initiated, sent to your mail',
+							'points' => $endorser_points2,
+							'allowance' => $endorser_points1,
+							'non_release_points' => $endorser_points3,
+							'queue_point_details' => $results4
+						);
+
+		echo json_encode($response);
+		die(0);
+	}
 
 	function ic_wallet_purchase_transaction(){
 		global $wpdb;
@@ -1115,8 +1140,8 @@ class IC_agent_api{
 				$wpdb->insert("wp_".$blog_id."_points_transaction", $data);
 
 				$results1 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and queue = 0 and endorser_id='".$user_id."'");
-				$results2 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where  endorser_id='".$user_id."'");
-				$results1 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and queue = 1 and endorser_id='".$user_id."'");
+				$results2 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where queue = 0 and endorser_id='".$user_id."'");
+				$results3 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where queue = 1 and endorser_id='".$user_id."'");
 
 				$endorser_points1 = $results1->points ? $results1->points : 0;
 				$endorser_points2 = $results2->points ? $results2->points : 0;

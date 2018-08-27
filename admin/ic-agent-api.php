@@ -47,7 +47,7 @@ class IC_agent_api{
 			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer','ic_create_stripe_customer_charge',
 			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead', 'ic_get_presentations', 'ic_get_videos', 
 			'ic_save_ppt', 'ic_wallet_purchase_transaction', 'ic_get_point_value', 'ic_add_chat_points', 'ic_agent_balance',
-			'ic_disable_agent_acc_have_no_wallet', 'ic_agent_account_active'
+			'ic_disable_agent_acc_have_no_wallet', 'ic_agent_account_active', 'ic_endorser_points_details', 'ic_agent_redeem_list', 'ic_agent_top_endorser'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -55,6 +55,35 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_agent_redeem_list(){
+		global $wpdb;
+
+		$resuts = $wpdb->get_results("select * from ".$wpdb->prefix."points_transaction where type = 'Redeem Point' ");
+
+		echo json_encode(array('status' => 'Success', 'data' => $resuts));
+
+		die(0);
+		exit;
+	}
+
+	function ic_agent_top_endorser(){
+		global $wpdb;
+
+		$resuts = $wpdb->get_results("SELECT sum(points) as points, endorser_id FROM ".$wpdb->prefix."points_transaction WHERE type != 'Redeem Point' group by endorser_id order by points desc");
+
+		$new_results = [];
+		foreach ($resuts as $key => $value) {
+			$value = (array) $value;
+			$value['name'] = get_user_meta($value['endorser_id'], 'first_name', true).' '.get_user_meta($value['endorser_id'], 'last_name', true); 
+			$new_results[] = $value;
+		}
+
+		echo json_encode(array('status' => 'Success', 'data' => $new_results));
+
+		die(0);
+		exit;
 	}
 
 	function ic_agent_account_active(){
@@ -131,7 +160,7 @@ class IC_agent_api{
 		exit;
 	}
 
-	function ic_get_point_value(){
+	function ic_get_point_value($point=false){
 	        
 		$points_per_dollar = get_option('points_per_dollar');
 
@@ -141,12 +170,23 @@ class IC_agent_api{
 		
 		$dollar_per_point = 1/$points_per_dollar;
 
-		$point_value = ($_POST['points']*$dollar_per_point)+$admin_fee;
+		if($point)
+			$points = ($point*$dollar_per_point);
+		else
+			$points = ($_POST['points']*$dollar_per_point);
 
-		echo json_encode(array('status' => 'Success', 'point_value' => number_format($point_value, 2)));
+		$point_value = $points+(($points*$admin_fee)/100);
 
-		die(0);
-		exit;
+		
+		if($point){
+			return array('point_with_admin_fee' => number_format($point_value, 2), 'points' => $points);
+		} else {
+			echo json_encode(array('status' => 'Success', 'point_value' => number_format($point_value, 2)));
+
+			die(0);
+			exit;
+		}
+		
 	}
 
 	function ic_save_ppt()
@@ -403,7 +443,7 @@ class IC_agent_api{
 			));
 			//VINO PLEASE ADD THE CODE FOR AGENT WALLET HERE.
 
-			$this->ic_add_agent_wallet($_POST['agent_id'], $_POST['amount_cents'], $charge);
+			$this->ic_add_agent_wallet($charge);
 			
 
 			$response = array('status' => 'Success', 'data' =>  $charge);
@@ -479,7 +519,7 @@ class IC_agent_api{
 				  )
 				);
 
-				$this->ic_add_agent_wallet($_POST['agent_id'], $_POST['amount_cents'], $charge);
+				$this->ic_add_agent_wallet($charge);
 			}
 			catch (Exception $e)
 			{
@@ -595,7 +635,7 @@ class IC_agent_api{
 	}
 
 	function ic_agent_balance($id = ''){
-		global $wpdb;
+		global $wpdb, $ntm_mail;
 		
 		if($id == ''){
 			$blog_id = get_current_blog_id();
@@ -610,26 +650,37 @@ class IC_agent_api{
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		$points_per_dollar = get_option('points_per_dollar');
-		$dollar_per_point = 1/$points_per_dollar;
+		$points_per_dollar = $points_per_dollar ? $points_per_dollar : 0;
+		$dollar_per_point = $points_per_dollar ? (1/$points_per_dollar) : 0;
 
 
 		$endorserr = [];
 
-		$res2 = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_points_transaction where queue = 1 and agent_id = ".$user." order by id desc");
+		$res2 = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_points_transaction where queue = 1 and agent_id = ".$uid." order by id desc");
 		if(count($res2)){
 			foreach ($res2 as $key => $value) {
 				$value = (array)$value;
 				$value['notes'] = unserialize($value['notes']);
 				$value['points'] = abs($value['points']);
-				$endorserr[$value->endorser_id] = $value;
+
+				/*if(!isset($endorserr[$value['endorser_id']])){
+					$endorserr[$value['endorser_id']] = array('data' => [], 
+						'name' => get_user_meta($value['endorser_id'], 'first_name', true).' '.get_user_meta($value['endorser_id'], 'last_name', true));
+				}
+
+				$endorserr[$value['endorser_id']]['data'][] = $value;*/
+
+				$value['name'] = get_user_meta($value['endorser_id'], 'first_name', true).' '.get_user_meta($value['endorser_id'], 'last_name', true);
+
+				$endorserr[] = $value;
 			}
 		}
 
-		$res3 = $wpdb->get_row("SELECT sum(points) as tp FROM wp_".$blog_id."_points_transaction where queue = 1 and agent_id = ".$user." order by id desc");
+		$res3 = $wpdb->get_row("SELECT sum(points) as tp FROM wp_".$blog_id."_points_transaction where queue = 1 and agent_id = ".$uid." order by id desc");
 
 		if($id == ''){
 			$response = array('status' => 'Success', 
-				'avail_points'=>$res->balance, 
+				'avail_points'=>$res->balance ? $res->balance : 0, 
 				'points_per_dollar' => $points_per_dollar,
 				'dollar_per_point' => $dollar_per_point,
 				'queue_point_details' => $endorserr,
@@ -643,7 +694,7 @@ class IC_agent_api{
 
 	}
 	
-	ic_endorser_points_details(){
+	function ic_endorser_points_details(){
 		$user_id = $_GET['endorser_id'];
 		$blog_id = get_active_blog_for_user( $_GET['endorser_id'] )->blog_id;
 
@@ -690,11 +741,15 @@ class IC_agent_api{
 		die(0);
 	}
 
-	function ic_add_agent_wallet($user, $amt, $notes = ''){
+	function ic_add_agent_wallet($notes = ''){
 		global $wpdb;
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		
+
+		$user = $_POST['agent_id'];
+		$amt = $this->ic_get_point_value($_POST['points']) * 100;
+		$points = $_POST['points'];
 
 		$blog_id = get_active_blog_for_user($user)->blog_id;
 
@@ -703,7 +758,7 @@ class IC_agent_api{
 		$wpdb->insert("wp_". $blog_id ."_agent_wallet", 
 				array(
 					'agent_id' => $user,
-			  		'points' => $amt,
+			  		'points' => $points,
 			  		'balance' => $balance+$amt,
 			  		'notes' => serialize($notes),
 			  		'created' => date('Y-m-d H-i-s')
@@ -715,16 +770,27 @@ class IC_agent_api{
 		if(count($res)){
 			foreach ($res as $key => $value) {
 				$balance = $this->ic_agent_balance($_POST['id']);
-				$wpdb->insert("wp_". $blog_id ."_agent_wallet", 
+				$point_value = $this->ic_get_point_value($value->points) * 100;
+				if($balance >= $point_value){
+					$wpdb->insert("wp_". $blog_id ."_agent_wallet", 
 						array(
 							'agent_id' => $user,
 					  		'points' => $value->points,
-					  		'balance' => $balance-$value->points,
+					  		'balance' => $balance-$point_value,
 					  		'notes' => 'Debited - Queue Transaction',
 					  		'transaction_id' => $value->id,
 					  		'created' => date('Y-m-d H-i-s')
 						)
-				);
+					);
+
+					$wpdb->update("wp_". $blog_id ."_points_transaction", array('queue' => 0), array('id' => $value->id));
+
+					$user_info1 = get_userdata($value->endorser_id);
+
+					$template1 = 'You now have access to your points, please proceed link to redeem your points.';
+
+					$ntm_mail->send_mail($user_info1->user_email, 'Your pending point released', $template1, '', '');
+				}
 			}
 		}
 
@@ -2702,13 +2768,14 @@ class IC_agent_api{
 
 
 				$balance = $this->ic_agent_balance($agent_id);
-				$queue = $balance >= $points ? 0 : 1;
+				$point_value = $this->ic_get_point_value($points) * 100;
+				$queue = $balance >= $point_value ? 0 : 1;
 
 				$data = array(
 								'endorser_id' =>$_POST['endorser_id'],
 								'agent_id' => $agent_id,
 								'points' => $points,
-								'queue' => $queue,
+								'queue' => $queue, 
 								'type' => $_POST['type'],
 								'notes' => $_POST['notes'],
 								'created'	=> date("Y-m-d H:i:s")
@@ -2720,7 +2787,7 @@ class IC_agent_api{
 							array(
 								'agent_id' => $_POST['id'],
 						  		'points' => $points,
-						  		'balance' => $balance-$points,
+						  		'balance' => $balance-$point_value,
 						  		'notes' => 'Debited',
 						  		'transaction_id' => $wpdb->insert_id,
 						  		'created' => date('Y-m-d H-i-s')
@@ -2847,7 +2914,8 @@ class IC_agent_api{
 
 				$endorser_points = $endorser_points + $total_points;
 				$balance = $this->ic_agent_balance($agent_id);
-				$queue = $balance >= $points ? 0 : 1;
+				$point_value = $this->ic_get_point_value($points) * 100;
+				$queue = $balance >= $point_value ? 0 : 1;
 				$data = array(
 								'endorser_id' => $_POST['id'],
 								'agent_id' => $agent_id,
@@ -2863,7 +2931,7 @@ class IC_agent_api{
 							array(
 								'agent_id' => $_POST['id'],
 						  		'points' => $points,
-						  		'balance' => $balance-$points,
+						  		'balance' => $balance-$point_value,
 						  		'notes' => 'Debited',
 						  		'transaction_id' => $wpdb->insert_id,
 						  		'created' => date('Y-m-d H-i-s')
@@ -3028,24 +3096,28 @@ class IC_agent_api{
 		$creds = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		$stripeAPI = pmpro_getOption("stripe_publishablekey");
 		$user = wp_signon( $creds, false );
-		$userBlogs = get_blogs_of_user((int)$user->data->ID);
-		$timekitGmail = get_user_meta((int)$user->data->ID, 'timekits_gmail_email', true);
-		$timekitTimeZone = get_user_meta((int)$user->data->ID, 'timekits_time_zone', true);
-		$siteUrl = get_site_url(get_user_meta((int)$user->data->ID, 'primary_blog', true));
-		$stripeCustomerId = get_user_meta((int)$user->data->ID, "pmpro_stripe_customerid");
+		
+
 		if ( is_wp_error($user) ) {
 			$response = array('status' => 'Error', 'msg' => 'Invalid Credentials');
 		}
 		else{
 			$data = (array) $user->data;
+			$userBlogs = get_blogs_of_user((int)$user->data->ID);
+			$timekitGmail = get_user_meta((int)$user->data->ID, 'timekits_gmail_email', true);
+			$timekitTimeZone = get_user_meta((int)$user->data->ID, 'timekits_time_zone', true);
+			$siteUrl = get_site_url(get_user_meta((int)$user->data->ID, 'primary_blog', true));
+			$stripeCustomerId = get_user_meta((int)$user->data->ID, "pmpro_stripe_customerid");
+			$blog_id = get_active_blog_for_user( $user->data->ID )->blog_id;
 			$membership = $wpdb->get_row("select * from wp_pmpro_memberships_users where user_id=".$user->data->ID);
 			$data['membership'] = isset($membership->membership_id) ? $membership->membership_id : 0;
 			$data['timekit_gmail'] = $timekitGmail;
 			$data['stripePublishAPI'] = $stripeAPI;
             $data['timekit_time_zone'] = $timekitTimeZone;
             $data['stripe_customer_id'] = $stripeCustomerId[0];
-            $data['points_per_dollar'] = get_option('points_per_dollar');
-            $data['admin_fee'] = get_option('admin_fee');
+            $data['points_per_dollar'] = get_blog_option($blog_id, 'points_per_dollar');
+            $data['admin_fee'] = get_blog_option($blog_id, 'admin_fee');
+            $data['blog_id'] = $blog_id;
 			$data['dollar_per_point'] = 1/$points_per_dollar;
 			$response = array('status' => 'Success', 'data' => $data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl);
 		}

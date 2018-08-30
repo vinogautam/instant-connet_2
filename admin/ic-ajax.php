@@ -78,8 +78,7 @@ class IC_ajax{
     		$agent_id = get_blog_option($blog_id, 'agent_id');
 			$points = get_user_meta($agent_id, 'endorsement_settings', true)['chat_point_value'];
 			$type = 'Instant connect Chat';
-			$new_balance = $endorsements->get_endorser_points($results->endorser) + $points;
-			$data = array('points' => $points, 'credit' => 1, 'endorser_id' => $results->endorser, 'new_balance' => $new_balance, 'transaction_on' => date("Y-m-d H:i:s"), 'type' => $type);
+			$data = array('points' => $points, 'agent_id' => $agent_id, 'endorser_id' => $results->endorser, 'created' => date("Y-m-d H:i:s"), 'type' => 'chat_conversion', 'notes' => $type);
 			$endorsements->add_points($data);
 			$wpdb->update($wpdb->prefix . "meeting_participants", array('chat_conversion' => 1), array('id' => $_GET['id']));
 			$data['participant_id'] = $_GET['id'];
@@ -114,8 +113,7 @@ class IC_ajax{
     		$agent_id = get_blog_option($blog_id, 'agent_id');
 			$points = get_user_meta($agent_id, 'endorsement_settings', true)['meeting_point_value'];
 			$type = 'Instant connect success meeting';
-			$new_balance = $endorsements->get_endorser_points($results->endorser) + $points;
-			$data = array('points' => $points, 'credit' => 1, 'endorser_id' => $results->endorser, 'new_balance' => $new_balance, 'transaction_on' => date("Y-m-d H:i:s"), 'type' => $type);
+			$data = array('points' => $points, 'agent_id' => $agent_id, 'endorser_id' => $results->endorser, 'created' => date("Y-m-d H:i:s"), 'type' => 'meeting_conversion', 'notes' => $type);
 			$endorsements->add_points($data);
 			$wpdb->update($wpdb->prefix . "meeting_participants", array('meeting_conversion' => 1), array('id' => $_GET['id']));
 			$data['participant_id'] = $_GET['id'];

@@ -420,6 +420,8 @@
 			  points int(11),
 			  balance int(11),
 			  notes text,
+			  endorser_id int(11),
+			  amount float,
 			  created datetime,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 
@@ -503,6 +505,23 @@
 			);	
 
 			wp_enqueue_style( 'jquery-ui-datepicker' );
+	}
+
+	function get_endorser_points($user_id){
+		global $wpdb;
+
+		$blog_id = get_active_blog_for_user( $user_id )->blog_id;
+
+		$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where queue = 0 and endorser_id='".$user_id."'");
+
+		$endorser_points = $results->points ? $results->points : 0;
+		return $endorser_points;
+	}
+
+	function add_points($data){
+		global $wpdb;
+		$blog_id = get_active_blog_for_user( $data['agent_id'] )->blog_id;
+		$wpdb->insert("wp_".$blog_id."_points_transaction", $data);
 	}
 
 	function ic_register_form(){

@@ -127,33 +127,37 @@ class IC_agent_api{
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
 		$endorser = $_POST['endorser'];
-		$results = $wpdb->get_results("select * from wp_leads where endorser_id = '".$endorser."' and (email='".$_POST['email']."' or ip_address '".$_POST['ip_address']."') and chat_conversion = 1");
+		$results = $wpdb->get_results("select * from wp_leads where endorser_id = '".$endorser."' and (email='".$_POST['email']."' or ip_address= '".$_POST['ip_address']."')");
 
-    	if(count($results)==0){
-			$blog_id = get_active_blog_for_user($endorser)->blog_id;
-			$agent_id = get_blog_option($blog_id, 'agent_id');
-			$points = get_user_meta($agent_id, 'endorsement_settings', true)['chat_point_value'];
-			$type = 'Instant connect Chat';
-			$new_balance = $endorsements->get_endorser_points($endorser) + $points;
-			$data = array('points' => $points, 'credit' => 1, 'endorser_id' => $endorser, 'new_balance' => $new_balance, 'transaction_on' => date("Y-m-d H:i:s"), 'type' => $type);
-			$endorsements->add_points($data);
-			$this->track_api('chat_participants', $blog_id, $endorser, $data);
-			$wpdb->update("wp_leads", array('chat_conversion' => 1), array('id' => $results[0]->id));
+    	if(count($results)!=0){
+    		if($results[0]->chat_conversion == 0){
+				$blog_id = get_active_blog_for_user($endorser)->blog_id;
+				$agent_id = get_blog_option($blog_id, 'agent_id');
+				$points = get_user_meta($agent_id, 'endorsement_settings', true)['chat_point_value'];
+				$type = 'Instant connect Chat';
+				$new_balance = $endorsements->get_endorser_points($endorser)['points'] + $points;
+				$data = array('points' => $points, 'agent_id' => $agent_id, 'endorser_id' => $endorser, 'created' => date("Y-m-d H:i:s"), 'type' => 'chat_conversion', 'notes' => $type);
+				$endorsements->add_points($data);
+				$this->track_api('chat_participants', $blog_id, $endorser, $data);
+				$wpdb->update("wp_leads", array('chat_conversion' => 1), array('id' => $results[0]->id));
 
-			$wpdb->insert($wpdb->prefix ."notes", 
-				array(
-					'agent_id' => $agent_id,
-			  		'lead_id' => $results[0]->id,
-			  		'endorser_id' => $endorser,
-			  		'notes' => 'Chat Point credited',
-			  		'events' => 'ic_add_chat_points',
-			  		'created' => date('Y-m-d H-i-s')
-				)
-			);
+				$wpdb->insert($wpdb->prefix ."notes", 
+					array(
+						'agent_id' => $agent_id,
+				  		'lead_id' => $results[0]->id,
+				  		'endorser_id' => $endorser,
+				  		'notes' => 'Chat Point credited',
+				  		'events' => 'ic_add_chat_points',
+				  		'created' => date('Y-m-d H-i-s')
+					)
+				);
 
-			echo json_encode(array('status' => 'Success', 'balance' => $new_balance));
+				echo json_encode(array('status' => 'Success', 'balance' => $new_balance));
+			} else {
+				echo json_encode(array('status' => 'Error', 'msg' => 'ALread chat point converted.'));
+			}
 		} else {
-			echo json_encode(array('status' => 'Error', 'msg' => 'ALread chat point converted.'));
+			echo json_encode(array('status' => 'Error', 'msg' => 'No lead info exist!!'));
 		}
 
 		die(0);
@@ -179,7 +183,7 @@ class IC_agent_api{
 
 		
 		if($point){
-			return array('point_with_admin_fee' => number_format($point_value, 2), 'points' => $points);
+			return number_format($points, 2);
 		} else {
 			echo json_encode(array('status' => 'Success', 'point_value' => number_format($point_value, 2)));
 
@@ -434,6 +438,8 @@ class IC_agent_api{
 			
 			try
 				{
+				
+				
 			$charge = Stripe_Charge::create(array(
 	  		"amount" => $_POST['amount_cents'],
 	  		"currency" => "CAD",
@@ -442,6 +448,7 @@ class IC_agent_api{
 	  		"description" => 'Point Purchase'
 			));
 			//VINO PLEASE ADD THE CODE FOR AGENT WALLET HERE.
+			
 
 			$this->ic_add_agent_wallet($charge);
 			
@@ -653,6 +660,11 @@ class IC_agent_api{
 		$points_per_dollar = $points_per_dollar ? $points_per_dollar : 0;
 		$dollar_per_point = $points_per_dollar ? (1/$points_per_dollar) : 0;
 
+		$avail_balance = $res->balance ? $res->balance : 0;
+
+		$avail_balance = $avail_balance / 100;
+
+		$avail_points = $avail_balance * $points_per_dollar;
 
 		$endorserr = [];
 
@@ -660,7 +672,7 @@ class IC_agent_api{
 		if(count($res2)){
 			foreach ($res2 as $key => $value) {
 				$value = (array)$value;
-				$value['notes'] = unserialize($value['notes']);
+				$value['notes'] = $value['notes'];
 				$value['points'] = abs($value['points']);
 
 				/*if(!isset($endorserr[$value['endorser_id']])){
@@ -680,7 +692,8 @@ class IC_agent_api{
 
 		if($id == ''){
 			$response = array('status' => 'Success', 
-				'avail_points'=>$res->balance ? $res->balance : 0, 
+				'avail_balance'=>$avail_balance, 
+				'avail_points'=>$avail_points, 
 				'points_per_dollar' => $points_per_dollar,
 				'dollar_per_point' => $dollar_per_point,
 				'queue_point_details' => $endorserr,
@@ -694,9 +707,9 @@ class IC_agent_api{
 
 	}
 	
-	function ic_endorser_points_details(){
-		$user_id = $_GET['endorser_id'];
-		$blog_id = get_active_blog_for_user( $_GET['endorser_id'] )->blog_id;
+	function ic_endorser_points_details($id=''){
+		$user_id = $id ? $id : $_GET['endorser_id'];
+		$blog_id = get_active_blog_for_user( $user_id )->blog_id;
 
 		$results1 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and queue = 0 and endorser_id='".$user_id."'");
 		$results2 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where queue = 0 and endorser_id='".$user_id."'");
@@ -717,8 +730,13 @@ class IC_agent_api{
 							'queue_point_details' => $results4
 						);
 
-		echo json_encode($response);
-		die(0);
+		if($id){
+			return $response;
+		} else {
+			echo json_encode($response);
+			die(0);
+		}
+		
 	}
 
 	function ic_wallet_purchase_transaction(){
@@ -731,7 +749,7 @@ class IC_agent_api{
 		$nres = array();
 		foreach ($res as $key => $value) {
 			$value = (array)$value;
-			$value['notes'] = unserialize($value['notes']);
+			$value['notes'] = $value['amount'] < 0 ? array('description' => $value['notes']) : unserialize($value['notes']);
 			$nres[] = $value;
 		}
 
@@ -742,16 +760,19 @@ class IC_agent_api{
 	}
 
 	function ic_add_agent_wallet($notes = ''){
-		global $wpdb;
+		global $wpdb, $ntm_mail;
 
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-		
-
 		$user = $_POST['agent_id'];
-		$amt = $this->ic_get_point_value($_POST['points']) * 100;
-		$points = $_POST['points'];
-
 		$blog_id = get_active_blog_for_user($user)->blog_id;
+
+		$points_per_dollar = get_blog_option($blog_id, 'points_per_dollar');
+		
+		$dollar_per_point = 1/$points_per_dollar;
+
+		$amt = $dollar_per_point * $_POST['points'] * 100;
+		$points = $_POST['points'];
+		
 
 		$balance = $this->ic_agent_balance($user);
 
@@ -759,6 +780,7 @@ class IC_agent_api{
 				array(
 					'agent_id' => $user,
 			  		'points' => $points,
+			  		'amount' => $amt,
 			  		'balance' => $balance+$amt,
 			  		'notes' => serialize($notes),
 			  		'created' => date('Y-m-d H-i-s')
@@ -767,9 +789,10 @@ class IC_agent_api{
 
 		/* Checking queue transaction*/
 		$res = $wpdb->get_results("SELECT * FROM wp_".$blog_id."_points_transaction where queue = 1 and agent_id = ".$user." order by id desc");
+		
 		if(count($res)){
 			foreach ($res as $key => $value) {
-				$balance = $this->ic_agent_balance($_POST['id']);
+				$balance = $this->ic_agent_balance($user);
 				$point_value = $this->ic_get_point_value($value->points) * 100;
 				if($balance >= $point_value){
 					$wpdb->insert("wp_". $blog_id ."_agent_wallet", 
@@ -777,6 +800,9 @@ class IC_agent_api{
 							'agent_id' => $user,
 					  		'points' => $value->points,
 					  		'balance' => $balance-$point_value,
+					  		'amount' => -$point_value,
+					  		'endorser_id' => $value->endorser_id,
+					  		'transaction_id' => $value->id,
 					  		'notes' => 'Debited - Queue Transaction',
 					  		'transaction_id' => $value->id,
 					  		'created' => date('Y-m-d H-i-s')
@@ -788,8 +814,10 @@ class IC_agent_api{
 					$user_info1 = get_userdata($value->endorser_id);
 
 					$template1 = 'You now have access to your points, please proceed link to redeem your points.';
-
+					
+					if(isset($user_info1->user_email)){
 					$ntm_mail->send_mail($user_info1->user_email, 'Your pending point released', $template1, '', '');
+					}
 				}
 			}
 		}
@@ -2785,17 +2813,19 @@ class IC_agent_api{
 				if($queue == 0){
 					$wpdb->insert("wp_". $blog_id ."_agent_wallet", 
 							array(
-								'agent_id' => $_POST['id'],
+								'agent_id' => $agent_id,
 						  		'points' => $points,
 						  		'balance' => $balance-$point_value,
 						  		'notes' => 'Debited',
+						  		'endorser_id' => $_POST['endorser_id'],
+						  		'amount' => -$point_value,
 						  		'transaction_id' => $wpdb->insert_id,
 						  		'created' => date('Y-m-d H-i-s')
 							)
 					);
 				} else {
 					// noti mail to agent and endorser
-					$user_info1 = get_userdata($_POST['id']);
+					$user_info1 = get_userdata($agent_id);
 					$user_info2 = get_userdata($_POST['endorser_id']);
 
 					$template1 = 'Your Wallet is empty, Please purchase';
@@ -2914,7 +2944,7 @@ class IC_agent_api{
 
 				$endorser_points = $endorser_points + $total_points;
 				$balance = $this->ic_agent_balance($agent_id);
-				$point_value = $this->ic_get_point_value($points) * 100;
+				$point_value = $this->ic_get_point_value($total_points) * 100;
 				$queue = $balance >= $point_value ? 0 : 1;
 				$data = array(
 								'endorser_id' => $_POST['id'],
@@ -2929,9 +2959,11 @@ class IC_agent_api{
 				if($queue == 0){
 					$wpdb->insert("wp_". $blog_id ."_agent_wallet", 
 							array(
-								'agent_id' => $_POST['id'],
+								'agent_id' => $agent_id,
 						  		'points' => $points,
 						  		'balance' => $balance-$point_value,
+						  		'endorser_id' => $_POST['endorser_id'],
+						  		'amount' => -$point_value,
 						  		'notes' => 'Debited',
 						  		'transaction_id' => $wpdb->insert_id,
 						  		'created' => date('Y-m-d H-i-s')

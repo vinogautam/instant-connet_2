@@ -721,7 +721,6 @@ class IC_agent_api{
 		$endorser_points2 = $results2->points ? $results2->points : 0;
 		$endorser_points3 = $results3->points ? $results3->points : 0;
 
-
 		$response = array('status' => 'Success', 
 							'msg' => 'Gift coupon request initiated, sent to your mail',
 							'points' => $endorser_points2,
@@ -729,6 +728,16 @@ class IC_agent_api{
 							'non_release_points' => $endorser_points3,
 							'queue_point_details' => $results4
 						);
+
+		$response['open_status'] = $wpdb->get_row("select count(*) as cnt from wp_".$blog_id."_endorsements where open_status = 1 and endorser_id='".$user_id."'");
+		$response['track_status'] = $wpdb->get_row("select count(*) as cnt from wp_".$blog_id."_endorsements where track_status = 1 and endorser_id='".$user_id."'");
+
+		$response['redeemlist'] = $wpdb->get_row("select * from wp_".$blog_id."_points_transaction where type = 'Redeem Point' and endorser_id='".$user_id."'");
+		$response['share_details'] = $wpdb->get_row("select * from wp_".$blog_id."_points_transaction where type != 'Redeem Point' and endorser_id='".$user_id."'");
+
+		$response['chat_conversion'] = $wpdb->get_row("select * from wp_leads where chat_conversion = 1 and endorser_id='".$user_id."'");
+		$response['meeting_conversion'] = $wpdb->get_row("select * from wp_".$blog_id."_meeting_participants where meeting_conversion = 1 and endorser='".$user_id."'");
+		
 
 		if($id){
 			return $response;

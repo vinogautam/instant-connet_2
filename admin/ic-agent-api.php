@@ -730,13 +730,17 @@ class IC_agent_api{
 						);
 
 		$response['open_status'] = $wpdb->get_row("select count(*) as cnt from wp_".$blog_id."_endorsements where open_status = 1 and endorser_id='".$user_id."'");
+		$response['open_status'] = $response['open_status']->cnt ? $response['open_status']->cnt : 0;
 		$response['track_status'] = $wpdb->get_row("select count(*) as cnt from wp_".$blog_id."_endorsements where track_status = 1 and endorser_id='".$user_id."'");
+		$response['track_status'] = $response['track_status']->cnt ? $response['track_status']->cnt : 0;
 
-		$response['redeemlist'] = $wpdb->get_row("select * from wp_".$blog_id."_points_transaction where type = 'Redeem Point' and endorser_id='".$user_id."'");
-		$response['share_details'] = $wpdb->get_row("select * from wp_".$blog_id."_points_transaction where type != 'Redeem Point' and endorser_id='".$user_id."'");
+		$response['redeemlist'] = $wpdb->get_resuts("select * from wp_".$blog_id."_points_transaction where type = 'Redeem Point' and endorser_id='".$user_id."'");
+		$response['share_details'] = $wpdb->get_resuts("select * from wp_".$blog_id."_points_transaction where type != 'Redeem Point' and endorser_id='".$user_id."'");
 
-		$response['chat_conversion'] = $wpdb->get_row("select * from wp_leads where chat_conversion = 1 and endorser_id='".$user_id."'");
-		$response['meeting_conversion'] = $wpdb->get_row("select * from wp_".$blog_id."_meeting_participants where meeting_conversion = 1 and endorser='".$user_id."'");
+		$response['chat_conversion'] = $wpdb->get_row("select count(*) as cnt from wp_leads where chat_conversion = 1 and endorser_id='".$user_id."'");
+		$response['chat_conversion'] = $response['chat_conversion']->cnt ? $response['chat_conversion']->cnt : 0;
+		$response['meeting_conversion'] = $wpdb->get_row("select count(*) as cnt from wp_".$blog_id."_meeting_participants where meeting_conversion = 1 and endorser='".$user_id."'");
+		$response['meeting_conversion'] = $response['meeting_conversion']->cnt ? $response['meeting_conversion']->cnt : 0;
 		
 
 		if($id){

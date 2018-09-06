@@ -47,7 +47,7 @@ class IC_agent_api{
 			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer','ic_create_stripe_customer_charge',
 			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead', 'ic_get_presentations', 'ic_get_videos', 
 			'ic_save_ppt', 'ic_wallet_purchase_transaction', 'ic_get_point_value', 'ic_add_chat_points', 'ic_agent_balance',
-			'ic_disable_agent_acc_have_no_wallet', 'ic_agent_account_active', 'ic_endorser_points_details', 'ic_agent_redeem_list', 'ic_agent_top_endorser'
+			'ic_disable_agent_acc_have_no_wallet', 'ic_agent_account_active', 'ic_endorser_points_details', 'ic_agent_redeem_list', 'ic_agent_top_endorser', 'ic_agent_create_landing_page', 'ic_agent_get_landing_page'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -55,6 +55,42 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_agent_create_landing_page(){
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));	
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+
+		$landing_page = get_user_meta($agent_id, 'ic_landing_page');
+		if($landing_page){
+			$strategy = array('post_title' => $_POST['title'], 'post_content' => $_POST['content'], 'ID' => $landing_page);
+			wp_update_post( $strategy);
+		} else {
+			$strategy = array('post_title' => $_POST['title'], 'post_content' => $_POST['content'], 'post_type' => 'page', 'post_status' => 'publish');
+			$landing_page = wp_insert_post( $strategy);
+			update_user_meta($agent_id, 'ic_landing_page', $landing_page);
+		}
+
+		echo json_encode(array('status' => 'Success', 'data' => get_permaink($landing_page)));
+
+		die(0);
+		exit;
+	}
+
+	function ic_agent_get_landing_page(){
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+
+		$landing_page = get_user_meta($agent_id, 'ic_landing_page');
+
+		$posts = get_post($landing_page);
+		$data = array('ID' => $landing_page, 'title' => $posts->post_title, 'content' => $posts->post_content, 'link' => get_permaink($landing_page))
+
+		echo json_encode(array('status' => 'Success', 'data' => $data);
+
+		die(0);
+		exit;
 	}
 
 	function ic_agent_redeem_list(){
@@ -708,6 +744,8 @@ class IC_agent_api{
 	}
 	
 	function ic_endorser_points_details($id=''){
+		global $wpdb;
+		
 		$user_id = $id ? $id : $_GET['endorser_id'];
 		$blog_id = get_active_blog_for_user( $user_id )->blog_id;
 

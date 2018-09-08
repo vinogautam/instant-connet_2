@@ -107,6 +107,41 @@
 	);
 
 	register_post_type( 'strategy', $args );
+
+	$labels = array(
+		'name'               => _x( 'Template', 'post type general name', 'your-plugin-textdomain' ),
+		'singular_name'      => _x( 'Template', 'post type singular name', 'your-plugin-textdomain' ),
+		'menu_name'          => _x( 'Templates', 'admin menu', 'your-plugin-textdomain' ),
+		'name_admin_bar'     => _x( 'Template', 'add new on admin bar', 'your-plugin-textdomain' ),
+		'add_new'            => _x( 'Add New', 'Template', 'your-plugin-textdomain' ),
+		'add_new_item'       => __( 'Add New Template', 'your-plugin-textdomain' ),
+		'new_item'           => __( 'New Template', 'your-plugin-textdomain' ),
+		'edit_item'          => __( 'Edit Template', 'your-plugin-textdomain' ),
+		'view_item'          => __( 'View Template', 'your-plugin-textdomain' ),
+		'all_items'          => __( 'All Templates', 'your-plugin-textdomain' ),
+		'search_items'       => __( 'Search Templates', 'your-plugin-textdomain' ),
+		'parent_item_colon'  => __( 'Parent Templates:', 'your-plugin-textdomain' ),
+		'not_found'          => __( 'No Templates found.', 'your-plugin-textdomain' ),
+		'not_found_in_trash' => __( 'No Templates found in Trash.', 'your-plugin-textdomain' )
+	);
+
+	$args = array(
+		'labels'             => $labels,
+        'description'        => __( 'Description.', 'your-plugin-textdomain' ),
+		'public'             => true,
+		'publicly_queryable' => true,
+		'show_ui'            => true,
+		'show_in_menu'       => true,
+		'query_var'          => true,
+		'rewrite'            => array( 'slug' => 'ictemplate' ),
+		'capability_type'    => 'post',
+		'has_archive'        => true,
+		'hierarchical'       => false,
+		'menu_position'      => null,
+		'supports'           => array( 'title' )
+	);
+
+	register_post_type( 'ictemplate', $args );
 }
 
 	function ic_meta_boxes() {
@@ -148,6 +183,37 @@
 
 	function ic_strategy_link(){
 		add_meta_box( 'ic_meta_boxes', __( 'Strategy link', 'textdomain' ), array( &$this, 'ic_strategy_link_callback'), 'strategy' );
+		add_meta_box( 'ic_meta_boxes', __( 'Template option', 'textdomain' ), array( &$this, 'ic_template_link_callback'), 'strategy' );
+	}
+
+	function ic_template_link_callback( $post ) {
+	    
+	    $template_thumbnail = get_post_meta($post->ID, 'template_thumbnail', true);
+	    $template_html = get_post_meta($post->ID, 'template_html', true);
+	    $template_agents = get_post_meta($post->ID, 'template_agents', true);
+	    $sagents = explode(',', $template_agents);
+	    ?>
+	    <div id="titlediv">
+	    	<p>
+	    		<label>HTML</label>
+	    		<textarea name="template_html"><?= isset($template_html) ? $template_html : '';?></textarea>
+	    	</p>
+	    	<p>
+	    		<label>Thumbnail</label>
+	    		<input type="text" id="title" name="template_thumbnail" value="<?= isset($template_thumbnail) ? $template_thumbnail : '';?>">
+	    	</p>
+	    	<p>
+	    		<label>Choose Agent</label>
+	    		<select name="template_agents" multiple>
+	    			<option <?= in_array(0, $sagents) ? 'selected' : ''?> value="0"></option>
+	    			<?php $users = get_users(array('userrole' => 'agent'));
+					foreach ($users as $key => $value) {?>
+	    			<option <?= in_array($value->ID, $sagents) ? 'selected' : ''?> value="<?= $value->ID?>"><?= $value->user_login?></option>
+	    			<?php }?>
+	    		</select>
+	    	</p>
+	    </div>
+	    <?php
 	}
 
 	function ic_strategy_link_callback( $post ) {
@@ -161,8 +227,12 @@
 	}
 
 	function ic_save_meta_box( $post_id ) {
-	    update_post_meta($post_id, 'instant_connect_settings', $_POST['instant_connect_settings']);
-	    update_post_meta($post_id, 'strategy_link', $_POST['strategy_link']);
+		if(isset($_POST['instant_connect_settings'])){
+			update_post_meta($post_id, 'instant_connect_settings', $_POST['instant_connect_settings']);
+		}
+	    if(isset($_POST['strategy_link'])){
+	    	update_post_meta($post_id, 'strategy_link', $_POST['strategy_link']);
+	    }
 	}
 
 	function after_login($user_login, $user)

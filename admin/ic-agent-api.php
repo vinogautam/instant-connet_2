@@ -85,7 +85,7 @@ class IC_agent_api{
 		$landing_page = get_user_meta($agent_id, 'ic_landing_page');
 
 		$posts = get_post($landing_page);
-		$data = array('ID' => $landing_page, 'title' => $posts->post_title, 'content' => $posts->post_content, 'link' => get_permaink($landing_page))
+		$data = array('ID' => $landing_page, 'title' => $posts->post_title, 'content' => $posts->post_content, 'link' => get_permaink($landing_page));
 
 		echo json_encode(array('status' => 'Success', 'data' => $data);
 

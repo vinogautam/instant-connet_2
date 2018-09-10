@@ -183,7 +183,10 @@
 
 	function ic_strategy_link(){
 		add_meta_box( 'ic_meta_boxes', __( 'Strategy link', 'textdomain' ), array( &$this, 'ic_strategy_link_callback'), 'strategy' );
-		add_meta_box( 'ic_meta_boxes', __( 'Template option', 'textdomain' ), array( &$this, 'ic_template_link_callback'), 'strategy' );
+
+		if(is_super_admin()){
+			add_meta_box( 'ic_meta_boxes', __( 'Template option', 'textdomain' ), array( &$this, 'ic_template_link_callback'), 'ictemplate' );
+		}
 	}
 
 	function ic_template_link_callback( $post ) {
@@ -195,17 +198,17 @@
 	    ?>
 	    <div id="titlediv">
 	    	<p>
-	    		<label>HTML</label>
-	    		<textarea name="template_html"><?= isset($template_html) ? $template_html : '';?></textarea>
+	    		<label><b>HTML</b></label><br>
+	    		<textarea rows="5" cols="90" name="template_html"><?= isset($template_html) ? $template_html : '';?></textarea>
 	    	</p>
 	    	<p>
-	    		<label>Thumbnail</label>
-	    		<input type="text" id="title" name="template_thumbnail" value="<?= isset($template_thumbnail) ? $template_thumbnail : '';?>">
+	    		<label><b>Thumbnail</b></label><br>
+	    		<input size="50" type="text" name="template_thumbnail" value="<?= isset($template_thumbnail) ? $template_thumbnail : '';?>">
 	    	</p>
 	    	<p>
-	    		<label>Choose Agent</label>
-	    		<select name="template_agents" multiple>
-	    			<option <?= in_array(0, $sagents) ? 'selected' : ''?> value="0"></option>
+	    		<label><b>Choose Agent</b></label><br>
+	    		<select name="template_agents[]" multiple>
+	    			<option <?= in_array(0, $sagents) ? 'selected' : ''?> value="0">For All</option>
 	    			<?php $users = get_users(array('userrole' => 'agent'));
 					foreach ($users as $key => $value) {?>
 	    			<option <?= in_array($value->ID, $sagents) ? 'selected' : ''?> value="<?= $value->ID?>"><?= $value->user_login?></option>
@@ -232,6 +235,11 @@
 		}
 	    if(isset($_POST['strategy_link'])){
 	    	update_post_meta($post_id, 'strategy_link', $_POST['strategy_link']);
+	    }
+	    if(isset($_POST['template_html'])){
+	    	update_post_meta($post_id, 'template_html', $_POST['template_html']);
+	    	update_post_meta($post_id, 'template_thumbnail', $_POST['template_thumbnail']);
+	    	update_post_meta($post_id, 'template_agents', implode(',',$_POST['template_agents']));
 	    }
 	}
 

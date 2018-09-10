@@ -47,7 +47,8 @@ class IC_agent_api{
 			'ic_add_agent_wallet', 'ic_update_agent_status', 'ic_agent_status', 'ic_get_stripe_customer_cards', 'ic_create_customer_card', 'ic_delete_customer_card', 'ic_charge_current_customer','ic_create_stripe_customer_charge',
 			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead', 'ic_get_presentations', 'ic_get_videos', 
 			'ic_save_ppt', 'ic_wallet_purchase_transaction', 'ic_get_point_value', 'ic_add_chat_points', 'ic_agent_balance',
-			'ic_disable_agent_acc_have_no_wallet', 'ic_agent_account_active', 'ic_endorser_points_details', 'ic_agent_redeem_list', 'ic_agent_top_endorser', 'ic_agent_create_landing_page', 'ic_agent_get_landing_page'
+			'ic_disable_agent_acc_have_no_wallet', 'ic_agent_account_active', 'ic_endorser_points_details', 'ic_agent_redeem_list', 'ic_agent_top_endorser', 'ic_agent_create_landing_page', 'ic_agent_get_landing_page',
+			'ic_get_landing_page_templates'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -55,6 +56,33 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_get_landing_page_templates(){
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+
+		switch_to_blog(1);
+        $templates = get_posts(array('post_type' => 'ictemplate', 'posts_per_page' => -1));
+        
+        $results = array();
+        foreach ($templates as $templates => $val) {
+        	$value = array('ID' => $val->ID, 'title' => $val->post_title);
+        	$value['template_thumbnail'] = get_post_meta($value['ID'], 'template_thumbnail', true);
+		    $value['template_html'] = get_post_meta($value['ID'], 'template_html', true);
+		    $template_agents = get_post_meta($value['ID'], 'template_agents', true);
+		    $value['agents'] = explode(',', $template_agents);
+
+		    if(in_array($agent_id, $value['agents']) || in_array(0, $value['agents'])){
+		    	$results[] = $value;
+		    }
+        }
+        restore_current_blog();
+
+        echo json_encode(array('status' => 'Success', 'data' => $results));
+
+		die(0);
+		exit;
 	}
 
 	function ic_agent_create_landing_page(){
@@ -87,7 +115,7 @@ class IC_agent_api{
 		$posts = get_post($landing_page);
 		$data = array('ID' => $landing_page, 'title' => $posts->post_title, 'content' => $posts->post_content, 'link' => get_permaink($landing_page));
 
-		echo json_encode(array('status' => 'Success', 'data' => $data);
+		echo json_encode(array('status' => 'Success', 'data' => $data));
 
 		die(0);
 		exit;

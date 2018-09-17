@@ -66,19 +66,26 @@ class IC_agent_api{
         $templates = get_posts(array('post_type' => 'ictemplate', 'posts_per_page' => -1));
         
         $results = array();
-        foreach ($templates as $templates => $val) {
+        foreach ($templates as $t => $val) {
         	$value = array('ID' => $val->ID, 'title' => $val->post_title);
-        	$value['template_thumbnail'] = get_post_meta($value['ID'], 'template_thumbnail', true);
-		    $value['template_html'] = get_post_meta($value['ID'], 'template_html', true);
+		    $value['template'] = get_post_meta($value['ID'], 'template_html', true);
 		    $template_agents = get_post_meta($value['ID'], 'template_agents', true);
 		    $value['agents'] = explode(',', $template_agents);
 
 		    if(in_array($agent_id, $value['agents']) || in_array(0, $value['agents'])){
+		    	$value['custom_field'] = [];
+		    	$dynamic_template = get_post_meta($value['ID'], 'dynamic_template', true);
+	    		$dynamic_template = is_array($dynamic_template) ? $dynamic_template : array() ;
+		    	foreach ($dynamic_template['type'] as $key => $va) {
+		    		$value['custom_field'][] = array('id' => 'customfield'.($key+1), 'type' => $va, 
+		    			'eitable' => $dynamic_template['eitable'][$key], 'content' => $dynamic_template['content'][$key]);
+		    	}
+
 		    	$results[] = $value;
 		    }
         }
         restore_current_blog();
-
+        header('Content-Type: application/json');
         echo json_encode(array('status' => 'Success', 'data' => $results));
 
 		die(0);
@@ -90,17 +97,20 @@ class IC_agent_api{
 		$blog_id = get_current_blog_id();
 		$agent_id = get_blog_option($blog_id, 'agent_id');
 
-		$landing_page = get_user_meta($agent_id, 'ic_landing_page');
+		$landing_page = $_POST['ID'];
 		if($landing_page){
-			$strategy = array('post_title' => $_POST['title'], 'post_content' => $_POST['content'], 'ID' => $landing_page);
+			$strategy = array('post_title' => $_POST['title'], 'ID' => $landing_page);
+			update_post_meta($post_id, 'template_html', $_POST['template']);
+			update_post_meta($post_id, 'customfield', $_POST['customfield']);
 			wp_update_post( $strategy);
 		} else {
-			$strategy = array('post_title' => $_POST['title'], 'post_content' => $_POST['content'], 'post_type' => 'page', 'post_status' => 'publish');
+			$strategy = array('post_title' => $_POST['title'], 'post_type' => 'ictemplate', 'post_status' => 'publish', 'post_author' => $agent_id);
 			$landing_page = wp_insert_post( $strategy);
-			update_user_meta($agent_id, 'ic_landing_page', $landing_page);
+			update_post_meta($post_id, 'template_html', $_POST['template']);
+			update_post_meta($post_id, 'customfield', $_POST['customfield']);
 		}
 
-		echo json_encode(array('status' => 'Success', 'data' => get_permaink($landing_page)));
+		echo json_encode(array('status' => 'Success'));
 
 		die(0);
 		exit;
@@ -110,12 +120,18 @@ class IC_agent_api{
 		$blog_id = get_current_blog_id();
 		$agent_id = get_blog_option($blog_id, 'agent_id');
 
-		$landing_page = get_user_meta($agent_id, 'ic_landing_page');
+		$landing_page = get_posts(array('post_type' => 'ictemplate', 'posts_per_page' => -1, 'author' => $agent_id));
 
-		$posts = get_post($landing_page);
-		$data = array('ID' => $landing_page, 'title' => $posts->post_title, 'content' => $posts->post_content, 'link' => get_permaink($landing_page));
-
-		echo json_encode(array('status' => 'Success', 'data' => $data));
+		$posts = get_posts($landing_page);
+		$results = array();
+        foreach ($posts as $t => $val) {
+        	$value = array('ID' => $val->ID, 'title' => $val->post_title);
+		    $value['template'] = get_post_meta($value['ID'], 'template_html', true);
+		    $value['custom_field'] = get_post_meta($value['ID'], 'custom_field', true);
+		    $results[] = $value;
+		}
+		header('Content-Type: application/json');
+		echo json_encode(array('status' => 'Success', 'data' => $results));
 
 		die(0);
 		exit;

@@ -191,7 +191,8 @@
 
 	function ic_template_link_callback( $post ) {
 	    
-	    $template_thumbnail = get_post_meta($post->ID, 'template_thumbnail', true);
+	    $dynamic_template = get_post_meta($post->ID, 'dynamic_template', true);
+	    $dynamic_template = is_array($dynamic_template) ? $dynamic_template : array() ;
 	    $template_html = get_post_meta($post->ID, 'template_html', true);
 	    $template_agents = get_post_meta($post->ID, 'template_agents', true);
 	    $sagents = explode(',', $template_agents);
@@ -201,10 +202,92 @@
 	    		<label><b>HTML</b></label><br>
 	    		<textarea rows="5" cols="90" name="template_html"><?= isset($template_html) ? $template_html : '';?></textarea>
 	    	</p>
-	    	<p>
+	    	<script type="text/template" id="ic_dynamic_html_template">
+	    		<tr>
+    				<td>
+    					<select name="dynamic_template[type][]">
+    						<option value="text">Text</option>
+    						<option value="image">Image</option>
+    					</select>
+    				</td>
+    				<td>
+    					<select name="dynamic_template[editabe][]">
+    						<option value="yes">Yes</option>
+    						<option value="no">No</option>
+    					</select>
+    				</td>
+    				<td>
+    					<textarea rows="5" cols="90" name="dynamic_template[content][]"></textarea>
+    				</td>
+    				<td><button class="ic_delete_dynamic_temp">Delete</button></td>
+    			</tr>
+	    	</script>
+	    	<script type="text/javascript">
+	    		jQuery(document).ready(function(){
+	    			jQuery('#add_more_ic_temp').click(function(e){
+	    				e.preventDefault();
+	    				jQuery('#ic_dynamic_template tbody').append(jQuery('#ic_dynamic_html_template').html());
+	    			});
+	    			jQuery('.ic_delete_dynamic_temp').click(function(e){
+	    				e.preventDefault();
+	    				jQuery(this).parent().parent().remove();
+	    			});
+	    		});
+	    	</script>
+	    	<h3>Dynamic Template <button id="add_more_ic_temp">Add</button></h3>
+	    	<table id="ic_dynamic_template" width="100%">
+	    		<tr>
+	    			<th width="20%">Type</th>
+	    			<th width="20%">Editable</th>
+	    			<th width="50%">Content</th>
+	    			<th width="10%">Delete</th>
+	    		</tr>
+	    		<tbody>
+	    			<?php  if(isset($dynamic_template['type']) && count($dynamic_template['type'])){ foreach($dynamic_template['type'] as $key=>$value){?>
+	    			<tr>
+	    				<td>
+	    					<select name="dynamic_template[type][]">
+	    						<option <?php echo $dynamic_template['type'][$key] == 'text' ? 'selected' : '';?> value="text">Text</option>
+	    						<option <?php echo $dynamic_template['type'][$key] == 'image' ? 'selected' : '';?> value="image">Image</option>
+	    					</select>
+	    				</td>
+	    				<td>
+	    					<select name="dynamic_template[editabe][]">
+	    						<option <?php echo $dynamic_template['editabe'][$key] == 'yes' ? 'selected' : '';?> value="yes">Yes</option>
+	    						<option <?php echo $dynamic_template['editabe'][$key] == 'no' ? 'selected' : '';?> value="no">No</option>
+	    					</select>
+	    				</td>
+	    				<td>
+	    					<textarea rows="5" cols="90" name="dynamic_template[content][]"><?= $dynamic_template['content'][$key];?></textarea>
+	    				</td>
+	    				<td><button class="ic_delete_dynamic_temp">Delete</button></td>
+	    			</tr>
+	    			<?php }} else {?>
+	    			<tr>
+	    				<td>
+	    					<select name="dynamic_template[type][]">
+	    						<option value="text">Text</option>
+	    						<option value="image">Image</option>
+	    					</select>
+	    				</td>
+	    				<td>
+	    					<select name="dynamic_template[editabe][]">
+	    						<option value="yes">Yes</option>
+	    						<option value="no">No</option>
+	    					</select>
+	    				</td>
+	    				<td>
+	    					<textarea rows="5" cols="90" name="dynamic_template[content][]"></textarea>
+	    				</td>
+	    				<td><button class="ic_delete_dynamic_temp">Delete</button></td>
+	    			</tr>	
+	    			<?php }?>
+	    		</tbody>
+	    	</table>
+	    	<!--<p>
 	    		<label><b>Thumbnail</b></label><br>
 	    		<input size="50" type="text" name="template_thumbnail" value="<?= isset($template_thumbnail) ? $template_thumbnail : '';?>">
-	    	</p>
+	    	</p>-->
 	    	<p>
 	    		<label><b>Choose Agent</b></label><br>
 	    		<select name="template_agents[]" multiple>
@@ -238,7 +321,7 @@
 	    }
 	    if(isset($_POST['template_html'])){
 	    	update_post_meta($post_id, 'template_html', $_POST['template_html']);
-	    	update_post_meta($post_id, 'template_thumbnail', $_POST['template_thumbnail']);
+	    	update_post_meta($post_id, 'dynamic_template', $_POST['dynamic_template']);
 	    	update_post_meta($post_id, 'template_agents', implode(',',$_POST['template_agents']));
 	    }
 	}

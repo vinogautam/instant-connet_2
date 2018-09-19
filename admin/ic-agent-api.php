@@ -5,6 +5,10 @@ $ipInfo = json_decode($ipInfo);
 $timezone = $ipInfo->timezone;
 date_default_timezone_set($timezone);
 
+if ( ! function_exists( 'wp_handle_upload' ) ) {
+    require_once( ABSPATH . 'wp-admin/includes/file.php' );
+}
+
 use OpenTok\OpenTok;
 use Stripe\Customer as Stripe_Customer;
 use Stripe\Invoice as Stripe_Invoice;
@@ -48,7 +52,7 @@ class IC_agent_api{
 			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead', 'ic_get_presentations', 'ic_get_videos', 
 			'ic_save_ppt', 'ic_wallet_purchase_transaction', 'ic_get_point_value', 'ic_add_chat_points', 'ic_agent_balance',
 			'ic_disable_agent_acc_have_no_wallet', 'ic_agent_account_active', 'ic_endorser_points_details', 'ic_agent_redeem_list', 'ic_agent_top_endorser', 'ic_agent_create_landing_page', 'ic_agent_get_landing_page',
-			'ic_get_landing_page_templates'
+			'ic_get_landing_page_templates', 'ic_upload_image'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -56,6 +60,24 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_upload_image(){
+		$uploadedfile = $_FILES['file'];
+
+		$upload_overrides = array( 'test_form' => false );
+
+		$movefile = wp_handle_upload( $uploadedfile, $upload_overrides );
+
+		if ( $movefile && ! isset( $movefile['error'] ) ) {
+		    $data = array('status' => 'Success', 'url' => $movefile['url']);
+		} else {
+		    $data = array('status' => 'Error');
+		}
+
+		echo json_encode($data);
+
+		die(0);
 	}
 
 	function ic_get_landing_page_templates(){

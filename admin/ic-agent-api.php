@@ -63,17 +63,21 @@ class IC_agent_api{
 	}
 
 	function ic_upload_image(){
-		$uploadedfile = $_FILES['file'];
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		$upload_overrides = array( 'test_form' => false );
+		$data = $_POST['file'];
+		$name = strtotime('now').str_replace(' ', '-', $_POST['name']);
 
-		$movefile = wp_handle_upload( $uploadedfile, $upload_overrides );
+		list($type, $data) = explode(';', $data);
+		list(, $data) = explode(',', $data);
+		$data = base64_decode($data);
+		$upload_dir       = wp_upload_dir();
 
-		if ( $movefile && ! isset( $movefile['error'] ) ) {
-		    $data = array('status' => 'Success', 'url' => $movefile['url']);
-		} else {
-		    $data = array('status' => 'Error');
-		}
+		$upload_path      = str_replace( '/', DIRECTORY_SEPARATOR, $upload_dir['path'] ) . DIRECTORY_SEPARATOR;
+		
+		file_put_contents($upload_path.$name, $data);
+
+		$data = array('status' => 'Success', 'url' => $upload_dir['url'].'/'.$name);
 
 		echo json_encode($data);
 
@@ -95,6 +99,13 @@ class IC_agent_api{
 		    $value['agents'] = explode(',', $template_agents);
 
 		    if(in_array($agent_id, $value['agents']) || in_array(0, $value['agents'])){
+
+		    	$value['fb_text'] = get_post_meta($val->ID, 'template_social_fb_text', true);
+			    $value['fb_image'] = get_post_meta($val->ID, 'template_social_fb_image', true);
+			    $value['tw_text'] = get_post_meta($val->ID, 'template_social_tw_text', true);
+			    $value['tw_image'] = get_post_meta($val->ID, 'template_social_tw_image', true);
+			    $value['pi_image'] = get_post_meta($val->ID, 'template_social_pi_image', true);
+
 		    	$value['custom_field'] = [];
 		    	$dynamic_template = get_post_meta($value['ID'], 'dynamic_template', true);
 	    		$dynamic_template = is_array($dynamic_template) ? $dynamic_template : array() ;

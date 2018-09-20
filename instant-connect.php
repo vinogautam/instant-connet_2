@@ -194,6 +194,11 @@
 	    $dynamic_template = get_post_meta($post->ID, 'dynamic_template', true);
 	    $dynamic_template = is_array($dynamic_template) ? $dynamic_template : array() ;
 	    $template_html = get_post_meta($post->ID, 'template_html', true);
+	    $template_social_fb_text = get_post_meta($post->ID, 'template_social_fb_text', true);
+	    $template_social_fb_image = get_post_meta($post->ID, 'template_social_fb_image', true);
+	    $template_social_tw_text = get_post_meta($post->ID, 'template_social_tw_text', true);
+	    $template_social_tw_image = get_post_meta($post->ID, 'template_social_tw_image', true);
+	    $template_social_pi_image = get_post_meta($post->ID, 'template_social_pi_image', true);
 	    $template_agents = get_post_meta($post->ID, 'template_agents', true);
 	    $sagents = explode(',', $template_agents);
 	    ?>
@@ -204,6 +209,9 @@
 	    	</p>
 	    	<script type="text/template" id="ic_dynamic_html_template">
 	    		<tr>
+    				<td>
+    					<b>customtemplate###</b>
+    				</td>
     				<td>
     					<select name="dynamic_template[type][]">
     						<option value="text">Text</option>
@@ -217,7 +225,7 @@
     					</select>
     				</td>
     				<td>
-    					<textarea rows="5" cols="90" name="dynamic_template[content][]"></textarea>
+    					<textarea rows="5" cols="60" name="dynamic_template[content][]"></textarea>
     				</td>
     				<td><button class="ic_delete_dynamic_temp">Delete</button></td>
     			</tr>
@@ -226,9 +234,10 @@
 	    		jQuery(document).ready(function(){
 	    			jQuery('#add_more_ic_temp').click(function(e){
 	    				e.preventDefault();
-	    				jQuery('#ic_dynamic_template tbody').append(jQuery('#ic_dynamic_html_template').html());
+	    				var hhh = jQuery('#ic_dynamic_html_template').html().replace('###', jQuery('#ic_dynamic_template tbody tr').length + 1);
+	    				jQuery('#ic_dynamic_template tbody').append(hhh);
 	    			});
-	    			jQuery('.ic_delete_dynamic_temp').click(function(e){
+	    			jQuery('body').on('click', '.ic_delete_dynamic_temp', function(e){
 	    				e.preventDefault();
 	    				jQuery(this).parent().parent().remove();
 	    			});
@@ -236,15 +245,21 @@
 	    	</script>
 	    	<h3>Dynamic Template <button id="add_more_ic_temp">Add</button></h3>
 	    	<table id="ic_dynamic_template" width="100%">
-	    		<tr>
-	    			<th width="20%">Type</th>
-	    			<th width="20%">Editable</th>
-	    			<th width="50%">Content</th>
-	    			<th width="10%">Delete</th>
-	    		</tr>
+	    		<thead>
+	    			<tr>
+		    			<th width="15%">#</th>
+		    			<th width="20%">Type</th>
+		    			<th width="20%">Editable</th>
+		    			<th width="35%">Content</th>
+		    			<th width="10%">Delete</th>
+		    		</tr>
+		    	</thead>
 	    		<tbody>
 	    			<?php  if(isset($dynamic_template['type']) && count($dynamic_template['type'])){ foreach($dynamic_template['type'] as $key=>$value){?>
 	    			<tr>
+	    				<td>
+	    					<b>customtemplate<?= $key + 1;?></b>
+	    				</td>
 	    				<td>
 	    					<select name="dynamic_template[type][]">
 	    						<option <?php echo $dynamic_template['type'][$key] == 'text' ? 'selected' : '';?> value="text">Text</option>
@@ -258,12 +273,15 @@
 	    					</select>
 	    				</td>
 	    				<td>
-	    					<textarea rows="5" cols="90" name="dynamic_template[content][]"><?= $dynamic_template['content'][$key];?></textarea>
+	    					<textarea rows="5" cols="60" name="dynamic_template[content][]"><?= $dynamic_template['content'][$key];?></textarea>
 	    				</td>
 	    				<td><button class="ic_delete_dynamic_temp">Delete</button></td>
 	    			</tr>
 	    			<?php }} else {?>
 	    			<tr>
+	    				<td>
+	    					<b>customtemplate1</b>
+	    				</td>
 	    				<td>
 	    					<select name="dynamic_template[type][]">
 	    						<option value="text">Text</option>
@@ -277,17 +295,33 @@
 	    					</select>
 	    				</td>
 	    				<td>
-	    					<textarea rows="5" cols="90" name="dynamic_template[content][]"></textarea>
+	    					<textarea rows="5" cols="60" name="dynamic_template[content][]"></textarea>
 	    				</td>
 	    				<td><button class="ic_delete_dynamic_temp">Delete</button></td>
 	    			</tr>	
 	    			<?php }?>
 	    		</tbody>
 	    	</table>
-	    	<!--<p>
-	    		<label><b>Thumbnail</b></label><br>
-	    		<input size="50" type="text" name="template_thumbnail" value="<?= isset($template_thumbnail) ? $template_thumbnail : '';?>">
-	    	</p>-->
+	    	<p>
+	    		<label style="display: inline-block;width:200px;"><b>Facebook Card Text</b></label>
+	    		<input size="50" type="text" name="template_social_fb_text" value="<?= isset($template_social_fb_text) ? $template_social_fb_text : '';?>">
+	    	</p>
+	    	<p>
+	    		<label style="display: inline-block;width:200px;"><b>Facebook Card Image</b></label>
+	    		<input size="50" type="text" name="template_social_fb_image" value="<?= isset($template_social_fb_image) ? $template_social_fb_image : '';?>">
+	    	</p>
+	    	<p>
+	    		<label style="display: inline-block;width:200px;"><b>Twitter Card Text</b></label>
+	    		<input size="50" type="text" name="template_social_tw_text" value="<?= isset($template_social_tw_text) ? $template_social_tw_text : '';?>">
+	    	</p>
+	    	<p>
+	    		<label style="display: inline-block;width:200px;"><b>Twitter Card Text</b></label>
+	    		<input size="50" type="text" name="template_social_tw_image" value="<?= isset($template_social_tw_image) ? $template_social_tw_image : '';?>">
+	    	</p>
+	    	<p>
+	    		<label style="display: inline-block;width:200px;"><b>Pinterest Image</b></label>
+	    		<input size="50" type="text" name="template_social_pi_image" value="<?= isset($template_social_pi_image) ? $template_social_pi_image : '';?>">
+	    	</p>
 	    	<p>
 	    		<label><b>Choose Agent</b></label><br>
 	    		<select name="template_agents[]" multiple>
@@ -323,6 +357,11 @@
 	    	update_post_meta($post_id, 'template_html', $_POST['template_html']);
 	    	update_post_meta($post_id, 'dynamic_template', $_POST['dynamic_template']);
 	    	update_post_meta($post_id, 'template_agents', implode(',',$_POST['template_agents']));
+	    	update_post_meta($post_id, 'template_social_fb_text', $_POST['template_social_fb_text']);
+	    	update_post_meta($post_id, 'template_social_fb_image', $_POST['template_social_fb_image']);
+	    	update_post_meta($post_id, 'template_social_tw_text', $_POST['template_social_tw_text']);
+	    	update_post_meta($post_id, 'template_social_tw_image', $_POST['template_social_tw_image']);
+	    	update_post_meta($post_id, 'template_social_pi_image', $_POST['template_social_pi_image']);
 	    }
 	}
 

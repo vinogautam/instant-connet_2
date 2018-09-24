@@ -99,12 +99,12 @@ class IC_agent_api{
 		    $value['agents'] = explode(',', $template_agents);
 
 		    if(in_array($agent_id, $value['agents']) || in_array(0, $value['agents'])){
-
-		    	$value['fb_text'] = get_post_meta($val->ID, 'template_social_fb_text', true);
-			    $value['fb_image'] = get_post_meta($val->ID, 'template_social_fb_image', true);
-			    $value['tw_text'] = get_post_meta($val->ID, 'template_social_tw_text', true);
-			    $value['tw_image'] = get_post_meta($val->ID, 'template_social_tw_image', true);
-			    $value['pi_image'] = get_post_meta($val->ID, 'template_social_pi_image', true);
+		    	$value['social_template'] = [];
+		    	$value['social_template']['fb_text'] = get_post_meta($val->ID, 'template_social_fb_text', true);
+			    $value['social_template']['fb_image'] = get_post_meta($val->ID, 'template_social_fb_image', true);
+			    $value['social_template']['tw_text'] = get_post_meta($val->ID, 'template_social_tw_text', true);
+			    $value['social_template']['tw_image'] = get_post_meta($val->ID, 'template_social_tw_image', true);
+			    $value['social_template']['pi_image'] = get_post_meta($val->ID, 'template_social_pi_image', true);
 
 		    	$value['custom_field'] = [];
 		    	$dynamic_template = get_post_meta($value['ID'], 'dynamic_template', true);
@@ -133,14 +133,22 @@ class IC_agent_api{
 		$landing_page = $_POST['ID'];
 		if($landing_page){
 			$strategy = array('post_title' => $_POST['title'], 'ID' => $landing_page);
-			update_post_meta($post_id, 'template_html', $_POST['template']);
-			update_post_meta($post_id, 'customfield', $_POST['customfield']);
+			update_post_meta($landing_page, 'template_html', $_POST['template']);
+			update_post_meta($landing_page, 'dynamic_template', $_POST['custom_field']);
+
+			foreach($_POST['social_template'] as $k=>$v){
+				update_post_meta($landing_page, 'template_social_'.$k, $v);
+			}
+			
 			wp_update_post( $strategy);
 		} else {
 			$strategy = array('post_title' => $_POST['title'], 'post_type' => 'ictemplate', 'post_status' => 'publish', 'post_author' => $agent_id);
 			$landing_page = wp_insert_post( $strategy);
-			update_post_meta($post_id, 'template_html', $_POST['template']);
-			update_post_meta($post_id, 'customfield', $_POST['customfield']);
+			update_post_meta($landing_page, 'template_html', $_POST['template']);
+			update_post_meta($landing_page, 'dynamic_template', $_POST['custom_field']);
+			foreach($_POST['social_template'] as $k=>$v){
+				update_post_meta($landing_page, 'template_social_'.$k, $v);
+			}
 		}
 
 		echo json_encode(array('status' => 'Success'));
@@ -153,14 +161,20 @@ class IC_agent_api{
 		$blog_id = get_current_blog_id();
 		$agent_id = get_blog_option($blog_id, 'agent_id');
 
-		$landing_page = get_posts(array('post_type' => 'ictemplate', 'posts_per_page' => -1, 'author' => $agent_id));
-
-		$posts = get_posts($landing_page);
+		$posts = get_posts(array('post_type' => 'ictemplate', 'posts_per_page' => -1, 'author' => $agent_id));
 		$results = array();
         foreach ($posts as $t => $val) {
         	$value = array('ID' => $val->ID, 'title' => $val->post_title);
 		    $value['template'] = get_post_meta($value['ID'], 'template_html', true);
-		    $value['custom_field'] = get_post_meta($value['ID'], 'custom_field', true);
+		    $value['custom_field'] = get_post_meta($value['ID'], 'dynamic_template', true);
+
+		    $value['social_template'] = [];
+	    	$value['social_template']['fb_text'] = get_post_meta($val->ID, 'template_social_fb_text', true);
+		    $value['social_template']['fb_image'] = get_post_meta($val->ID, 'template_social_fb_image', true);
+		    $value['social_template']['tw_text'] = get_post_meta($val->ID, 'template_social_tw_text', true);
+		    $value['social_template']['tw_image'] = get_post_meta($val->ID, 'template_social_tw_image', true);
+		    $value['social_template']['pi_image'] = get_post_meta($val->ID, 'template_social_pi_image', true);
+
 		    $results[] = $value;
 		}
 		header('Content-Type: application/json');

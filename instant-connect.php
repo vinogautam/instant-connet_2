@@ -67,9 +67,45 @@
 	}
 	
 	function on_create_blog( $blog_id, $user_id, $domain, $path, $site_id, $meta ) {
+        	$clone_from = isset($_GET['clone']) ? $_GET['clone'] : 1;
+        	switch_to_blog($clone_from);
+        	$ltemplates = get_posts(array('post_type' => 'ictemplate', 'posts_per_page' => -1));
+        	$stemplates = get_posts(array('post_type' => 'icstatic', 'posts_per_page' => -1));
+        	restore_current_blog();
+
         	switch_to_blog( $blog_id );
         	$this->Endorsement_install($blog_id, $user_id, $domain, $path, $site_id, $meta);
+        	
+        	foreach ($ltemplates as $t => $val) {
+        		$strategy = array('post_title' => $val->post_title, 'post_type' => 'ictemplate', 'post_status' => 'publish', 'post_author' => $user_id);
+				$post_id = wp_insert_post( $strategy);
+
+				update_post_meta($post_id, 'template_html', get_post_meta($post_id, 'template_html', true));
+		    	update_post_meta($post_id, 'dynamic_template', get_post_meta($post_id, 'dynamic_template', true));
+		    	update_post_meta($post_id, 'template_agents', array(0));
+		    	update_post_meta($post_id, 'template_social_fb_text', get_post_meta($post_id, 'template_social_fb_text', true));
+		    	update_post_meta($post_id, 'template_social_fb_image', get_post_meta($post_id, 'template_social_fb_image', true));
+		    	update_post_meta($post_id, 'template_social_tw_text', get_post_meta($post_id, 'template_social_tw_text', true));
+		    	update_post_meta($post_id, 'template_social_tw_image', get_post_meta($post_id, 'template_social_tw_image', true));
+		    	update_post_meta($post_id, 'template_social_pi_image', get_post_meta($post_id, 'template_social_pi_image', true));
+        	}
+
+        	foreach ($stemplates as $t => $val) {
+        		$strategy = array('post_title' => $val->post_title, 'post_type' => 'ictemplate', 'post_status' => 'publish', 'post_author' => $user_id);
+				$post_id = wp_insert_post( $strategy);
+
+				update_post_meta($post_id, 'template_html', get_post_meta($post_id, 'template_html', true));
+		    	update_post_meta($post_id, 'dynamic_template', get_post_meta($post_id, 'dynamic_template', true));
+		    	update_post_meta($post_id, 'template_agents', array(0));
+		    	update_post_meta($post_id, 'template_social_fb_text', get_post_meta($post_id, 'template_social_fb_text', true));
+		    	update_post_meta($post_id, 'template_social_fb_image', get_post_meta($post_id, 'template_social_fb_image', true));
+		    	update_post_meta($post_id, 'template_social_tw_text', get_post_meta($post_id, 'template_social_tw_text', true));
+		    	update_post_meta($post_id, 'template_social_tw_image', get_post_meta($post_id, 'template_social_tw_image', true));
+		    	update_post_meta($post_id, 'template_social_pi_image', get_post_meta($post_id, 'template_social_pi_image', true));
+        	}
+
         	restore_current_blog();
+
 	}
 
 	function strategy_posttype() {
@@ -142,6 +178,41 @@
 	);
 
 	register_post_type( 'ictemplate', $args );
+
+	$labels = array(
+		'name'               => _x( 'Static Template', 'post type general name', 'your-plugin-textdomain' ),
+		'singular_name'      => _x( 'Static Template', 'post type singular name', 'your-plugin-textdomain' ),
+		'menu_name'          => _x( 'Static Templates', 'admin menu', 'your-plugin-textdomain' ),
+		'name_admin_bar'     => _x( 'Static Template', 'add new on admin bar', 'your-plugin-textdomain' ),
+		'add_new'            => _x( 'Add New', 'Static', 'your-plugin-textdomain' ),
+		'add_new_item'       => __( 'Add New Static', 'your-plugin-textdomain' ),
+		'new_item'           => __( 'New Static', 'your-plugin-textdomain' ),
+		'edit_item'          => __( 'Edit Static', 'your-plugin-textdomain' ),
+		'view_item'          => __( 'View Static', 'your-plugin-textdomain' ),
+		'all_items'          => __( 'All Templates', 'your-plugin-textdomain' ),
+		'search_items'       => __( 'Search Templates', 'your-plugin-textdomain' ),
+		'parent_item_colon'  => __( 'Parent Templates:', 'your-plugin-textdomain' ),
+		'not_found'          => __( 'No Templates found.', 'your-plugin-textdomain' ),
+		'not_found_in_trash' => __( 'No Templates found in Trash.', 'your-plugin-textdomain' )
+	);
+
+	$args = array(
+		'labels'             => $labels,
+        'description'        => __( 'Description.', 'your-plugin-textdomain' ),
+		'public'             => true,
+		'publicly_queryable' => true,
+		'show_ui'            => true,
+		'show_in_menu'       => true,
+		'query_var'          => true,
+		'rewrite'            => array( 'slug' => 'icstatic' ),
+		'capability_type'    => 'post',
+		'has_archive'        => true,
+		'hierarchical'       => false,
+		'menu_position'      => null,
+		'supports'           => array( 'title' )
+	);
+
+	register_post_type( 'icstatic', $args );
 }
 
 	function ic_meta_boxes() {
@@ -186,6 +257,7 @@
 
 		if(is_super_admin()){
 			add_meta_box( 'ic_meta_boxes', __( 'Template option', 'textdomain' ), array( &$this, 'ic_template_link_callback'), 'ictemplate' );
+			add_meta_box( 'ic_meta_boxes', __( 'Template option', 'textdomain' ), array( &$this, 'ic_template_link_callback'), 'icstatic' );
 		}
 	}
 
@@ -213,19 +285,19 @@
     					<b>customtemplate###</b>
     				</td>
     				<td>
-    					<select name="dynamic_template[type][]">
+    					<select class="ct_type" name="dynamic_template[type][]">
     						<option value="text">Text</option>
     						<option value="image">Image</option>
     					</select>
+    					
     				</td>
     				<td>
-    					<select name="dynamic_template[editabe][]">
-    						<option value="yes">Yes</option>
-    						<option value="no">No</option>
-    					</select>
+    					<div class="preview_dimension"><b>Preview Dimension</b><br>
+	    				<input name="dynamic_template[width][]" size="5">
+	    				<input name="dynamic_template[height][]" size="5"></div>
     				</td>
     				<td>
-    					<textarea rows="5" cols="60" name="dynamic_template[content][]"></textarea>
+    					<textarea rows="5" cols="40" name="dynamic_template[content][]"></textarea>
     				</td>
     				<td><button class="ic_delete_dynamic_temp">Delete</button></td>
     			</tr>
@@ -241,6 +313,15 @@
 	    				e.preventDefault();
 	    				jQuery(this).parent().parent().remove();
 	    			});
+	    			jQuery('body').on('change', '.ct_type', function(e){
+	    				var tt = jQuery(this).val();
+	    				if(tt == 'text'){
+	    					jQuery(this).parent().parent().find('.preview_dimension').hide();
+	    				} else {
+	    					jQuery(this).parent().parent().find('.preview_dimension').show();
+	    				}
+	    				
+	    			});
 	    		});
 	    	</script>
 	    	<h3>Dynamic Template <button id="add_more_ic_temp">Add</button></h3>
@@ -248,9 +329,9 @@
 	    		<thead>
 	    			<tr>
 		    			<th width="15%">#</th>
-		    			<th width="20%">Type</th>
-		    			<th width="20%">Editable</th>
-		    			<th width="35%">Content</th>
+		    			<th width="10%">Type</th>
+		    			<th width="25%">Dimension</th>
+		    			<th width="45%">Content</th>
 		    			<th width="10%">Delete</th>
 		    		</tr>
 		    	</thead>
@@ -261,19 +342,19 @@
 	    					<b>customtemplate<?= $key + 1;?></b>
 	    				</td>
 	    				<td>
-	    					<select name="dynamic_template[type][]">
+	    					<select class="ct_type" name="dynamic_template[type][]">
 	    						<option <?php echo $dynamic_template['type'][$key] == 'text' ? 'selected' : '';?> value="text">Text</option>
 	    						<option <?php echo $dynamic_template['type'][$key] == 'image' ? 'selected' : '';?> value="image">Image</option>
 	    					</select>
+	    					
 	    				</td>
 	    				<td>
-	    					<select name="dynamic_template[editabe][]">
-	    						<option <?php echo $dynamic_template['editabe'][$key] == 'yes' ? 'selected' : '';?> value="yes">Yes</option>
-	    						<option <?php echo $dynamic_template['editabe'][$key] == 'no' ? 'selected' : '';?> value="no">No</option>
-	    					</select>
+	    					<div <?php echo $dynamic_template['type'][$key] == 'text' ? 'style="display:none"' : '';?> class="preview_dimension"><b>Preview DImension</b><br>
+	    					<input name="dynamic_template[width][]" size="5" value="<?= $dynamic_template['width'][$key];?>">x
+	    					<input name="dynamic_template[height][]" size="5" value="<?= $dynamic_template['height'][$key];?>"></div>
 	    				</td>
 	    				<td>
-	    					<textarea rows="5" cols="60" name="dynamic_template[content][]"><?= $dynamic_template['content'][$key];?></textarea>
+	    					<textarea rows="5" cols="40" name="dynamic_template[content][]"><?= $dynamic_template['content'][$key];?></textarea>
 	    				</td>
 	    				<td><button class="ic_delete_dynamic_temp">Delete</button></td>
 	    			</tr>
@@ -283,19 +364,19 @@
 	    					<b>customtemplate1</b>
 	    				</td>
 	    				<td>
-	    					<select name="dynamic_template[type][]">
+	    					<select class="ct_type" name="dynamic_template[type][]">
 	    						<option value="text">Text</option>
 	    						<option value="image">Image</option>
 	    					</select>
+	    					
 	    				</td>
 	    				<td>
-	    					<select name="dynamic_template[editabe][]">
-	    						<option value="yes">Yes</option>
-	    						<option value="no">No</option>
-	    					</select>
+	    					<div style="display: none;" class="preview_dimension"><b>Preview Dimension</b><br>
+		    				<input name="dynamic_template[width][]" size="5">
+		    				<input name="dynamic_template[height][]" size="5"></div>
 	    				</td>
 	    				<td>
-	    					<textarea rows="5" cols="60" name="dynamic_template[content][]"></textarea>
+	    					<textarea rows="5" cols="40" name="dynamic_template[content][]"></textarea>
 	    				</td>
 	    				<td><button class="ic_delete_dynamic_temp">Delete</button></td>
 	    			</tr>	

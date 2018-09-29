@@ -110,8 +110,11 @@ class IC_agent_api{
 		    	$dynamic_template = get_post_meta($value['ID'], 'dynamic_template', true);
 	    		$dynamic_template = is_array($dynamic_template) ? $dynamic_template : array() ;
 		    	foreach ($dynamic_template['type'] as $key => $va) {
-		    		$value['custom_field'][] = array('id' => 'customfield'.($key+1), 'type' => $va, 
-		    			'eitable' => $dynamic_template['eitable'][$key], 'content' => $dynamic_template['content'][$key]);
+		    		$value['custom_field'][] = array('id' => 'customfield'.($key+1), 
+		    			'type' => $va, 
+		    			'width' => $dynamic_template['width'][$key],
+		    			'height' => $dynamic_template['height'][$key],
+		    			'content' => $dynamic_template['content'][$key]);
 		    	}
 
 		    	$results[] = $value;
@@ -162,6 +165,110 @@ class IC_agent_api{
 		$agent_id = get_blog_option($blog_id, 'agent_id');
 
 		$posts = get_posts(array('post_type' => 'ictemplate', 'posts_per_page' => -1, 'author' => $agent_id));
+		$results = array();
+        foreach ($posts as $t => $val) {
+        	$value = array('ID' => $val->ID, 'title' => $val->post_title);
+		    $value['template'] = get_post_meta($value['ID'], 'template_html', true);
+		    $value['custom_field'] = get_post_meta($value['ID'], 'dynamic_template', true);
+
+		    $value['social_template'] = [];
+	    	$value['social_template']['fb_text'] = get_post_meta($val->ID, 'template_social_fb_text', true);
+		    $value['social_template']['fb_image'] = get_post_meta($val->ID, 'template_social_fb_image', true);
+		    $value['social_template']['tw_text'] = get_post_meta($val->ID, 'template_social_tw_text', true);
+		    $value['social_template']['tw_image'] = get_post_meta($val->ID, 'template_social_tw_image', true);
+		    $value['social_template']['pi_image'] = get_post_meta($val->ID, 'template_social_pi_image', true);
+
+		    $results[] = $value;
+		}
+		header('Content-Type: application/json');
+		echo json_encode(array('status' => 'Success', 'data' => $results));
+
+		die(0);
+		exit;
+	}
+
+
+	function ic_get_static_page_templates(){
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+
+		switch_to_blog(1);
+        $templates = get_posts(array('post_type' => 'icstatic', 'posts_per_page' => -1));
+        
+        $results = array();
+        foreach ($templates as $t => $val) {
+        	$value = array('ID' => $val->ID, 'title' => $val->post_title);
+		    $value['template'] = get_post_meta($value['ID'], 'template_html', true);
+		    $template_agents = get_post_meta($value['ID'], 'template_agents', true);
+		    $value['agents'] = explode(',', $template_agents);
+
+		    if(in_array($agent_id, $value['agents']) || in_array(0, $value['agents'])){
+		    	$value['social_template'] = [];
+		    	$value['social_template']['fb_text'] = get_post_meta($val->ID, 'template_social_fb_text', true);
+			    $value['social_template']['fb_image'] = get_post_meta($val->ID, 'template_social_fb_image', true);
+			    $value['social_template']['tw_text'] = get_post_meta($val->ID, 'template_social_tw_text', true);
+			    $value['social_template']['tw_image'] = get_post_meta($val->ID, 'template_social_tw_image', true);
+			    $value['social_template']['pi_image'] = get_post_meta($val->ID, 'template_social_pi_image', true);
+
+		    	$value['custom_field'] = [];
+		    	$dynamic_template = get_post_meta($value['ID'], 'dynamic_template', true);
+	    		$dynamic_template = is_array($dynamic_template) ? $dynamic_template : array() ;
+		    	foreach ($dynamic_template['type'] as $key => $va) {
+		    		$value['custom_field'][] = array('id' => 'customfield'.($key+1), 
+		    			'type' => $va, 
+		    			'width' => $dynamic_template['width'][$key],
+		    			'height' => $dynamic_template['height'][$key],
+		    			'content' => $dynamic_template['content'][$key]);
+		    	}
+
+		    	$results[] = $value;
+		    }
+        }
+        restore_current_blog();
+        header('Content-Type: application/json');
+        echo json_encode(array('status' => 'Success', 'data' => $results));
+
+		die(0);
+		exit;
+	}
+
+	function ic_agent_create_static_page(){
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));	
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+
+		$landing_page = $_POST['ID'];
+		if($landing_page){
+			$strategy = array('post_title' => $_POST['title'], 'ID' => $landing_page);
+			update_post_meta($landing_page, 'template_html', $_POST['template']);
+			update_post_meta($landing_page, 'dynamic_template', $_POST['custom_field']);
+
+			foreach($_POST['social_template'] as $k=>$v){
+				update_post_meta($landing_page, 'template_social_'.$k, $v);
+			}
+			
+			wp_update_post( $strategy);
+		} else {
+			$strategy = array('post_title' => $_POST['title'], 'post_type' => 'icstatic', 'post_status' => 'publish', 'post_author' => $agent_id);
+			$landing_page = wp_insert_post( $strategy);
+			update_post_meta($landing_page, 'template_html', $_POST['template']);
+			update_post_meta($landing_page, 'dynamic_template', $_POST['custom_field']);
+			foreach($_POST['social_template'] as $k=>$v){
+				update_post_meta($landing_page, 'template_social_'.$k, $v);
+			}
+		}
+
+		echo json_encode(array('status' => 'Success'));
+
+		die(0);
+		exit;
+	}
+
+	function ic_agent_get_static_page(){
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+
+		$posts = get_posts(array('post_type' => 'icstatic', 'posts_per_page' => -1, 'author' => $agent_id));
 		$results = array();
         foreach ($posts as $t => $val) {
         	$value = array('ID' => $val->ID, 'title' => $val->post_title);

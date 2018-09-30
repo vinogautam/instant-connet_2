@@ -54,6 +54,10 @@ else
     die("Invalid meeting url");
   }*/
 }
+$blog_id = get_current_blog_id();
+$agent_id = get_blog_option($blog_id, 'agent_id');
+
+$profile_image = get_user_meta($agent_id, 'ic_agent_profile_image', true);
 ?>
 <!DOCTYPE html>
 <!--
@@ -248,7 +252,7 @@ Instant Connect UI
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel">
         <div class="pull-left image">
-          <img src="<?= plugin_dir_url(__FILE__); ?>dist/v2/img/neil-avatar.jpg" class="img-circle" alt="User Image">
+          <img src="<?= $profile_image ? $profile_image : plugin_dir_url(__FILE__).'dist/v2/img/neil-avatar.jpg'; ?>" class="img-circle" alt="User Image">
         </div>
         <div class="pull-left info">
           <p>Neil Thomas</p>

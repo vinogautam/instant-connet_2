@@ -52,7 +52,7 @@ class IC_agent_api{
 			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead', 'ic_get_presentations', 'ic_get_videos', 
 			'ic_save_ppt', 'ic_wallet_purchase_transaction', 'ic_get_point_value', 'ic_add_chat_points', 'ic_agent_balance',
 			'ic_disable_agent_acc_have_no_wallet', 'ic_agent_account_active', 'ic_endorser_points_details', 'ic_agent_redeem_list', 'ic_agent_top_endorser', 'ic_agent_create_landing_page', 'ic_agent_get_landing_page',
-			'ic_get_landing_page_templates', 'ic_upload_image'
+			'ic_get_landing_page_templates', 'ic_upload_image', 'ic_profile_image'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -60,6 +60,23 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_profile_image(){
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+
+		if(isset($_POST['img'])){
+			update_user_meta($agent_id, 'ic_agent_profile_image', $_POST['img']);
+		}
+
+		$data = array('status' => 'Success', 'url' => get_user_meta($agent_id, 'ic_agent_profile_image', true));
+
+		echo json_encode($data);
+
+		die(0);
 	}
 
 	function ic_upload_image(){

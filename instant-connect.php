@@ -58,12 +58,23 @@
 		add_action( 'save_post', array( &$this, 'ic_save_meta_box' ));
 
 		add_shortcode('REGISTER_FORM', array( &$this, 'ic_register_form'));
+		add_shortcode('PROFILEIMAGE', array( &$this, 'ic_profile_image'));
 
 		$ntmadmin = new IC_admin();
 		new IC_Metabox();
 		new IC_ajax();
 		new IC_front();
 		new IC_agent_api();
+	}
+
+	function ic_profile_image(){
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+
+		$profile_image = get_user_meta($agent_id, 'ic_agent_profile_image', true);
+		$profile_image = $profile_image ? $profile_image : plugin_dir_url(__FILE__).'dist/v2/img/neil-avatar.jpg';
+
+		return '<img class="ic_profile_image" src="'.$profile_image.'" />';
 	}
 	
 	function on_create_blog( $blog_id, $user_id, $domain, $path, $site_id, $meta ) {

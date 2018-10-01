@@ -52,7 +52,8 @@ class IC_agent_api{
 			'ic_lead_list', 'ic_lead_meeting', 'ic_get_lead_info', 'ic_delete_lead', 'ic_get_presentations', 'ic_get_videos', 
 			'ic_save_ppt', 'ic_wallet_purchase_transaction', 'ic_get_point_value', 'ic_add_chat_points', 'ic_agent_balance',
 			'ic_disable_agent_acc_have_no_wallet', 'ic_agent_account_active', 'ic_endorser_points_details', 'ic_agent_redeem_list', 'ic_agent_top_endorser', 'ic_agent_create_landing_page', 'ic_agent_get_landing_page',
-			'ic_get_landing_page_templates', 'ic_upload_image', 'ic_profile_image'
+			'ic_get_landing_page_templates', 'ic_agent_create_static_page', 'ic_agent_get_static_page',
+			'ic_get_static_page_templates', 'ic_upload_image', 'ic_profile_image'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -181,7 +182,7 @@ class IC_agent_api{
 		$blog_id = get_current_blog_id();
 		$agent_id = get_blog_option($blog_id, 'agent_id');
 
-		$posts = get_posts(array('post_type' => 'ictemplate', 'posts_per_page' => -1, 'author' => $agent_id));
+		$posts = get_posts(array('post_type' => 'ictemplate', 'posts_per_page' => -1));
 		$results = array();
         foreach ($posts as $t => $val) {
         	$value = array('ID' => $val->ID, 'title' => $val->post_title);
@@ -285,7 +286,7 @@ class IC_agent_api{
 		$blog_id = get_current_blog_id();
 		$agent_id = get_blog_option($blog_id, 'agent_id');
 
-		$posts = get_posts(array('post_type' => 'icstatic', 'posts_per_page' => -1, 'author' => $agent_id));
+		$posts = get_posts(array('post_type' => 'icstatic', 'posts_per_page' => -1));
 		$results = array();
         foreach ($posts as $t => $val) {
         	$value = array('ID' => $val->ID, 'title' => $val->post_title);

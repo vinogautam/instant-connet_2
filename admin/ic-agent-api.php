@@ -3560,12 +3560,12 @@ class IC_agent_api{
 		$offset = $start * $length;
 		$order = 
 		
-		$recordsFiltered = $wpdb->get_results("select * from tmp_user where status = 0 order by $order $orderby limit $offset, $length ");
+		$recordsFiltered = $wpdb->get_results("select * from tmp_user where status = 0 order by $order $orderby limit $start, $length ");
 
 		$response = array('status' => 'Success', 
 							'data' => $recordsFiltered,
 						  	'recordsTotal' => count($recordsTotal),
-						  	'recordsFiltered' => count($recordsFiltered),
+						  	'recordsFiltered' => count($recordsTotal),
 						);*/
 
         $newdat = array();

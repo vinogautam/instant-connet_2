@@ -145,7 +145,7 @@
 		'show_ui'            => true,
 		'show_in_menu'       => true,
 		'query_var'          => true,
-		'rewrite'            => array( 'slug' => 'strategy' ),
+		'rewrite'            => array( 'slug' => 'strategy', 'with_front' => false ),
 		'capability_type'    => 'post',
 		'has_archive'        => true,
 		'hierarchical'       => false,
@@ -180,7 +180,7 @@
 		'show_ui'            => true,
 		'show_in_menu'       => true,
 		'query_var'          => true,
-		'rewrite'            => array( 'slug' => 'ictemplate' ),
+		'rewrite'            => array( 'slug' => 'ictemplate', 'with_front' => false ),
 		'capability_type'    => 'post',
 		'has_archive'        => true,
 		'hierarchical'       => false,
@@ -299,6 +299,7 @@
     					<select class="ct_type" name="dynamic_template[type][]">
     						<option value="text">Text</option>
     						<option value="image">Image</option>
+    						<option value="video">Video</option>
     					</select>
     					
     				</td>
@@ -356,6 +357,7 @@
 	    					<select class="ct_type" name="dynamic_template[type][]">
 	    						<option <?php echo $dynamic_template['type'][$key] == 'text' ? 'selected' : '';?> value="text">Text</option>
 	    						<option <?php echo $dynamic_template['type'][$key] == 'image' ? 'selected' : '';?> value="image">Image</option>
+	    						<option <?php echo $dynamic_template['type'][$key] == 'video' ? 'selected' : '';?> value="video">Video</option>
 	    					</select>
 	    					
 	    				</td>
@@ -378,6 +380,7 @@
 	    					<select class="ct_type" name="dynamic_template[type][]">
 	    						<option value="text">Text</option>
 	    						<option value="image">Image</option>
+	    						<option value="video">Video</option>
 	    					</select>
 	    					
 	    				</td>

@@ -53,7 +53,7 @@ class IC_agent_api{
 			'ic_save_ppt', 'ic_wallet_purchase_transaction', 'ic_get_point_value', 'ic_add_chat_points', 'ic_agent_balance',
 			'ic_disable_agent_acc_have_no_wallet', 'ic_agent_account_active', 'ic_endorser_points_details', 'ic_agent_redeem_list', 'ic_agent_top_endorser', 'ic_agent_create_landing_page', 'ic_agent_get_landing_page',
 			'ic_get_landing_page_templates', 'ic_agent_create_static_page', 'ic_agent_get_static_page',
-			'ic_get_static_page_templates', 'ic_upload_image', 'ic_profile_image'
+			'ic_get_static_page_templates', 'ic_upload_image', 'ic_profile_image', 'ic_get_base64_image'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -61,6 +61,19 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_get_base64_image(){
+
+		$file = explode(".", $_GET['img']);
+		$base = 'data:image/'.$file[count($file)-1].';base64,';
+		$encode = base64_encode(file_get_contents($_GET['img']));
+
+		$data = array('status' => 'Success', 'url' => $base.$encode);
+
+		echo json_encode($data);
+
+		die(0);
 	}
 
 	function ic_profile_image(){
@@ -188,6 +201,7 @@ class IC_agent_api{
         	$value = array('ID' => $val->ID, 'title' => $val->post_title);
 		    $value['template'] = get_post_meta($value['ID'], 'template_html', true);
 		    $value['custom_field'] = get_post_meta($value['ID'], 'dynamic_template', true);
+		    $value['link'] = get_permalink($value['ID']);
 
 		    $value['social_template'] = [];
 	    	$value['social_template']['fb_text'] = get_post_meta($val->ID, 'template_social_fb_text', true);
@@ -259,7 +273,17 @@ class IC_agent_api{
 		if($landing_page){
 			$strategy = array('post_title' => $_POST['title'], 'ID' => $landing_page);
 			update_post_meta($landing_page, 'template_html', $_POST['template']);
-			update_post_meta($landing_page, 'dynamic_template', $_POST['custom_field']);
+			
+
+			$dynamic_template = array('type' => [], 'width' => [], 'height' => [], 'content' => []);
+	    	foreach ($_POST['custom_field'] as $key => $va) {
+	    		$dynamic_template['type'][$key] =  $va['type'];
+	    		$dynamic_template['width'][$key] = $va['width'];
+	    		$dynamic_template['height'][$key] = $va['height'];
+	    		$dynamic_template['content'][$key] = $va['content'];
+	    	}
+
+	    	update_post_meta($landing_page, 'dynamic_template', $dynamic_template);
 
 			foreach($_POST['social_template'] as $k=>$v){
 				update_post_meta($landing_page, 'template_social_'.$k, $v);
@@ -286,12 +310,13 @@ class IC_agent_api{
 		$blog_id = get_current_blog_id();
 		$agent_id = get_blog_option($blog_id, 'agent_id');
 
-		$posts = get_posts(array('post_type' => 'icstatic', 'posts_per_page' => -1));
+		$posts = get_posts(array('post_type' => 'icstatic', 'posts_per_page' => -1, 'orderby'    => 'menu_order', 'sort_order' => 'asc'));
 		$results = array();
         foreach ($posts as $t => $val) {
         	$value = array('ID' => $val->ID, 'title' => $val->post_title);
 		    $value['template'] = get_post_meta($value['ID'], 'template_html', true);
-		    $value['custom_field'] = get_post_meta($value['ID'], 'dynamic_template', true);
+		    //$value['custom_field'] = get_post_meta($value['ID'], 'dynamic_template', true);
+		    $value['link'] = get_permalink($value['ID']);
 
 		    $value['social_template'] = [];
 	    	$value['social_template']['fb_text'] = get_post_meta($val->ID, 'template_social_fb_text', true);
@@ -300,7 +325,18 @@ class IC_agent_api{
 		    $value['social_template']['tw_image'] = get_post_meta($val->ID, 'template_social_tw_image', true);
 		    $value['social_template']['pi_image'] = get_post_meta($val->ID, 'template_social_pi_image', true);
 
-		    $results[] = $value;
+		    $value['custom_field'] = [];
+	    	$dynamic_template = get_post_meta($value['ID'], 'dynamic_template', true);
+    		$dynamic_template = is_array($dynamic_template) ? $dynamic_template : array() ;
+	    	foreach ($dynamic_template['type'] as $key => $va) {
+	    		$value['custom_field'][] = array('id' => 'customfield'.($key+1), 
+	    			'type' => $va, 
+	    			'width' => $dynamic_template['width'][$key],
+	    			'height' => $dynamic_template['height'][$key],
+	    			'content' => $dynamic_template['content'][$key]);
+	    	}
+
+	    	$results[] = $value;
 		}
 		header('Content-Type: application/json');
 		echo json_encode(array('status' => 'Success', 'data' => $results));
@@ -2049,7 +2085,8 @@ class IC_agent_api{
 	function ic_video_list(){
 		global $wpdb;
 
-		$results = $wpdb->get_results("select * from ". $wpdb->prefix . "video_library where agent_id=".$_GET['agent_id']);
+		
+		$results = $wpdb->get_results("select * from ". $wpdb->prefix . "video_library");
 
 		$data = [];
 
@@ -2708,7 +2745,7 @@ class IC_agent_api{
 		
 		$resuts = $wpdb->get_results('select * from wp_leads where email = "'. $lead['email'].'"');
 		
-		$leadtoinsert = array('email' => $lead['email'], 'first_name' => $lead['first_name'], 'last_name' => $lead['last_name'], 'agent_id' => $lead['agent_id'], 'created' => date("Y-m-d H:i:s"));
+		$leadtoinsert = array('endorser_id' => $lead['endorser_id'], 'email' => $lead['email'], 'first_name' => $lead['first_name'], 'last_name' => $lead['last_name'], 'agent_id' => $lead['agent_id'], 'created' => date("Y-m-d H:i:s"));
 		
 		if(count($resuts)){
 			

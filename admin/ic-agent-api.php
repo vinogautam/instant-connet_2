@@ -3593,7 +3593,7 @@ class IC_agent_api{
 		$newdat = array();
 		foreach($data as $v){
 			$v = (array)$v;
-			$item = array('ID' => $v['ID']);
+			$item = array('id' => $v['ID']);
 			//if(!get_user_meta($item['ID'], 'imcomplete_profile', true) && get_user_meta($item['ID'], 'agent_id', true) == $_GET['agent_id']){
 
 				$endorser_id = $item['ID'];

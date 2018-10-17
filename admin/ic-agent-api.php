@@ -3565,7 +3565,7 @@ class IC_agent_api{
 		foreach($data as $v){
 			$v = (array)$v;
 			$item = (array)$v['data'];
-			$item['id'] = $item['ID'];
+			$item['ID'] = $item['ID'];
 			if(!get_user_meta($v['ID'], 'imcomplete_profile', true)){
 				$last_login = get_user_meta($item['ID'], 'last_login', true);
     			$the_login_date = human_time_diff($last_login);

@@ -595,7 +595,7 @@ class IC_agent_api{
 		
 		//print_r("select * from wp_leads where agent_id = " . $agent_id ." order by ". $order ." ". $orderby." limit " .$offset.", ".$length);
 
-		$recordsFiltered = $wpdb->get_results("select * from wp_leads where $ss agent_id = " . $agent_id ." order by ". $order ." ". $orderby." limit " .$offset.", ".$length."");
+		$recordsFiltered = $wpdb->get_results("select * from wp_leads where $ss agent_id = " . $agent_id ." order by ". $order ." ". $orderby." limit " .$start.", ".$length."");
 		
 		//echo $recordsFiltered;
 
@@ -603,7 +603,7 @@ class IC_agent_api{
 							'draw' => (int)$_GET['draw'],
 							'data' => $recordsFiltered,
 						  	'recordsTotal' => count($recordsTotal),
-						  	'recordsFiltered' => count($recordsFiltered),
+						  	'recordsFiltered' => count($recordsTotal),
 						);
 		echo json_encode($response);
 		die(0);
@@ -3597,12 +3597,12 @@ class IC_agent_api{
 		$offset = $start * $length;
 		$order = 
 		
-		$recordsFiltered = $wpdb->get_results("select * from tmp_user where status = 0 order by $order $orderby limit $offset, $length ");
+		$recordsFiltered = $wpdb->get_results("select * from tmp_user where status = 0 order by $order $orderby limit $start, $length ");
 
 		$response = array('status' => 'Success', 
 							'data' => $recordsFiltered,
 						  	'recordsTotal' => count($recordsTotal),
-						  	'recordsFiltered' => count($recordsFiltered),
+						  	'recordsFiltered' => count($recordsTotal),
 						);*/
 
         $newdat = array();

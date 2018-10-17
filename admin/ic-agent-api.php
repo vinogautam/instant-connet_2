@@ -603,7 +603,7 @@ class IC_agent_api{
 							'draw' => (int)$_GET['draw'],
 							'data' => $recordsFiltered,
 						  	'recordsTotal' => count($recordsTotal),
-						  	'recordsFiltered' => count($recordsFiltered),
+						  	'recordsFiltered' => count($recordsTotal),
 						);
 		echo json_encode($response);
 		die(0);
@@ -3593,9 +3593,8 @@ class IC_agent_api{
 		$newdat = array();
 		foreach($data as $v){
 			$v = (array)$v;
-			$item = (array)$v['data'];
-			$item['id'] = $item['ID'];
-			if(!get_user_meta($item['ID'], 'imcomplete_profile', true) && get_user_meta($item['ID'], 'agent_id', true) == $_GET['agent_id']){
+			$item = array('ID' => $v['ID']);
+			//if(!get_user_meta($item['ID'], 'imcomplete_profile', true) && get_user_meta($item['ID'], 'agent_id', true) == $_GET['agent_id']){
 
 				$endorser_id = $item['ID'];
 				$endorser = get_userdata($endorser_id);
@@ -3629,33 +3628,33 @@ class IC_agent_api{
 				} else {
 					$newdat[] = $item;
 				}
-			}
+			//}
 		}
 
 		$recordsTotal = $newdat;
 		$start = $_GET['start'];
 		$length = $_GET['length'];
-		$order = $_GET['columns'][$_GET['order'][0]['column']]['data'];
-		$orderby = $_GET['order'][0]['dir'];
+		
 
 		function sortByOrder($a, $b) {
-		    if($orderby == 'ASC')
-			    return $a[$order] - $b[$order];
+			$order = $_GET['columns'][$_GET['order'][0]['column']]['data'];
+			$orderby = $_GET['order'][0]['dir'];
+			if(strtoupper($orderby) == 'ASC')
+				return $a[$order] > $b[$order] ? 1 : -1;
 			else
-				return $b[$order] - $a[$order];
+				return $b[$order] > $a[$order] ? 1 : -1;
 		}
 
-		$newdat = usort($myArray, 'sortByOrder');
+		usort($newdat, 'sortByOrder');
 		$recordsFiltered = array_slice($newdat, $start, $length);
 
 		$response = array('status' => 'Success', 
 							'draw' => (int)$_GET['draw'],
 							'data' => $recordsFiltered,
 						  	'recordsTotal' => count($recordsTotal),
-						  	'recordsFiltered' => count($recordsFiltered),
+						  	'recordsFiltered' => count($recordsTotal),
 						);
 
-		$response = array('status' => 'Success', 'data' => $newdat);
 		echo json_encode($response);
 		die(0);
 		

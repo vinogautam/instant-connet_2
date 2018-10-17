@@ -603,7 +603,7 @@ class IC_agent_api{
 							'draw' => (int)$_GET['draw'],
 							'data' => $recordsFiltered,
 						  	'recordsTotal' => count($recordsTotal),
-						  	'recordsFiltered' => count($recordsTotal),
+						  	'recordsFiltered' => count($recordsFiltered),
 						);
 		echo json_encode($response);
 		die(0);
@@ -2569,11 +2569,11 @@ class IC_agent_api{
 		$agent_id = get_blog_option($blog_id, 'agent_id');
 
 		//$response = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where endorser_id=".$endorser_id);
-		$total_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_endorsements where type!='Redeem Point' and queue = 0 and endorser_id = ".$endorser_id);
+		$total_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where type!='Redeem Point' and queue = 0 and endorser_id = ".$endorser_id);
 
-		$non_queue_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_endorsements where type!='Redeem Point' and queue = 1 and endorser_id = ".$endorser_id);
+		$non_queue_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where type!='Redeem Point' and queue = 1 and endorser_id = ".$endorser_id);
 
-		$redeem_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_endorsements where type='Redeem Point' and endorser_id = ".$endorser_id);
+		$redeem_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where type='Redeem Point' and endorser_id = ".$endorser_id);
 
 		$invitations = $wpdb->get_row("select count(*) as count from wp_".$blog_id."_endorsements where endorser_id = ".$endorser_id);
 
@@ -3585,64 +3585,76 @@ class IC_agent_api{
 
 	function ic_endorser_list(){
 		global $wpdb;
+		$blog_id = get_current_blog_id();
+		$arr = array('blog_id' => $blog_id, 'role'=>'endorser');
 
-		$arr = array('role'=>'endorser');
-		//$arr['order'] = $_GET['columns'][$_GET['order'][0]['column']]['data'];
-		//$arr['orderby'] = $_GET['order'][0]['dir'];
 		$data = (array)get_users($arr);
-		
-		/*$recordsTotal = $wpdb->get_results("select * from tmp_user where status = 0");
-		$start = $_GET['start'];
-		$length = $_GET['length'];
-		$offset = $start * $length;
-		$order = 
-		
-		$recordsFiltered = $wpdb->get_results("select * from tmp_user where status = 0 order by $order $orderby limit $start, $length ");
-
-		$response = array('status' => 'Success', 
-							'data' => $recordsFiltered,
-						  	'recordsTotal' => count($recordsTotal),
-						  	'recordsFiltered' => count($recordsTotal),
-						);*/
-
-        $newdat = array();
+		$search = $_GET['search']['value'];
+		$newdat = array();
 		foreach($data as $v){
 			$v = (array)$v;
 			$item = (array)$v['data'];
 			$item['id'] = $item['ID'];
 			if(!get_user_meta($item['ID'], 'imcomplete_profile', true) && get_user_meta($item['ID'], 'agent_id', true) == $_GET['agent_id']){
-				$item['invitation'] = get_user_meta($item['ID'], 'invitation_sent', true) 
-				? get_user_meta($item['ID'], 'invitation_sent', true) 
-				: "-";
-				$item['converted'] = array('email' => get_user_meta($item['ID'], "tracked_invitation", true), 'fb' => get_user_meta($item['ID'], "tracked_fb_invitation", true), 'tw' => get_user_meta($item['ID'], "tracked_tw_invitation", true));
 
-				$item['converted_new'] = array('email' => get_user_meta($item['ID'], "tracked_counter", true), 'fb' => get_user_meta($item['ID'], "tracked_fb_counter", true), 'tw' => get_user_meta($item['ID'], "tracked_tw_counter", true));
+				$endorser_id = $item['ID'];
+				$endorser = get_userdata($endorser_id);
 
-				$re = get_user_meta($item['ID'], 'endorser_letter', true);
-				$result = $wpdb->get_row("select name from ". $wpdb->prefix . "mailtemplates where id=".$re);
-				$re = get_user_meta($item['ID'], 'endorsement_letter', true);
-				$result2 = $wpdb->get_row("select name from ". $wpdb->prefix . "mailtemplates where id=".$re);
-				$campaign = get_user_meta($item['ID'], 'campaign', true);
-				$result3 = $wpdb->get_row("select title from ". $wpdb->prefix . "campaigns where id=".$campaign);
-				$social_campaign = get_user_meta($item['ID'], 'social_campaign', true);
-				$result4 = $wpdb->get_row("select title from ". $wpdb->prefix . "campaigns where id=".$social_campaign);
+				$item['name'] = get_user_meta($endorser_id, 'first_name', true). ' '. get_user_meta($endorser_id, 'last_name', true);
+				$item['email'] = $endorser->user_email;
+				
+				$total_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where type!='Redeem Point' and queue = 0 and endorser_id = ".$endorser_id);
 
-				$item['first_name'] = get_user_meta($item['ID'], 'first_name', true);
-				$item['last_name'] = get_user_meta($item['ID'], 'last_name', true);
-				$item['phone'] = get_user_meta($item['ID'], 'phone', true);
-				$item['video'] = get_user_meta($item['ID'], 'video', true);
-				$item['campaign'] = $campaign;
-				$item['social_campaign'] = $social_campaign;
-				$item['landing_page'] = get_user_meta($item['ID'], 'landingPageContent', true);
+				$non_queue_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where type!='Redeem Point' and queue = 1 and endorser_id = ".$endorser_id);
 
-				$item['endorser_letter_name'] = ($result->name ? $result->name : 'Default') ;
-				$item['endorsement_letter_name'] = ($result2->name ? $result2->name : 'Default') ;
-				$item['campaign_name'] = ($result3->title ? $result3->title : 'Default') ;
-				$item['social_ampaign_name'] = ($result4->title ? $result4->title : 'Default') ;
+				$redeem_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where type='Redeem Point' and endorser_id = ".$endorser_id);
 
-				$newdat[] = $item;
+				$chat_conversion = $wpdb->get_row("select count(*) as cnt from wp_".$blog_id."_points_transaction where type='chat_conversion' and endorser_id = ".$endorser_id);
+
+				$meeting_conversion = $wpdb->get_row("select count(*) as cnt from wp_".$blog_id."_points_transaction where type='meeting_conversion' and endorser_id = ".$endorser_id);
+
+
+				$item['total_points'] = $total_points ? $total_points->points : 0;
+				$item['non_queue_points'] = $non_queue_points ? $non_queue_points->points : 0;
+				$item['redeem_points'] = $redeem_points ? $redeem_points->points : 0;
+				$item['chat_conversion'] = $chat_conversion ? $chat_conversion->cnt : 0;
+				$item['meeting_conversion'] = $meeting_conversion ? $meeting_conversion->cnt : 0;
+
+				$last_login = get_user_meta($endorser_id, 'last_login', true);
+				$the_login_date = human_time_diff($last_login);
+				$item['last_login'] = $the_login_date;
+
+				if($search && (strpos($item['name'], $search) || strpos($item['email'], $search))){
+					$newdat[] = $item;
+				} else {
+					$newdat[] = $item;
+				}
 			}
 		}
+
+		$recordsTotal = $newdat;
+		$start = $_GET['start'];
+		$length = $_GET['length'];
+		$order = $_GET['columns'][$_GET['order'][0]['column']]['data'];
+		$orderby = $_GET['order'][0]['dir'];
+
+		function sortByOrder($a, $b) {
+		    if($orderby == 'ASC')
+			    return $a[$order] - $b[$order];
+			else
+				return $b[$order] - $a[$order];
+		}
+
+		$newdat = usort($myArray, 'sortByOrder');
+		$recordsFiltered = array_slice($newdat, $start, $length);
+
+		$response = array('status' => 'Success', 
+							'draw' => (int)$_GET['draw'],
+							'data' => $recordsFiltered,
+						  	'recordsTotal' => count($recordsTotal),
+						  	'recordsFiltered' => count($recordsFiltered),
+						);
+
 		$response = array('status' => 'Success', 'data' => $newdat);
 		echo json_encode($response);
 		die(0);

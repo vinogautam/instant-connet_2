@@ -678,7 +678,7 @@
 			  id int(11) NOT NULL AUTO_INCREMENT,
 			  agent_id int(11),
 			  campaign_id int(11),
-			  name tinytext NOT NULL,
+			  name longtext NOT NULL,
 			  content tinytext NOT NULL,
 			  status int(1),
 			  created datetime,

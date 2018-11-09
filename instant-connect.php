@@ -724,6 +724,55 @@
 			dbDelta($sql_one);
 		}
 
+		$mailtemplates = $wpdb->prefix ."chat_category";
+
+		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){
+			$sql_one = "CREATE TABLE " . $mailtemplates . "(
+			  id int(11) NOT NULL AUTO_INCREMENT,
+			  agent_id int(11),
+			  notes tinytext NOT NULL,
+			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
+
+			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+			dbDelta($sql_one);
+		}
+
+		$mailtemplates = $wpdb->prefix ."chat_bot";
+
+		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){
+			$sql_one = "CREATE TABLE " . $mailtemplates . "(
+			  id int(11) NOT NULL AUTO_INCREMENT,
+			  title tinytext NOT NULL,
+			  category_id int(11),
+			  created datetime,
+			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
+
+			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+			dbDelta($sql_one);
+		}
+
+		$mailtemplates = $wpdb->prefix ."chat_bot_data";
+
+		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){
+			$sql_one = "CREATE TABLE " . $mailtemplates . "(
+			  id int(11) NOT NULL AUTO_INCREMENT,
+			  chat_id int(11),
+			  parent int(11),
+			  option int(1),
+			  label text,
+			  back int(1),
+			  skip int(1),
+			  userinput tinytext NOT NULL,
+			  opt tinytext NOT NULL,
+			  image tinytext NOT NULL,
+			  video tinytext NOT NULL,
+			  type tinytext NOT NULL,
+			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
+
+			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+			dbDelta($sql_one);
+		}
+
 		$blog_id = get_current_blog_id();
 		$check_already_exist = !get_blog_option($blog_id, 'strategy_link_created');
 

@@ -53,7 +53,8 @@ class IC_agent_api{
 			'ic_save_ppt', 'ic_wallet_purchase_transaction', 'ic_get_point_value', 'ic_add_chat_points', 'ic_agent_balance',
 			'ic_disable_agent_acc_have_no_wallet', 'ic_agent_account_active', 'ic_endorser_points_details', 'ic_agent_redeem_list', 'ic_agent_top_endorser', 'ic_agent_create_landing_page', 'ic_agent_get_landing_page',
 			'ic_get_landing_page_templates', 'ic_agent_create_static_page', 'ic_agent_get_static_page',
-			'ic_get_static_page_templates', 'ic_upload_image', 'ic_profile_image', 'ic_get_base64_image'
+			'ic_get_static_page_templates', 'ic_upload_image', 'ic_profile_image', 'ic_get_base64_image',
+			'ic_chat_bot_category', 'ic_chat_bot_new', 'ic_retrieve_chat_bot'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -61,6 +62,90 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_chat_bot_category(){
+		global $wpdb;
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		if($_POST['perform'] == 'add'){
+			$wpdb->insert($wpdb->prefix ."chat_category", array('name' => $_POST['name']));
+		} elseif($_POST['perform'] == 'edit'){
+			$wpdb->update($wpdb->prefix ."chat_category", array('name' => $_POST['name']), array('id' => $_POST['id']));
+		} elseif($_POST['perform'] == 'delete'){
+			$wpdb->delete($wpdb->prefix ."chat_category", array('id' => $_GET['id']));
+		}
+
+		$results = $wpdb->get_results("select * from ".$wpdb->prefix ."chat_category");
+
+		$data = array('status' => 'Success', 'url' => $results);
+
+		echo json_encode($data);
+
+		die(0);
+	}
+
+	function store_elements($cid, $pid, $results){
+		foreach ($results as $key => $value) {
+			if($value['opt'] == 'option'){
+				$wpdb->insert($wpdb->prefix ."chat_bot_data", array(
+					'chat_id' => $cid,
+			  		'parent' => $pid,
+			  		'label' => $value['label'],
+			  		'back' => $value['back'],
+			  		'jump' => $value['jump'],
+			  		'userinput' => $value['userinput']
+				));
+
+				$parent_id = $wpdb->insert_id;
+
+				foreach ($_POST['choice'] as $key1 => $value1) {
+					$wpdb->insert($wpdb->prefix ."chat_bot_data", array(
+						'chat_id' => $cid,
+				  		'parent' => $parent_id,
+				  		'option' => 1,
+				  		'label' => $value1['option']
+					));
+					if(count($value1['logic_jump'])){
+						store_elements($cid, $wpdb->insert_id, $value1['logic_jump']);
+					}
+				}
+
+			} else {
+				$wpdb->insert($wpdb->prefix ."chat_bot_data", array(
+					'type' => $_POST['type'],
+					'chat_id' => $cid,
+			  		'parent' => $pid,
+			  		'label' => $value['label'],
+			  		'back' => $value['back'],
+			  		'skip' => $value['skip'],
+			  		'userinput' => $value['userinput'],
+			  		'video' => $value['video'],
+			  		'type' => $value['type']
+				));
+			}
+		}
+	}
+
+	function ic_chat_bot_new(){
+		global $wpdb;
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$wpdb->insert($wpdb->prefix ."chat_bot", array('title' => $_POST['title'], 'category_id' => $_POST['category_id']));
+
+		$chat_id = $wpdb->insert_id;
+
+		store_elements($chat_id, 0, $_POST['elements']);
+
+		$data = array('status' => 'Success');
+
+		echo json_encode($data);
+
+		die(0);
+	}
+
+	function ic_retrieve_chat_bot(){
+		
 	}
 
 	function ic_get_base64_image(){

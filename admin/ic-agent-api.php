@@ -117,6 +117,7 @@ class IC_agent_api{
 					'chat_id' => $cid,
 			  		'parent' => $pid,
 			  		'label' => $value['label'],
+			  		'opt' => $value['opt'],
 			  		'back' => $value['back'],
 			  		'skip' => $value['skip'],
 			  		'userinput' => $value['userinput'],
@@ -144,8 +145,47 @@ class IC_agent_api{
 		die(0);
 	}
 
+	function get_chat_data($chat_data, $ind){
+		$res = array();
+		foreach ($chat_data[$ind] as $key => $value) {
+			if($value->opt == 'option'){
+				$tmp = $value;
+				$tmp['choice'] = array();
+				foreach ($chat_data[$value->id] as $key1 => $value1) {
+					$tmp['choice'][] = array(
+						'option' => $value1['label'],
+						'logic_jump' => get_chat_data($chat_data, $value->id)
+					);
+				}
+				$res[] = $tmp;
+			} else {
+				$res[] = $value;
+			}
+		}
+
+		return $res;
+	}
+
 	function ic_retrieve_chat_bot(){
-		
+		global $wpdb;
+
+		$chat = $wpdb->get_row("select * from ".$wpdb->prefix ."chat_bot where id =".$_GET['chat']);
+		$chat['elements'] = array();
+
+		$chat_results = $wpdb->get_results("select * from ".$wpdb->prefix ."chat_bot_data where chat_id =".$_GET['chat']." order by parent asc");
+
+		$chat_data = array();
+		foreach ($chat_results as $key => $value) {
+			$chat_data[$value->parent] = $value;
+		}
+
+		$results = get_chat_data($chat_data, 0);
+
+		$data = array('status' => 'Success', 'data' => $results);
+
+		echo json_encode($data);
+
+		die(0);
 	}
 
 	function ic_get_base64_image(){

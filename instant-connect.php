@@ -224,6 +224,41 @@
 	);
 
 	register_post_type( 'icstatic', $args );
+
+	$labels = array(
+		'name'               => _x( 'Chat Bot', 'post type general name', 'your-plugin-textdomain' ),
+		'singular_name'      => _x( 'Chat Bot', 'post type singular name', 'your-plugin-textdomain' ),
+		'menu_name'          => _x( 'Chat Bot', 'admin menu', 'your-plugin-textdomain' ),
+		'name_admin_bar'     => _x( 'Chat Bot', 'add new on admin bar', 'your-plugin-textdomain' ),
+		'add_new'            => _x( 'Add New', 'Chat Bot', 'your-plugin-textdomain' ),
+		'add_new_item'       => __( 'Add New Chat Bot', 'your-plugin-textdomain' ),
+		'new_item'           => __( 'New Chat Bot', 'your-plugin-textdomain' ),
+		'edit_item'          => __( 'Edit Chat Bot', 'your-plugin-textdomain' ),
+		'view_item'          => __( 'View Chat Bot', 'your-plugin-textdomain' ),
+		'all_items'          => __( 'All Chat Bot', 'your-plugin-textdomain' ),
+		'search_items'       => __( 'Search Chat Bot', 'your-plugin-textdomain' ),
+		'parent_item_colon'  => __( 'Parent Chat Bot:', 'your-plugin-textdomain' ),
+		'not_found'          => __( 'No Chat Bot found.', 'your-plugin-textdomain' ),
+		'not_found_in_trash' => __( 'No Chat Bot found in Trash.', 'your-plugin-textdomain' )
+	);
+
+	$args = array(
+		'labels'             => $labels,
+        'description'        => __( 'Description.', 'your-plugin-textdomain' ),
+		'public'             => true,
+		'publicly_queryable' => true,
+		'show_ui'            => true,
+		'show_in_menu'       => true,
+		'query_var'          => true,
+		'rewrite'            => array( 'slug' => 'ic-chat-bot' ),
+		'capability_type'    => 'post',
+		'has_archive'        => true,
+		'hierarchical'       => false,
+		'menu_position'      => null,
+		'supports'           => array( 'title' )
+	);
+
+	register_post_type( 'ic-chat-bot', $args );
 }
 
 	function ic_meta_boxes() {

@@ -132,11 +132,42 @@ class IC_agent_api{
 		global $wpdb;
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		$wpdb->insert($wpdb->prefix ."chat_bot", array('title' => $_POST['title'], 'category_id' => $_POST['category_id']));
+		$args = array('post_title' => $_POST['title'], 'post_content' => $_POST['content']);
 
-		$chat_id = $wpdb->insert_id;
+		$id = wp_insert_post($args);
+
+
+		$arr = array('chat_category', 'chat_avatar_img', 'chat_type', 'chat_fb_card', 'chat_twitter_card', 'chat_linked_card', 'chat_pinterest_card');
+
+		foreach($arr as $a){
+			update_post_meta($id, $a, $_POST[$a]);
+		}
 
 		store_elements($chat_id, 0, $_POST['elements']);
+
+		$data = array('status' => 'Success');
+
+		echo json_encode($data);
+
+		die(0);
+	}
+
+
+	function ic_chat_bot_update(){
+		global $wpdb;
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$args = array('post_title' => $_POST['title'], 'post_content' => $_POST['content'], 'ID' => $_POST['ID']);
+
+		$id = wp_update_post($args);
+
+		$arr = array('chat_category', 'chat_avatar_img', 'chat_type', 'chat_fb_card', 'chat_twitter_card', 'chat_linked_card', 'chat_pinterest_card');
+
+		foreach($arr as $a){
+			update_post_meta($_POST['ID'], $a, $_POST[$a]);
+		}
+		$wpdb->delete($wpdb->prefix ."chat_bot_data", array('chat_id' => $_POST['ID']);
+		store_elements($_POST['ID'], 0, $_POST['elements']);
 
 		$data = array('status' => 'Success');
 
@@ -169,7 +200,14 @@ class IC_agent_api{
 	function ic_retrieve_chat_bot(){
 		global $wpdb;
 
-		$chat = $wpdb->get_row("select * from ".$wpdb->prefix ."chat_bot where id =".$_GET['chat']);
+		$chat = (array) get_post($_GET['chat']);
+
+		$arr = array('chat_category', 'chat_avatar_img', 'chat_type', 'chat_fb_card', 'chat_twitter_card', 'chat_linked_card', 'chat_pinterest_card');
+
+		foreach($arr as $a){
+			$chat[$a] = update_post_meta($id, $a, true);
+		}
+
 		$chat['elements'] = array();
 
 		$chat_results = $wpdb->get_results("select * from ".$wpdb->prefix ."chat_bot_data where chat_id =".$_GET['chat']." order by parent asc");

@@ -200,6 +200,11 @@ class IC_agent_api{
 	function ic_retrieve_chat_bot(){
 		global $wpdb;
 
+		if(isset($_GET['agentID'])) {		
+			$siteID = get_active_blog_for_user( $_GET['agentID'] )->blog_id;
+			switch_to_blog( $siteID );
+		}
+		
 		$chat = (array) get_post($_GET['chat']);
 
 		$arr = array('chat_category', 'chat_avatar_img', 'chat_type', 'chat_fb_card', 'chat_twitter_card', 'chat_linked_card', 'chat_pinterest_card');

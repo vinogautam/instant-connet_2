@@ -54,7 +54,7 @@ class IC_agent_api{
 			'ic_disable_agent_acc_have_no_wallet', 'ic_agent_account_active', 'ic_endorser_points_details', 'ic_agent_redeem_list', 'ic_agent_top_endorser', 'ic_agent_create_landing_page', 'ic_agent_get_landing_page',
 			'ic_get_landing_page_templates', 'ic_agent_create_static_page', 'ic_agent_get_static_page',
 			'ic_get_static_page_templates', 'ic_upload_image', 'ic_profile_image', 'ic_get_base64_image',
-			'ic_chat_bot_category', 'ic_chat_bot_new', 'ic_retrieve_chat_bot'
+			'ic_chat_bot_category', 'ic_chat_bot_new', 'ic_retrieve_chat_bot', 'ic_retrieve_chat_list'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -86,20 +86,27 @@ class IC_agent_api{
 	}
 
 	function store_elements($cid, $pid, $results){
+		global $wpdb;
+
 		foreach ($results as $key => $value) {
+			$value = (array) $value;
+
 			if($value['opt'] == 'option'){
 				$wpdb->insert($wpdb->prefix ."chat_bot_data", array(
+					'type' => $value['type'],
 					'chat_id' => $cid,
 			  		'parent' => $pid,
 			  		'label' => $value['label'],
-			  		'back' => $value['back'],
-			  		'jump' => $value['jump'],
-			  		'userinput' => $value['userinput']
+			  		'opt' => $value['opt'],
+			  		'back' => $value['back'] ? 1 : 0,
+			  		'skip' => $value['skip'] ? 1 : 0,
+			  		'userinput' => $value['userinput'] ? $value['userinput'] : ''
 				));
 
 				$parent_id = $wpdb->insert_id;
 
-				foreach ($_POST['choice'] as $key1 => $value1) {
+				foreach ($value['choice'] as $key1 => $value1) {
+					$value1 = (array) $value1;
 					$wpdb->insert($wpdb->prefix ."chat_bot_data", array(
 						'chat_id' => $cid,
 				  		'parent' => $parent_id,
@@ -107,22 +114,22 @@ class IC_agent_api{
 				  		'label' => $value1['option']
 					));
 					if(count($value1['logic_jump'])){
-						store_elements($cid, $wpdb->insert_id, $value1['logic_jump']);
+						$this->store_elements($cid, $wpdb->insert_id, $value1['logic_jump']);
 					}
 				}
 
 			} else {
 				$wpdb->insert($wpdb->prefix ."chat_bot_data", array(
-					'type' => $_POST['type'],
+					'type' => $value['type'],
 					'chat_id' => $cid,
 			  		'parent' => $pid,
 			  		'label' => $value['label'],
 			  		'opt' => $value['opt'],
-			  		'back' => $value['back'],
-			  		'skip' => $value['skip'],
-			  		'userinput' => $value['userinput'],
-			  		'video' => $value['video'],
-			  		'type' => $value['type']
+			  		'back' => $value['back'] ? 1 : 0,
+			  		'skip' => $value['skip'] ? 1 : 0,
+			  		'userinput' => $value['userinput'] ? $value['userinput'] : '',
+			  		'video' => $value['video'] ? $value['video'] : '',
+			  		'type' => $value['type'] ? $value['type'] : ''
 				));
 			}
 		}
@@ -132,7 +139,7 @@ class IC_agent_api{
 		global $wpdb;
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		$args = array('post_title' => $_POST['title'], 'post_content' => $_POST['content']);
+		$args = array('post_title' => $_POST['title'], 'post_content' => $_POST['content'], 'post_type' => 'ic-chat-bot', 'post_status' => 'publish');
 
 		$id = wp_insert_post($args);
 
@@ -143,9 +150,9 @@ class IC_agent_api{
 			update_post_meta($id, $a, $_POST[$a]);
 		}
 
-		store_elements($chat_id, 0, $_POST['elements']);
+		$this->store_elements($id, 0, $_POST['elements']);
 
-		$data = array('status' => 'Success');
+		$data = array('status' => 'Success', 'id' => $id);
 
 		echo json_encode($data);
 
@@ -166,8 +173,8 @@ class IC_agent_api{
 		foreach($arr as $a){
 			update_post_meta($_POST['ID'], $a, $_POST[$a]);
 		}
-		$wpdb->delete($wpdb->prefix ."chat_bot_data", array('chat_id' => $_POST['ID']);
-		store_elements($_POST['ID'], 0, $_POST['elements']);
+		$wpdb->delete($wpdb->prefix ."chat_bot_data", array('chat_id' => $_POST['ID']));
+		$this->store_elements($_POST['ID'], 0, $_POST['elements']);
 
 		$data = array('status' => 'Success');
 
@@ -180,12 +187,14 @@ class IC_agent_api{
 		$res = array();
 		foreach ($chat_data[$ind] as $key => $value) {
 			if($value->opt == 'option'){
-				$tmp = $value;
+
+				$tmp = (array)$value;
 				$tmp['choice'] = array();
 				foreach ($chat_data[$value->id] as $key1 => $value1) {
+					$value1 = (array)$value1;
 					$tmp['choice'][] = array(
 						'option' => $value1['label'],
-						'logic_jump' => get_chat_data($chat_data, $value->id)
+						'logic_jump' => $this->get_chat_data($chat_data, $value1['id'])
 					);
 				}
 				$res[] = $tmp;
@@ -205,21 +214,45 @@ class IC_agent_api{
 		$arr = array('chat_category', 'chat_avatar_img', 'chat_type', 'chat_fb_card', 'chat_twitter_card', 'chat_linked_card', 'chat_pinterest_card');
 
 		foreach($arr as $a){
-			$chat[$a] = update_post_meta($id, $a, true);
+			$chat[$a] = get_post_meta($id, $a, true);
 		}
-
-		$chat['elements'] = array();
 
 		$chat_results = $wpdb->get_results("select * from ".$wpdb->prefix ."chat_bot_data where chat_id =".$_GET['chat']." order by parent asc");
 
+
+
 		$chat_data = array();
 		foreach ($chat_results as $key => $value) {
-			$chat_data[$value->parent] = $value;
+			if(!isset($chat_data[$value->parent])){
+				$chat_data[$value->parent] = array();
+			}
+			$chat_data[$value->parent][] = $value;
 		}
 
-		$results = get_chat_data($chat_data, 0);
+		$chat['elements'] = $this->get_chat_data($chat_data, 0);
 
-		$data = array('status' => 'Success', 'data' => $results);
+		$data = array('status' => 'Success', 'data' => $chat);
+
+		echo json_encode($data);
+
+		die(0);
+	}
+
+	function ic_retrieve_chat_list(){
+		global $wpdb;
+
+		$chat = get_posts(array('post_type' => 'ic-chat-bot', 'posts_per_page' => -1));
+		$newresults = [];
+		foreach ($chat as $key => $value) {
+			$newresults[] = array(
+				'ID' => $value->ID,
+				'title' => $value->post_title,
+				'description' => $value->post_content,
+				'type' => get_post_meta($value->ID, 'chat_type', true)
+			);
+		}
+
+		$data = array('status' => 'Success', 'data' => $newresults);
 
 		echo json_encode($data);
 

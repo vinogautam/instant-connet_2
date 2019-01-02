@@ -54,7 +54,8 @@ class IC_agent_api{
 			'ic_disable_agent_acc_have_no_wallet', 'ic_agent_account_active', 'ic_endorser_points_details', 'ic_agent_redeem_list', 'ic_agent_top_endorser', 'ic_agent_create_landing_page', 'ic_agent_get_landing_page',
 			'ic_get_landing_page_templates', 'ic_agent_create_static_page', 'ic_agent_get_static_page',
 			'ic_get_static_page_templates', 'ic_upload_image', 'ic_profile_image', 'ic_get_base64_image',
-			'ic_chat_bot_category', 'ic_chat_bot_new', 'ic_retrieve_chat_bot', 'ic_retrieve_chat_list'
+			'ic_chat_bot_category', 'ic_chat_bot_new', 'ic_retrieve_chat_bot', 'ic_retrieve_chat_list',
+			'ic_new_endorsement_invitation'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -3368,6 +3369,62 @@ class IC_agent_api{
 	function ic_site_pages() {
 
 		echo json_encode(array('data' => get_pages()));
+		die(0);
+	}
+
+	function ic_new_endorsement_invitation(){
+		global $wpdb, $ntm_mail;
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+		$botId = $_POST['botId'];
+		$contact_list = $_POST['contacts'];
+		$notes = $_POST['template'];
+		$endorser = get_userdata($_POST['id']);
+		$blog_id = get_active_blog_for_user( $_POST['id'] )->blog_id;
+		$subject = 'Endorser Invitation';
+
+		$email_invitation = get_post_meta($botId, 'email_invitation', true);
+
+		$valid = 0;
+		$contact_list_res = [];
+		foreach($contact_list as $res)
+		{
+
+			$res = (array)$res;
+
+			$check = $wpdb->get_results('select * from wp_'.$blog_id.'_endorsements where email = "'.$res['email'].'"');
+			
+			if(!count($check)){
+
+				$info = array(
+					"name" => $res['name'], 
+					"created" => date("Y-m-d H:i:s"), 
+					"email" => $res['email'],
+					"endorser_id" => $_POST['id'],
+					"tracker_id" => wp_generate_password( $length=12, $include_standard_special_chars=false )
+				);
+				$wpdb->insert("wp_".$blog_id."_endorsements", $info);
+				$content = file_get_contents('../emailtemplate/invitation.html');
+
+				$content 	=	str_ireplace('[USERNAME]', $res['name'], $content);
+				$content 	=	str_ireplace('[ENDORSERNAME]', get_user_meta($_POST['id'], 'first_name', true), $content);
+				$content 	=	str_ireplace('[BOTLINK]', get_permalink($botId).'?ref='.base64_encode(base64_encode($botId.'#&$#'.$endorser.'#&$#'.$wpdb->insert_id)).'&video='.$video, $content);
+
+				$content 	=	str_ireplace('[EMAILINVIATION]', $email_invitation, $content);
+				$content 	=	str_ireplace('[PERSONALNOTE]', $notes, $content);
+
+				$image = "<img src='".site_url('wp-admin/admin-ajax.php?action=ic_track_invitation_open&ref='.base64_encode(base64_encode($eeid.'#&$#'.$_POST['id'].'#&$#'.$info['tracker_id'])))."' width='1' height='1'>";
+				$endorse_letter = $content = str_ireplace("[TRACKIMAGE]", $image, $content);
+				$ntm_mail->send_mail($_POST['email'], $subject, $content);
+				$valid++;
+				$res['valid'] = true;
+			} else {
+				$res['valid'] = false;
+			}
+
+			$contact_list_res[] = $res;
+		}
+
+		echo json_encode($response);
 		die(0);
 	}
 

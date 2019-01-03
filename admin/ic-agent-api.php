@@ -239,7 +239,7 @@ class IC_agent_api{
 		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'chat_fb_card', 'chat_twitter_card', 'chat_linked_card', 'chat_pinterest_card');
 
 		foreach($arr as $a){
-			$chat[$a] = get_post_meta($id, $a, true);
+			$chat[$a] = get_post_meta($value->ID, $a, true);
 		}
 
 		$chat_results = $wpdb->get_results("select * from ".$wpdb->prefix ."chat_bot_data where chat_id =".$_GET['chat']." order by parent asc");

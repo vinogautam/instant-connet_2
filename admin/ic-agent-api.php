@@ -98,6 +98,11 @@ class IC_agent_api{
 					'chat_id' => $cid,
 			  		'parent' => $pid,
 			  		'label' => $value['label'],
+			  		'data' => $value['data'] ? serialize($value['data']) : '',
+			  		'labelref' => $value['labelref'] ? $value['labelref'] : '',
+			  		'inputref' => $value['inputref'] ? $value['inputref'] : '',
+			  		'ref' => $value['ref'] ? $value['ref'] : '',
+			  		'action' => $value['action'] ? $value['action'] : '',
 			  		'opt' => $value['opt'],
 			  		'back' => $value['back'] ? 1 : 0,
 			  		'skip' => $value['skip'] ? 1 : 0,
@@ -125,6 +130,11 @@ class IC_agent_api{
 					'chat_id' => $cid,
 			  		'parent' => $pid,
 			  		'label' => $value['label'],
+			  		'data' => $value['data'] ? serialize($value['data']) : '',
+			  		'labelref' => $value['labelref'] ? $value['labelref'] : '',
+			  		'inputref' => $value['inputref'] ? $value['inputref'] : '',
+			  		'ref' => $value['ref'] ? $value['ref'] : '',
+			  		'action' => $value['action'] ? $value['action'] : '',
 			  		'opt' => $value['opt'],
 			  		'back' => $value['back'] ? 1 : 0,
 			  		'skip' => $value['skip'] ? 1 : 0,
@@ -145,7 +155,7 @@ class IC_agent_api{
 		$id = wp_insert_post($args);
 
 
-		$arr = array('chat_category', 'chat_avatar_img', 'chat_type', 'chat_fb_card', 'chat_twitter_card', 'chat_linked_card', 'chat_pinterest_card');
+		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'chat_fb_card', 'chat_twitter_card', 'chat_linked_card', 'chat_pinterest_card');
 
 		foreach($arr as $a){
 			update_post_meta($id, $a, $_POST[$a]);
@@ -169,7 +179,7 @@ class IC_agent_api{
 
 		$id = wp_update_post($args);
 
-		$arr = array('chat_category', 'chat_avatar_img', 'chat_type', 'chat_fb_card', 'chat_twitter_card', 'chat_linked_card', 'chat_pinterest_card');
+		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'chat_fb_card', 'chat_twitter_card', 'chat_linked_card', 'chat_pinterest_card');
 
 		foreach($arr as $a){
 			update_post_meta($_POST['ID'], $a, $_POST[$a]);
@@ -187,11 +197,13 @@ class IC_agent_api{
 	function get_chat_data($chat_data, $ind){
 		$res = array();
 		foreach ($chat_data[$ind] as $key => $value) {
-			if($value->opt == 'option'){
+			$value = (array)$value;
+			$value['data'] = $value['data'] ? unserialize($value['data']) : '';
+			if($value['opt'] == 'option'){
 
-				$tmp = (array)$value;
-				$tmp['choice'] = array();
-				foreach ($chat_data[$value->id] as $key1 => $value1) {
+				$tmp = $value;
+				$tmp['choice'] = $value;
+				foreach ($chat_data[$value['id']] as $key1 => $value1) {
 					$value1 = (array)$value1;
 					$tmp['choice'][] = array(
 						'option' => $value1['label'],
@@ -215,9 +227,16 @@ class IC_agent_api{
 			switch_to_blog( $siteID );
 		}
 		
-		$chat = (array) get_post($_GET['chat']);
+		$value = get_post($_GET['chat']);
 
-		$arr = array('chat_category', 'chat_avatar_img', 'chat_type', 'chat_fb_card', 'chat_twitter_card', 'chat_linked_card', 'chat_pinterest_card');
+		$chat = array(
+			'ID' => $value->ID,
+			'title' => $value->post_title,
+			'content' => $value->post_content,
+			'link' => get_permalink($value->ID)
+		);
+
+		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'chat_fb_card', 'chat_twitter_card', 'chat_linked_card', 'chat_pinterest_card');
 
 		foreach($arr as $a){
 			$chat[$a] = get_post_meta($id, $a, true);
@@ -253,7 +272,9 @@ class IC_agent_api{
 			$newresults[] = array(
 				'ID' => $value->ID,
 				'title' => $value->post_title,
-				'description' => $value->post_content,
+				'content' => $value->post_content,
+				'link' => get_permalink($value->ID),
+				'avatar' => get_post_meta($value->ID, 'chat_avatar_img', true),
 				'type' => get_post_meta($value->ID, 'chat_type', true)
 			);
 		}

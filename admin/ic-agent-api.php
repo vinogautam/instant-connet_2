@@ -155,7 +155,7 @@ class IC_agent_api{
 		$id = wp_insert_post($args);
 
 
-		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'chat_fb_card', 'chat_twitter_card', 'chat_linked_card', 'chat_pinterest_card');
+		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'fbText', 'fb_image', 'twText', 'tw_image', 'piText', 'pi_image', 'liText', 'li_image', 'inviteContent');
 
 		foreach($arr as $a){
 			update_post_meta($id, $a, $_POST[$a]);
@@ -179,7 +179,7 @@ class IC_agent_api{
 
 		$id = wp_update_post($args);
 
-		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'chat_fb_card', 'chat_twitter_card', 'chat_linked_card', 'chat_pinterest_card');
+		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'fbText', 'fb_image', 'twText', 'tw_image', 'piText', 'pi_image', 'liText', 'li_image', 'inviteContent');
 
 		foreach($arr as $a){
 			update_post_meta($_POST['ID'], $a, $_POST[$a]);
@@ -236,7 +236,7 @@ class IC_agent_api{
 			'link' => get_permalink($value->ID)
 		);
 
-		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'chat_fb_card', 'chat_twitter_card', 'chat_linked_card', 'chat_pinterest_card');
+		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'fbText', 'fb_image', 'twText', 'tw_image', 'piText', 'pi_image', 'liText', 'li_image', 'inviteContent');
 
 		foreach($arr as $a){
 			$chat[$a] = get_post_meta($value->ID, $a, true);

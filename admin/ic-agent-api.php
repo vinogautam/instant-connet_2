@@ -275,7 +275,8 @@ class IC_agent_api{
 				'content' => $value->post_content,
 				'link' => get_permalink($value->ID),
 				'avatar' => get_post_meta($value->ID, 'chat_avatar_img', true),
-				'type' => get_post_meta($value->ID, 'chat_type', true)
+				'type' => get_post_meta($value->ID, 'chat_type', true),
+				'chatCardImg' => get_post_meta($value->ID, 'backgroundImage', true)
 			);
 		}
 

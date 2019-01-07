@@ -55,7 +55,7 @@ class IC_agent_api{
 			'ic_get_landing_page_templates', 'ic_agent_create_static_page', 'ic_agent_get_static_page',
 			'ic_get_static_page_templates', 'ic_upload_image', 'ic_profile_image', 'ic_get_base64_image',
 			'ic_chat_bot_category', 'ic_chat_bot_new', 'ic_retrieve_chat_bot', 'ic_retrieve_chat_list',
-			'ic_new_endorsement_invitation'
+			'ic_new_endorsement_invitation', 'ic_delete_bot', 'ic_chat_bot_update'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -194,6 +194,21 @@ class IC_agent_api{
 		die(0);
 	}
 
+	function ic_delete_bot(){
+		global $wpdb;
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$args = array('post_status' => 'trash', 'ID' => $_POST['ID']);
+
+		$id = wp_update_post($args);
+
+		$data = array('status' => 'Success');
+
+		echo json_encode($data);
+
+		die(0);
+	}
+
 	function get_chat_data($chat_data, $ind){
 		$res = array();
 		foreach ($chat_data[$ind] as $key => $value) {
@@ -202,7 +217,7 @@ class IC_agent_api{
 			if($value['opt'] == 'option'){
 
 				$tmp = $value;
-				$tmp['choice'] = $value;
+				$tmp['choice'] = array();
 				foreach ($chat_data[$value['id']] as $key1 => $value1) {
 					$value1 = (array)$value1;
 					$tmp['choice'][] = array(

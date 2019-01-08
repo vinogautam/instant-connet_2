@@ -119,7 +119,7 @@ class IC_agent_api{
 				  		'parent' => $parent_id,
 				  		'option' => 1,
 				  		'label' => $value1['option'],
-				  		'action' => $value['action'] ? $value['action'] : ''
+				  		'action' => $value1['action'] ? $value1['action'] : ''
 					));
 					if(count($value1['logic_jump'])){
 						$this->store_elements($cid, $wpdb->insert_id, $value1['logic_jump']);
@@ -264,6 +264,7 @@ class IC_agent_api{
 					$value1 = (array)$value1;
 					$tmp['choice'][] = array(
 						'option' => $value1['label'],
+						'action' => $value1['action'],
 						'logic_jump' => $this->get_chat_data($chat_data, $value1['id'])
 					);
 				}

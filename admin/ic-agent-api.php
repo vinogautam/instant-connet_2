@@ -55,7 +55,8 @@ class IC_agent_api{
 			'ic_get_landing_page_templates', 'ic_agent_create_static_page', 'ic_agent_get_static_page',
 			'ic_get_static_page_templates', 'ic_upload_image', 'ic_profile_image', 'ic_get_base64_image',
 			'ic_chat_bot_category', 'ic_chat_bot_new', 'ic_retrieve_chat_bot', 'ic_retrieve_chat_list',
-			'ic_new_endorsement_invitation', 'ic_delete_bot', 'ic_chat_bot_update'
+			'ic_new_endorsement_invitation', 'ic_delete_bot', 'ic_chat_bot_update', 'ic_chat_toggle_status',
+			'ic_copy_chat_bot'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -170,6 +171,46 @@ class IC_agent_api{
 		die(0);
 	}
 
+	function ic_copy_chat_bot(){
+		global $wpdb;
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$botId = $_POST['ID'];
+		$botData = $this->ic_retrieve_chat_bot($botId, 1);
+
+		$args = array('post_title' => $botData['title'].' - Copy', 'post_content' => $botData['content'], 'post_type' => 'ic-chat-bot', 'post_status' => 'publish');
+
+		$id = wp_insert_post($args);
+
+
+		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'fbText', 'fb_image', 'twText', 'tw_image', 'piText', 'pi_image', 'liText', 'li_image', 'inviteContent', 'backgroundImage', 'fullscreen', 'emailInvite');
+
+		foreach($arr as $a){
+			update_post_meta($id, $a, $botData[$a]);
+		}
+
+		$this->store_elements($id, 0, $botData['elements']);
+
+		$data = array('status' => 'Success', 'id' => $id);
+
+		echo json_encode($data);
+
+		die(0);
+	}
+
+	function ic_chat_toggle_status(){
+		global $wpdb;
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$args = array('post_status' => $_POST['status'] ? 'publish' : 'draft', 'ID' => $_POST['ID']);
+
+		$id = wp_update_post($args);
+		$data = array('status' => 'Success');
+
+		echo json_encode($data);
+
+		die(0);
+	}
 
 	function ic_chat_bot_update(){
 		global $wpdb;
@@ -234,7 +275,7 @@ class IC_agent_api{
 		return $res;
 	}
 
-	function ic_retrieve_chat_bot(){
+	function ic_retrieve_chat_bot($botId, $fl = 0){
 		global $wpdb;
 
 		if(isset($_GET['agentID'])) {		
@@ -242,7 +283,9 @@ class IC_agent_api{
 			switch_to_blog( $siteID );
 		}
 		
-		$value = get_post($_GET['chat']);
+		$botId = $fl == 0 ? $_GET['chat'] : $botId;
+
+		$value = get_post($botId);
 
 		$chat = array(
 			'ID' => $value->ID,
@@ -257,7 +300,7 @@ class IC_agent_api{
 			$chat[$a] = get_post_meta($value->ID, $a, true);
 		}
 
-		$chat_results = $wpdb->get_results("select * from ".$wpdb->prefix ."chat_bot_data where chat_id =".$_GET['chat']." order by parent asc");
+		$chat_results = $wpdb->get_results("select * from ".$wpdb->prefix ."chat_bot_data where chat_id =".$botId." order by parent asc");
 
 
 
@@ -271,21 +314,24 @@ class IC_agent_api{
 
 		$chat['elements'] = $this->get_chat_data($chat_data, 0);
 
-		$data = array('status' => 'Success', 'data' => $chat);
-
-		echo json_encode($data);
-
-		die(0);
+		if($fl){
+			return $chat;
+		} else {
+			$data = array('status' => 'Success', 'data' => $chat);
+			echo json_encode($data);
+			die(0);
+		}
 	}
 
 	function ic_retrieve_chat_list(){
 		global $wpdb;
 
-		$chat = get_posts(array('post_type' => 'ic-chat-bot', 'posts_per_page' => -1));
+		$chat = get_posts(array('post_type' => 'ic-chat-bot', 'posts_per_page' => -1, 'post_status' => array('draft', 'publish')));
 		$newresults = [];
 		foreach ($chat as $key => $value) {
 			$newresults[] = array(
 				'ID' => $value->ID,
+				'status' => $value->post_status == 'publish',
 				'title' => $value->post_title,
 				'content' => $value->post_content,
 				'link' => get_permalink($value->ID),

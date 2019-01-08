@@ -276,7 +276,8 @@ class IC_agent_api{
 				'link' => get_permalink($value->ID),
 				'avatar' => get_post_meta($value->ID, 'chat_avatar_img', true),
 				'type' => get_post_meta($value->ID, 'chat_type', true),
-				'chatCardImg' => get_post_meta($value->ID, 'backgroundImage', true)
+				'chatCardImg' => get_post_meta($value->ID, 'backgroundImage', true),
+				'description' => get_post_meta($value->ID, 'backgroundImage', true)
 			);
 		}
 
@@ -558,7 +559,7 @@ class IC_agent_api{
 	    			'width' => $dynamic_template['width'][$key],
 	    			'height' => $dynamic_template['height'][$key],
 	    			'content' => $dynamic_template['content'][$key]);
-	    	}
+	    		}
 
 	    	$results[] = $value;
 		}
@@ -3446,8 +3447,89 @@ class IC_agent_api{
 			$contact_list_res[] = $res;
 		}
 
+		if($valid){
+			
+			$agent_id = get_blog_option($blog_id, 'agent_id');
+			$points = get_user_meta($agent_id, 'endorsement_settings', true)['email_point_value'];
+			$note_points = get_user_meta($agent_id, 'endorsement_settings', true)['note_point_value'];
+			
+
+			$monthly_invitation_allowance = get_user_meta($agent_id, 'endorsement_settings', true)['monthly_invitation_allowance'];
+			
+			$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and endorser_id='".$_POST['id']."'");
+
+			$endorser_points = $results->points ? $results->points : 0;
+
+			if($endorser_points < $monthly_invitation_allowance){
+
+				$total_points = $points * $valid;
+
+				if(strlen($notes) > 100){
+					$total_points += $note_points;
+				}
+
+
+				if(($total_points + $endorser_points) > $monthly_invitation_allowance){
+					$total_points = $monthly_invitation_allowance - $endorser_points;
+				}
+
+
+				$endorser_points = $endorser_points + $total_points;
+				$balance = $this->ic_agent_balance($agent_id);
+				$point_value = $this->ic_get_point_value($total_points) * 100;
+				$queue = $balance >= $point_value ? 0 : 1;
+				$data = array(
+								'endorser_id' => $_POST['id'],
+								'agent_id' => $agent_id,
+								'points' => $total_points,
+								'queue' => $queue,
+								'type' => 'email_invitation',
+								'created'	=> date("Y-m-d H:i:s")
+								);
+				$wpdb->insert("wp_".$blog_id."_points_transaction", $data);
+
+				if($queue == 0){
+					$wpdb->insert("wp_". $blog_id ."_agent_wallet", 
+							array(
+								'agent_id' => $agent_id,
+						  		'points' => $points,
+						  		'balance' => $balance-$point_value,
+						  		'endorser_id' => $_POST['endorser_id'],
+						  		'amount' => -$point_value,
+						  		'notes' => 'Debited',
+						  		'transaction_id' => $wpdb->insert_id,
+						  		'created' => date('Y-m-d H-i-s')
+							)
+					);
+				}
+				
+				update_user_meta($_POST['id'], "invitation_sent", (get_user_meta($_POST['id'], "invitation_sent", true) + $valid));
+			}
+
+			update_user_meta($_POST['id'], 'end_follow_up', 1);
+
+			$results = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where queue = 0 and endorser_id='".$_POST['id']."'");
+			$endorser_points2 = $results->points ? $results->points : 0;
+
+			$results2 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where queue = 1 and endorser_id='".$_POST['id']."'");
+			$endorser_points3 = $results2->points ? $results2->points : 0;
+
+			$response = array('status' => 'Success', 'msg' => 'Invitation send', 'points' => $endorser_points2, 'non_release_points' => $endorser_points3, 'allowance' => $endorser_points, 'valid_email' => $valid);
+
+			$track = array('contacts' => $contact_list_res,  'valid_email' => $valid,
+				'points_earned' => $total_points
+			);
+			$this->track_api('ic_send_endorsement_invitation', $blog_id, $_POST['id'], $track, $response);
+		} else{
+			$response = array('status' => 'Error', 'msg' => 'No valid Email, already shared invitation for this email');
+
+			$this->track_api('ic_send_endorsement_invitation', $blog_id, $_POST['id'], array(), $response);
+		}
+
 		echo json_encode($response);
 		die(0);
+
+		
 	}
 
 	function ic_send_endorsement_invitation() {

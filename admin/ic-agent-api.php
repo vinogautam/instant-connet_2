@@ -118,7 +118,8 @@ class IC_agent_api{
 						'chat_id' => $cid,
 				  		'parent' => $parent_id,
 				  		'option' => 1,
-				  		'label' => $value1['option']
+				  		'label' => $value1['option'],
+				  		'action' => $value['action'] ? $value['action'] : ''
 					));
 					if(count($value1['logic_jump'])){
 						$this->store_elements($cid, $wpdb->insert_id, $value1['logic_jump']);

@@ -203,7 +203,7 @@ class IC_agent_api{
 		global $wpdb;
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		$args = array('post_status' => $_POST['status'] ? 'publish' : 'draft', 'ID' => $_POST['ID']);
+		$args = array('post_status' => $_POST['status'] == 'true'? 'publish' : 'draft', 'ID' => $_POST['ID']);
 
 		$id = wp_update_post($args);
 		$data = array('status' => 'Success');
@@ -217,7 +217,7 @@ class IC_agent_api{
 		global $wpdb;
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		$args = array('post_title' => $_POST['title'], 'post_content' => $_POST['content'], 'ID' => $_POST['ID']);
+		$args = array('post_title' => $_POST['title'], 'post_content' => $_POST['content'], 'ID' => $_POST['ID'], 'post_status' => $_POST['status'] == 'true'? 'publish' : 'draft');
 
 		$id = wp_update_post($args);
 
@@ -291,6 +291,7 @@ class IC_agent_api{
 
 		$chat = array(
 			'ID' => $value->ID,
+			'status' => $value->post_status == 'publish',
 			'title' => $value->post_title,
 			'content' => $value->post_content,
 			'link' => get_permalink($value->ID)

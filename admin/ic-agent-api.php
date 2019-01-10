@@ -2691,9 +2691,9 @@ class IC_agent_api{
 		if(!is_wp_error($current_user)) {
 			$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
 			$agent_id = get_blog_option($blog_id, 'agent_id');
-
+			$current_agent_data = get_userdata($agent_id);
     		update_user_meta( $current_user->ID, 'last_login', time() );
-
+    		$current_user_data = get_userdata($current_user->ID);
 
 			$points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where queue = 0 and endorser_id=".$current_user->ID);
 
@@ -2726,13 +2726,17 @@ class IC_agent_api{
 			$endorsement_settings = get_user_meta($agent_id, 'endorsement_settings', true);
 			$data = array(
 					'endorser' => $current_user,
+					'endorser_first_name' => $current_user_data->first_name,
+					'endorser_last_name' => $current_user_data->last_name,
+					'agent_first_name' => $current_agent_data->first_name,
+					'agent_last_name' => $current_agent_data->last_name,
 					'points' => $points->points ? $points->points : 0,
 					'non_release_points' => $points2->points ? $points2->points : 0,
 					'monthly_limit_points' => $invitation_points->points ? $invitation_points->points : 0,
-					'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')).'&video='.$video,
-					'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')).'&video='.$video,
-					'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')).'&video='.$video,
-					'mailtemplate' => str_replace('[ENDORSERS NOTES]', '<div id="dynamicNoteContainer" ng-click="editNote()" dynamic="bodyContent" style="background-color: white;"></div><a href="javascript:void(0)" style="float: right; top: -30px; position: relative; right: 10px;" ng-click="editNote()">Edit</a>', $content),
+					//'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')).'&video='.$video,
+					//'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')).'&video='.$video,
+					//'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')).'&video='.$video,
+					//'mailtemplate' => str_replace('[ENDORSERS NOTES]', '<div id="dynamicNoteContainer" ng-click="editNote()" dynamic="bodyContent" style="background-color: white;"></div><a href="javascript:void(0)" style="float: right; top: -30px; position: relative; right: 10px;" ng-click="editNote()">Edit</a>', $content),
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
 					'twitter_text' => get_option('twitter_text'),
@@ -2766,7 +2770,7 @@ class IC_agent_api{
 		$creds['user_password'] = $autologin[1];
 		$creds['remember'] = true;
 		$current_user = wp_signon( $creds, false );
-
+		$current_user_data = get_userdata($current_user->ID);
 		$points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where queue = 0 and endorser_id=".$current_user->ID);
 
 			$points2 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where queue = 1 and endorser_id=".$current_user->ID);
@@ -2801,7 +2805,7 @@ class IC_agent_api{
 			update_user_meta( $current_user->ID, 'last_login', time() );
 			$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
 			$agent_id = get_blog_option($blog_id, 'agent_id');
-
+			$current_agent_user = get_userdata($agent_id);
 			$campaign = get_user_meta($current_user->ID, 'campaign', true);
 			$dcampaign = $wpdb->get_row("select * from wp_".$blog_id."_campaigns where id=".$campaign);
 			
@@ -2817,13 +2821,17 @@ class IC_agent_api{
 			$endorsement_settings = get_user_meta($agent_id, 'endorsement_settings', true);
 			$data = array(
 					'endorser' => $current_user,
+					'endorser_first_name' => $current_user_data->first_name,
+					'endorser_last_name' => $current_user_data->last_name,
+					'agent_first_name' => $current_agent_user->first_name,
+					'agent_last_name' => $current_agent_user->last_name,
 					'points' => $points->points ? $points->points : 0,
 					'non_release_points' => $points2->points ? $points2->points : 0,
 					'monthly_limit_points' => $invitation_points->points ? $invitation_points->points : 0,
-					'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')).'&video='.$video,
-					'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')).'&video='.$video,
-					'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')).'&video='.$video,
-					'mailtemplate' => str_replace('[ENDORSERS NOTES]', '<div id="dynamicNoteContainer" ng-click="editNote()" dynamic="bodyContent" style="background-color: white;"></div><a href="javascript:void(0)" style="float: right; top: -30px; position: relative; right: 10px;" ng-click="editNote()">Edit</a>', $content),
+					//'fb_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#fb')).'&video='.$video,
+					//'li_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#li')).'&video='.$video,
+					//'tw_ref_link' => $pagelink.'?ref='.base64_encode(base64_encode($current_user->ID.'#&$#tw')).'&video='.$video,
+					//'mailtemplate' => str_replace('[ENDORSERS NOTES]', '<div id="dynamicNoteContainer" ng-click="editNote()" dynamic="bodyContent" style="background-color: white;"></div><a href="javascript:void(0)" style="float: right; top: -30px; position: relative; right: 10px;" ng-click="editNote()">Edit</a>', $content),
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
 					'points_per_dollar' => get_option('points_per_dollar'),

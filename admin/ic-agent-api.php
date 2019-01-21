@@ -103,6 +103,7 @@ class IC_agent_api{
 			  		'labelref' => $value['labelref'] ? $value['labelref'] : '',
 			  		'inputref' => $value['inputref'] ? $value['inputref'] : '',
 			  		'ref' => $value['ref'] ? $value['ref'] : '',
+			  		'reflabel' => $value['reflabel'] ? $value['reflabel'] : '',
 			  		'action' => $value['action'] ? $value['action'] : '',
 			  		'opt' => $value['opt'],
 			  		'back' => $value['back'] ? 1 : 0,
@@ -119,6 +120,7 @@ class IC_agent_api{
 				  		'parent' => $parent_id,
 				  		'option' => 1,
 				  		'label' => $value1['option'],
+				  		'type' => $value1['opttype'] ? $value1['opttype'] : ''
 				  		'action' => $value1['action'] ? $value1['action'] : ''
 					));
 					if(count($value1['logic_jump'])){
@@ -136,6 +138,7 @@ class IC_agent_api{
 			  		'labelref' => $value['labelref'] ? $value['labelref'] : '',
 			  		'inputref' => $value['inputref'] ? $value['inputref'] : '',
 			  		'ref' => $value['ref'] ? $value['ref'] : '',
+			  		'reflabel' => $value['reflabel'] ? $value['reflabel'] : '',
 			  		'action' => $value['action'] ? $value['action'] : '',
 			  		'opt' => $value['opt'],
 			  		'back' => $value['back'] ? 1 : 0,
@@ -263,6 +266,8 @@ class IC_agent_api{
 				foreach ($chat_data[$value['id']] as $key1 => $value1) {
 					$value1 = (array)$value1;
 					$tmp['choice'][] = array(
+						'id' => $value1['id'],
+						'opttype' => $value1['type'],
 						'option' => $value1['label'],
 						'action' => $value1['action'],
 						'logic_jump' => $this->get_chat_data($chat_data, $value1['id'])

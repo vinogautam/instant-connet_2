@@ -801,6 +801,7 @@
 			  userinput tinytext NOT NULL,
 			  opt tinytext NOT NULL,
 			  ref tinytext NOT NULL,
+			  reflabel tinytext NOT NULL,
 			  labelref tinytext NOT NULL,
 			  inputref tinytext NOT NULL,
 			  action tinytext NOT NULL,

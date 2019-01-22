@@ -108,7 +108,8 @@ class IC_agent_api{
 			  		'opt' => $value['opt'],
 			  		'back' => $value['back'] ? 1 : 0,
 			  		'skip' => $value['skip'] ? 1 : 0,
-			  		'userinput' => $value['userinput'] ? $value['userinput'] : ''
+			  		'userinput' => $value['userinput'] ? $value['userinput'] : '',
+			  		'drag_order' => $value['drag_order'] ? $value['drag_order'] : 0,
 				));
 
 				$parent_id = $wpdb->insert_id;
@@ -120,7 +121,7 @@ class IC_agent_api{
 				  		'parent' => $parent_id,
 				  		'option' => 1,
 				  		'label' => $value1['option'],
-				  		'type' => $value1['opttype'] ? $value1['opttype'] : ''
+				  		'type' => $value1['opttype'] ? $value1['opttype'] : '',
 				  		'action' => $value1['action'] ? $value1['action'] : ''
 					));
 					if(count($value1['logic_jump'])){
@@ -145,7 +146,8 @@ class IC_agent_api{
 			  		'skip' => $value['skip'] ? 1 : 0,
 			  		'userinput' => $value['userinput'] ? $value['userinput'] : '',
 			  		'video' => $value['video'] ? $value['video'] : '',
-			  		'type' => $value['type'] ? $value['type'] : ''
+			  		'type' => $value['type'] ? $value['type'] : '',
+			  		'drag_order' => $value['drag_order'] ? $value['drag_order'] : 0,
 				));
 			}
 		}
@@ -258,6 +260,7 @@ class IC_agent_api{
 		$res = array();
 		foreach ($chat_data[$ind] as $key => $value) {
 			$value = (array)$value;
+			$value['label'] = stripslashes($value['label']);
 			$value['data'] = $value['data'] ? unserialize($value['data']) : '';
 			if($value['opt'] == 'option'){
 
@@ -308,7 +311,7 @@ class IC_agent_api{
 			$chat[$a] = get_post_meta($value->ID, $a, true);
 		}
 
-		$chat_results = $wpdb->get_results("select * from ".$wpdb->prefix ."chat_bot_data where chat_id =".$botId." order by parent asc");
+		$chat_results = $wpdb->get_results("select * from ".$wpdb->prefix ."chat_bot_data where chat_id =".$botId." order by parent asc, drag_order asc");
 
 
 

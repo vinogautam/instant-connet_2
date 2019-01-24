@@ -109,6 +109,8 @@ class IC_agent_api{
 			  		'back' => $value['back'] ? 1 : 0,
 			  		'skip' => $value['skip'] ? 1 : 0,
 			  		'userinput' => $value['userinput'] ? $value['userinput'] : '',
+			  		'avatar' => $value['avatar'] ? $value['avatar'] : 0,
+			  		'avatar_image' => $value['avatar_image'] ? $value['avatar_image'] : '',
 			  		'drag_order' => $value['drag_order'] ? $value['drag_order'] : 0,
 				));
 
@@ -147,6 +149,8 @@ class IC_agent_api{
 			  		'userinput' => $value['userinput'] ? $value['userinput'] : '',
 			  		'video' => $value['video'] ? $value['video'] : '',
 			  		'type' => $value['type'] ? $value['type'] : '',
+			  		'avatar' => $value['avatar'] ? $value['avatar'] : 0,
+			  		'avatar_image' => $value['avatar_image'] ? $value['avatar_image'] : '',
 			  		'drag_order' => $value['drag_order'] ? $value['drag_order'] : 0,
 				));
 			}

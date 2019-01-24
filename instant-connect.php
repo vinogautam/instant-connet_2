@@ -798,6 +798,8 @@
 			  data text,
 			  back int(1),
 			  skip int(1),
+			  avatar int(1),
+			  avatar_image tinytext NOT NULL,
 			  userinput tinytext NOT NULL,
 			  opt tinytext NOT NULL,
 			  ref tinytext NOT NULL,

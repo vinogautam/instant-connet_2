@@ -809,6 +809,7 @@
 			  action tinytext NOT NULL,
 			  image tinytext NOT NULL,
 			  video tinytext NOT NULL,
+			  videotype tinytext NOT NULL,
 			  type tinytext NOT NULL,
 			  drag_order int(1),
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";

@@ -112,6 +112,8 @@ class IC_agent_api{
 			  		'avatar' => $value['avatar'] ? $value['avatar'] : 0,
 			  		'avatar_image' => $value['avatar_image'] ? $value['avatar_image'] : '',
 			  		'drag_order' => $value['drag_order'] ? $value['drag_order'] : 0,
+			  		'video' => $value['video'] ? $value['video'] : '',
+			  		'videotype' => $value['videotype'] ? $value['videotype'] : ''
 				));
 
 				$parent_id = $wpdb->insert_id;
@@ -133,7 +135,6 @@ class IC_agent_api{
 
 			} else {
 				$wpdb->insert($wpdb->prefix ."chat_bot_data", array(
-					'type' => $value['type'],
 					'chat_id' => $cid,
 			  		'parent' => $pid,
 			  		'label' => $value['label'],
@@ -148,6 +149,7 @@ class IC_agent_api{
 			  		'skip' => $value['skip'] ? 1 : 0,
 			  		'userinput' => $value['userinput'] ? $value['userinput'] : '',
 			  		'video' => $value['video'] ? $value['video'] : '',
+			  		'videotype' => $value['videotype'] ? $value['videotype'] : '',
 			  		'type' => $value['type'] ? $value['type'] : '',
 			  		'avatar' => $value['avatar'] ? $value['avatar'] : 0,
 			  		'avatar_image' => $value['avatar_image'] ? $value['avatar_image'] : '',

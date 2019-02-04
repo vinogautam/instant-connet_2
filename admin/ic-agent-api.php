@@ -4060,7 +4060,10 @@ class IC_agent_api{
 		$user = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		$user['role'] = 'endorser';
 		$user['user_login'] = strtolower($user['first_name'].'_'.$user['last_name']);
-		
+		if(isset($user['agentID'])) {		
+			$siteID = get_active_blog_for_user( $user['agentID'] )->blog_id;
+			switch_to_blog( $siteID );
+		}
 		$user_id = username_exists( $user['user_login'] );
 		if ( !$user_id and email_exists($user['user_email']) == false ) {
 			if(isset($user['password'])) {

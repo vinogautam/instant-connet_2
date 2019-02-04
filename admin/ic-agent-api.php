@@ -4063,8 +4063,12 @@ class IC_agent_api{
 		
 		$user_id = username_exists( $user['user_login'] );
 		if ( !$user_id and email_exists($user['user_email']) == false ) {
-			$user['user_pass'] = wp_generate_password( $length=12, $include_standard_special_chars=false );
-			$user_id = wp_insert_user( $user ) ;
+			if(isset($user['password'])) {
+				$user['user_pass'] = $user['password'];
+			} else {
+				$user['user_pass'] = wp_generate_password( $length=12, $include_standard_special_chars=false );
+			}
+				$user_id = wp_insert_user( $user ) ;
 			if (  is_wp_error( $user_id ) ) {
 				$response = array('status' => 'Error', 'msg' => 'Something went wrong. Try Again!!!.');
 			}
@@ -4080,7 +4084,9 @@ class IC_agent_api{
 				update_user_meta($user_id, 'campaign', $user['campaign']);
 				update_user_meta($user_id, 'social_campaign', $user['social_campaign']);
 				update_user_meta($user_id, 'landingPageContent', $user['landingPageContent']);
-
+				if(isset($user['password'])) {
+					update_user_meta($user_id, 'issuePoints', $user['issue_points']);
+				}
 				if( isset($user['video']) ){
 					$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass'], $user['video']);
 				} else {

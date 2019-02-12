@@ -1246,7 +1246,9 @@ class IC_agent_api{
 			$data = get_user_meta($agent_id, 'status_data_Offline', true);
 		}
 
-		$response = array('status' => 'Success', 'data'=>$data);
+		$data = (array) $data;
+
+		$response = array('status' => 'Success', 'data'=>$data['msg']);
 		echo json_encode($response);
 		die(0);
 	}

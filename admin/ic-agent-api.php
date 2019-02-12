@@ -56,7 +56,7 @@ class IC_agent_api{
 			'ic_get_static_page_templates', 'ic_upload_image', 'ic_profile_image', 'ic_get_base64_image',
 			'ic_chat_bot_category', 'ic_chat_bot_new', 'ic_retrieve_chat_bot', 'ic_retrieve_chat_list',
 			'ic_new_endorsement_invitation', 'ic_delete_bot', 'ic_chat_bot_update', 'ic_chat_toggle_status',
-			'ic_copy_chat_bot'
+			'ic_copy_chat_bot', 'ic_agent_status_frontend'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -1225,6 +1225,25 @@ class IC_agent_api{
 			);
 		} else {
 			$data = get_user_meta($_GET['agent_id'], 'status_data_'.$_GET['type'], true);
+		}
+
+		$response = array('status' => 'Success', 'data'=>$data);
+		echo json_encode($response);
+		die(0);
+	}
+
+	function ic_agent_status_frontend(){
+		$status = $_GET['online'];
+		$agent_id = $_GET['agent_id'];
+		if($status){
+			
+			$arr = array(1 => 'Online', 2 => 'Offline', 3 => 'Meeting', 4 => 'Away');
+
+			$st = get_user_meta($agent_id, 'agent_status', true);
+
+			$data = get_user_meta($agent_id, 'status_data_'.$arr[$st], true);
+		} else {
+			$data = get_user_meta($agent_id, 'status_data_Offline', true);
 		}
 
 		$response = array('status' => 'Success', 'data'=>$data);

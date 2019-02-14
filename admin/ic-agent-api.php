@@ -1218,6 +1218,7 @@ class IC_agent_api{
 		
 		if(!isset($_GET['type'])){
 			$data = array(
+				'Welcome' => get_user_meta($_GET['agent_id'], 'status_data_Welcome', true),
 				'Online' => get_user_meta($_GET['agent_id'], 'status_data_Online', true),
 				'Offline' => get_user_meta($_GET['agent_id'], 'status_data_Offline', true),
 				'Away' => get_user_meta($_GET['agent_id'], 'status_data_Away', true),

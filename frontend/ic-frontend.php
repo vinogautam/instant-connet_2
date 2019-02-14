@@ -44,6 +44,15 @@ class IC_front{
 			$fiApp.visited_page = getCookie('fa_surfing_page');
 			$fiApp.introVideo = "<?php if(!empty($_GET['video'])) { echo $_GET['video']; } ?>";
 			
+			<?php
+			if(get_post_type( get_the_ID() ) == 'ic-chat-bot'){
+				$botId = get_the_ID();
+			} else {
+				$botId = get_user_meta($agent_id, 'status_data_Welcome', true);
+			}
+			?>
+			$fiApp.botId = "<?php echo $botId;?>";
+
 			if($fiApp.endorserId || $fiApp.siteId){
 				var d = document, s = d.createElement('script'); 
 	            s.type = "text/javascript";

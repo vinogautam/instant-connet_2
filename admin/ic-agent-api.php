@@ -298,6 +298,11 @@ class IC_agent_api{
 			$siteID = get_active_blog_for_user( $_GET['agentID'] )->blog_id;
 			switch_to_blog( $siteID );
 		}
+
+		if(isset($_GET['agent_id'])) {		
+			$siteID = get_active_blog_for_user( $_GET['agent_id'] )->blog_id;
+			switch_to_blog( $siteID );
+		}
 		
 		$botId = $fl == 0 ? $_GET['chat'] : $botId;
 
@@ -1252,7 +1257,7 @@ class IC_agent_api{
 		$response = array(
 			'status' => 'Success', 
 			'botID'=>$data['msg'], 
-			'data' => $botData = $this->ic_retrieve_chat_bot($data['msg'], 1)
+			'data' => $this->ic_retrieve_chat_bot($data['msg'], 1)
 		);
 		echo json_encode($response);
 		die(0);

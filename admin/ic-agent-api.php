@@ -1,9 +1,9 @@
 <?php
-$ip = $_SERVER['REMOTE_ADDR'];
-$ipInfo = file_get_contents('http://ip-api.com/json/' . $ip);
-$ipInfo = json_decode($ipInfo);
-$timezone = $ipInfo->timezone;
-date_default_timezone_set($timezone);
+//$ip = $_SERVER['REMOTE_ADDR'];
+//$ipInfo = file_get_contents('http://ip-api.com/json/' . $ip);
+//$ipInfo = json_decode($ipInfo);
+//$timezone = $ipInfo->timezone;
+//date_default_timezone_set($timezone);
 
 if ( ! function_exists( 'wp_handle_upload' ) ) {
     require_once( ABSPATH . 'wp-admin/includes/file.php' );

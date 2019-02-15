@@ -1249,7 +1249,11 @@ class IC_agent_api{
 
 		$data = (array) $data;
 
-		$response = array('status' => 'Success', 'data'=>$data['msg']);
+		$response = array(
+			'status' => 'Success', 
+			'botID'=>$data['msg'], 
+			'data' => $botData = $this->ic_retrieve_chat_bot($data['msg'], 1)
+		);
 		echo json_encode($response);
 		die(0);
 	}

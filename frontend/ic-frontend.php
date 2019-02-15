@@ -47,10 +47,10 @@ class IC_front{
 			<?php
 			if(get_post_type( get_the_ID() ) == 'ic-chat-bot'){
 				$botId = get_the_ID();
-				$fullScreen = true;
+				$fullScreen = "true";
 			} else {
 				$botId = get_user_meta($agent_id, 'status_data_Welcome', true);
-				$fullScreen = false;
+				$fullScreen = "false";
 			}
 			?>
 			$fiApp.botId = "<?php echo $botId;?>";

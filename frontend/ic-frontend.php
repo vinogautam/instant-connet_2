@@ -54,7 +54,7 @@ class IC_front{
 			}
 			?>
 			$fiApp.botId = "<?php echo $botId;?>";
-			$fiApp.isFullscreen = <?php echo $fullScreen;?>;
+			$fiApp.isFullscreen = "<?php echo $fullScreen;?>";
 			if($fiApp.endorserId || $fiApp.siteId){
 				var d = document, s = d.createElement('script'); 
 	            s.type = "text/javascript";

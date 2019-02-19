@@ -2033,25 +2033,46 @@ class IC_agent_api{
 	}
 
 	function ic_endorser_register() {
-		global $wpdb;
-		$_POST = (array) json_decode(file_get_contents('php://input'));
+		global $ntm_mail;
 
-		$data = array(
-				'firstname' => $_POST['firstname'],
-				'lastname' => $_POST['lastname'],
-				'email' => $_POST['email'],
-				'agent_id' => $_POST['agent_id'],
-				'created' => date('Y-m-d H:i:s'),
-				'status' => 0
-			);
-
-		$res = $wpdb->insert("tmp_user", $data);
-		$blog_id = get_active_blog_for_user($_POST['agent_id'])->blog_id;
+		$user = isset($_POST['firstname']) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		$user['role'] = 'endorser';
+		$user['user_email'] = $user['email'];
+		$user['user_login'] = strtolower($user['firstname'].'_'.$user['lastname']).rand(1111,9999);
 		$this->track_api('ic_endorser_register', $blog_id, $_POST['agent_id'], $res);
+		if(isset($user['agent_id'])) {		
+			$siteID = get_active_blog_for_user( $user['agent_id'] )->blog_id;
+			switch_to_blog( $siteID );
+		}
+		$user_id = username_exists( $user['user_login'] );
+		if ( !$user_id and email_exists($user['user_email']) == false ) {
+			if(isset($user['password'])) {
+				$user['user_pass'] = $user['password'];
+			} else {
+				$user['user_pass'] = wp_generate_password( $length=12, $include_standard_special_chars=false );
+			}
+				$user_id = wp_insert_user( $user ) ;
+			if (  is_wp_error( $user_id ) ) {
+				$response = array('status' => 'Error', 'msg' => 'Something went wrong. Try Again!!!.');
+			}
+			else
+			{
+				update_user_meta($user_id, 'agent_id', $user['agent_id']);
+				update_user_meta($user_id, 'first_name', $user['firstname']);
+				update_user_meta($user_id, 'last_name', $user['lastname']);
+				update_user_meta($user_id, 'issuePoints', false);
+				$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);
+				$ntm_mail->send_notification_mail($user_id);
 
-		$response = array('status' => 'Success', 'data' => $res);
+				$response = array('status' => 'Success', 'data' => $user_id, 'msg' => 'Endorser created successfully');
+			}
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'User already exists.  Password inherited.');
+		}
+
 		echo json_encode($response);
 		die(0);
+
 	}
 
 	function ic_timekit_add_gmail() {

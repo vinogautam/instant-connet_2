@@ -50,11 +50,13 @@ class IC_front{
 				$fullScreen = "true";
 			} else {
 				$botId = get_user_meta($agent_id, 'status_data_Welcome', true);
-				$fullScreen = "false";
+				// $fullScreen = "false";
 			}
 			?>
 			$fiApp.botId = "<?php echo $botId;?>";
-			$fiApp.isFullscreen = "<?php echo $fullScreen;?>";
+			<?php if(isset($fullScreen)) { ?>
+			$fiApp.isFullScreen = "<?php echo $fullScreen;?>";
+			<?php  } ?>
 			if($fiApp.endorserId || $fiApp.siteId){
 				var d = document, s = d.createElement('script'); 
 	            s.type = "text/javascript";

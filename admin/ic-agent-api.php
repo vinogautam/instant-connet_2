@@ -2061,8 +2061,8 @@ class IC_agent_api{
 				update_user_meta($user_id, 'first_name', $user['firstname']);
 				update_user_meta($user_id, 'last_name', $user['lastname']);
 				update_user_meta($user_id, 'issuePoints', false);
-				$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);
-				$ntm_mail->send_notification_mail($user_id);
+				//$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);
+				//$ntm_mail->send_notification_mail($user_id);
 
 				$response = array('status' => 'Success', 'data' => $user_id, 'msg' => 'Endorser created successfully');
 			}

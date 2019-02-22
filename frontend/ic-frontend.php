@@ -92,6 +92,18 @@ class IC_front{
 			} else {
 				$botId = get_user_meta($agent_id, 'status_data_Welcome', true);
 				// $fullScreen = "false";
+				?>
+					$fiApp.botId = "<?php echo $botId;?>";
+					<?php if(isset($fullScreen)) { ?>
+					$fiApp.isFullScreen = "<?php echo $fullScreen;?>";
+					<?php  } ?>
+					if($fiApp.endorserId || $fiApp.siteId){
+						var d = document, s = d.createElement('script'); 
+			            s.type = "text/javascript";
+			            s.src = "//chat.app.financialinsiders.ca/fichat.script.js";
+			            d.body.appendChild(s);
+					}
+				<?php
 			}
 			?>
 			

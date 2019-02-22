@@ -11,6 +11,7 @@ class IC_front{
 		$siteidd = isset($_COOKIE['fi_agent_site']) ? $_COOKIE['fi_agent_site']:  get_current_blog_id();
 
 		$agent_id = get_blog_option($_COOKIE['fi_agent_site'], 'agent_id');
+
 		if($agent_id){
 		?>
 		<script type="text/javascript">
@@ -47,25 +48,53 @@ class IC_front{
 			<?php
 			if(get_post_type( get_the_ID() ) == 'ic-chat-bot'){
 				$botId = get_the_ID();
+				$chat_type = get_post_meta($botId, 'chat_type', true);
 				$fullScreen = "true";
+
+				if($chat_type == 'Endorser Registeration'){
+					?>
+					var d = document, s = d.createElement('iframe'); 
+					s.src = "https://financialinsiders.github.io/endorsers/#!/cb/<?= $botId?>?autologin=<?= $_GET['autologin']?>&videoURL=<?= $_GET['videoURL']?>&messagetxt=<?= $_GET['messagetxt']?>";
+					s.style.position = 'fixed';
+					s.style.width = "100%";
+					s.style.height = "100%";
+					s.style.left = 0;
+					s.style.top = 0;
+					d.body.appendChild(s);
+					<?php
+				} elseif($chat_type == 'Endorser Send Invitation'){
+					?>
+					var d = document, s = d.createElement('iframe'); 
+					s.src = "https://financialinsiders.github.io/endorsers/#!/register/<?= $botId?>/<?= $agent_id?>/?ref=$_GET['ref']";
+					s.style.position = 'fixed';
+					s.style.width = "100%";
+					s.style.height = "100%";
+					s.style.left = 0;
+					s.style.top = 0;
+					d.body.appendChild(s);
+					<?php
+				} else {
+					?>
+						$fiApp.botId = "<?php echo $botId;?>";
+						<?php if(isset($fullScreen)) { ?>
+						$fiApp.isFullScreen = "<?php echo $fullScreen;?>";
+						<?php  } ?>
+						if($fiApp.endorserId || $fiApp.siteId){
+							var d = document, s = d.createElement('script'); 
+				            s.type = "text/javascript";
+				            s.src = "//chat.app.financialinsiders.ca/fichat.script.js";
+				            d.body.appendChild(s);
+						}
+					<?php
+				}
+
+
 			} else {
 				$botId = get_user_meta($agent_id, 'status_data_Welcome', true);
 				// $fullScreen = "false";
 			}
 			?>
-			$fiApp.botId = "<?php echo $botId;?>";
-			<?php if(isset($fullScreen)) { ?>
-			$fiApp.isFullScreen = "<?php echo $fullScreen;?>";
-			<?php  } ?>
-			if($fiApp.endorserId || $fiApp.siteId){
-				var d = document, s = d.createElement('script'); 
-	            s.type = "text/javascript";
-	            s.src = "//chat.app.financialinsiders.ca/fichat.script.js";
-	            d.body.appendChild(s);
-			}
-            
-
-            
+			
         </script>
 		<?php
 		}

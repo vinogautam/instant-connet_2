@@ -3956,7 +3956,7 @@ class IC_agent_api{
 			$subject = $_POST['subject'];
 			$message = $_POST['message'];
 
-			NTM_mail_template::send_gift_mail($mail['mail'], $subject, $message, '', '');
+			NTM_mail_template::send_endorser_invitation_mail($mail['mail']);
 		}
 
 		$response = array('status' => 'Success', 'msg' => 'Invitation send');

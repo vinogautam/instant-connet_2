@@ -51,7 +51,7 @@ class IC_front{
 				$chat_type = get_post_meta($botId, 'chat_type', true);
 				$fullScreen = "true";
 
-				if($chat_type == 'Endorser Registeration'){
+				if($chat_type == 'Endorser Send Invitation'){
 					?>
 					var d = document, s = d.createElement('iframe'); 
 					s.src = "https://financialinsiders.github.io/endorsers/#!/cb/<?= $botId?>?autologin=<?= $_GET['autologin']?>&videoURL=<?= $_GET['videoURL']?>&messagetxt=<?= $_GET['messagetxt']?>";
@@ -60,9 +60,10 @@ class IC_front{
 					s.style.height = "100%";
 					s.style.left = 0;
 					s.style.top = 0;
+					s.style['z-index'] = 9999;
 					d.body.appendChild(s);
 					<?php
-				} elseif($chat_type == 'Endorser Send Invitation'){
+				} elseif($chat_type == 'Endorser Registeration'){
 					?>
 					var d = document, s = d.createElement('iframe'); 
 					s.src = "https://financialinsiders.github.io/endorsers/#!/register/<?= $botId?>/<?= $agent_id?>/?ref=$_GET['ref']";
@@ -71,6 +72,7 @@ class IC_front{
 					s.style.height = "100%";
 					s.style.left = 0;
 					s.style.top = 0;
+					s.style['z-index'] = 9999;
 					d.body.appendChild(s);
 					<?php
 				} else {

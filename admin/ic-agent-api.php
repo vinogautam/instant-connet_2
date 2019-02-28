@@ -4099,7 +4099,7 @@ class IC_agent_api{
             $data['points_per_dollar'] = get_blog_option($blog_id, 'points_per_dollar');
             $data['admin_fee'] = get_blog_option($blog_id, 'admin_fee');
             $data['blog_id'] = $blog_id;
-			$data['dollar_per_point'] = 1/$points_per_dollar;
+			$data['dollar_per_point'] = 1/$data['points_per_dollar'];
 			$response = array('status' => 'Success', 'data' => $data, 'msg' => 'Logged in successfully', 'site_url' => $siteUrl);
 		}
 		echo json_encode($response);

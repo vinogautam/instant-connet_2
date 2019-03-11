@@ -66,7 +66,7 @@ class IC_front{
 				} elseif($chat_type == 'Endorser Registeration'){
 					?>
 					var d = document, s = d.createElement('iframe'); 
-					s.src = "https://financialinsiders.github.io/endorsers/#!/register/<?= $botId?>/<?= $agent_id?>/?ref=$_GET['ref']";
+					s.src = "https://financialinsiders.github.io/endorsers/#!/register/<?= $botId?>/<?= $agent_id?>";
 					s.style.position = 'fixed';
 					s.style.width = "100%";
 					s.style.height = "100%";

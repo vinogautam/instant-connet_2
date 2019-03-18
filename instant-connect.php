@@ -85,6 +85,13 @@
         	restore_current_blog();
 
         	switch_to_blog( $blog_id );
+        	
+
+        	
+        	
+
+
+
         	$this->Endorsement_install($blog_id, $user_id, $domain, $path, $site_id, $meta);
         	
         	foreach ($ltemplates as $t => $val) {

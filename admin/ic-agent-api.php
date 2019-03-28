@@ -56,7 +56,7 @@ class IC_agent_api{
 			'ic_get_static_page_templates', 'ic_upload_image', 'ic_profile_image', 'ic_get_base64_image',
 			'ic_chat_bot_category', 'ic_chat_bot_new', 'ic_retrieve_chat_bot', 'ic_retrieve_chat_list',
 			'ic_new_endorsement_invitation', 'ic_delete_bot', 'ic_chat_bot_update', 'ic_chat_toggle_status',
-			'ic_copy_chat_bot', 'ic_agent_status_frontend'
+			'ic_copy_chat_bot', 'ic_agent_status_frontend', 'ic_update_profile_page_data', 'ic_get_profile_page_data'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -64,6 +64,80 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_update_profile_page_data() {
+		
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));	
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+		
+		//update_user_meta( $agent_id, 'profile_img', 'https://financialinsiders.ca/profile/agentsite/profile-img.png');
+        
+		$arr = array('agent_full_name', 'agent_designation', 'agent_company_name', 'profile_img', 'profile_bg_img', 'agent_about_profile_short_desc', 'agent_about_featured_img', 'agent_about_page_html', 'cares_reg_bot_id', 'cares_short_desc', 'cares_title', 'cta_bot_id', 'bot_listing_text_header', 'approach_short_desc', 'approach_page_title', 'footer_cta_headline_1','footer_cta_headline_2', 'footer_cta_bg_img', 'cta_btn_text','video_bool', 'video_url');
+		foreach($arr as $a){
+			if(isset($_POST[$a])) {
+						update_user_meta($agent_id, $a, $_POST[$a]);
+			}
+		}
+		
+	   	if(isset($_POST['home_bots'])) { update_user_meta($agent_id, 'home_bots', $_POST['home_bots']); }
+        
+        	if(isset($_POST['approach_blocks'])) { update_user_meta($agent_id, 'approach_blocks', $_POST['approach_blocks']); } 
+
+		$response = array('Status' => 'Success', 'message' => "Updated Data");
+		echo json_encode($response);
+        die(0);
+
+	}
+
+	function ic_get_profile_page_data() {
+		
+
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+			
+		$videoBoolean = get_user_meta($agent_id, 'video_bool', true);
+		
+		
+		if($videoBoolean == "true")  {
+
+			$videoBool = true;
+
+
+		} else {
+
+			$videoBool = false;
+		}
+		 $data = array('agent_full_name' => get_user_meta($agent_id, 'agent_full_name', true),
+			'agent_designation' => get_user_meta($agent_id, 'agent_designation', true),
+			'agent_company_name' => get_user_meta($agent_id, 'agent_company_name', true),
+			'profile_img' => get_user_meta($agent_id, 'profile_img', true),
+			'profile_bg_img' => get_user_meta($agent_id, 'profile_bg_img', true),
+			'agent_about_profile_short_desc' => get_user_meta($agent_id, 'agent_about_profile_short_desc', true),
+			//'agent_about_page_title' => get_user_meta($agent_id, 'about_page_title', true),
+        	'agent_about_featured_img' => get_user_meta($agent_id, 'agent_about_featured_img', true),
+        	'agent_about_page_html' => get_user_meta($agent_id, 'agent_about_page_html', true),
+        	'cares_reg_bot_id' => get_user_meta($agent_id, 'cares_reg_bot_id', true),
+        	'cares_short_desc' => get_user_meta($agent_id, 'cares_short_desc', true),
+        	'cares_title' => get_user_meta($agent_id, 'cares_title', true),
+        	'cta_bot_id' => get_user_meta($agent_id, 'cta_bot_id', true),
+        	'bot_listing_text_header' => get_user_meta($agent_id, 'bot_listing_text_header', true),
+        	'approach_page_title' => get_user_meta($agent_id, 'approach_page_title', true),
+        	'approach_short_desc' => get_user_meta($agent_id, 'approach_short_desc', true),
+        	'footer_cta_headline_1' => get_user_meta($agent_id, 'footer_cta_headline_1', true),
+        	'footer_cta_headline_2' => get_user_meta($agent_id, 'footer_cta_headline_2', true),
+        	'footer_cta_bg_img' => get_user_meta($agent_id, 'footer_cta_headline_2', true),
+        	'cta_btn_text' => get_user_meta($agent_id, 'cta_btn_text', true),
+			'video_bool' => $videoBool,
+			'video_url' => get_user_meta($agent_id, 'video_url', true),
+        	'home_bots' => get_user_meta($agent_id, 'home_bots', true),
+        	'approach_blocks' => get_user_meta($agent_id, 'approach_blocks', true)
+        );
+
+		$response = array('Status' => 'Success', 'data' => $data);
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_chat_bot_category(){
@@ -531,6 +605,7 @@ class IC_agent_api{
 		exit;
 	}
 
+	
 
 	function ic_get_static_page_templates(){
 		$blog_id = get_current_blog_id();

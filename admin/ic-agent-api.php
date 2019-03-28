@@ -74,16 +74,18 @@ class IC_agent_api{
 		
 		//update_user_meta( $agent_id, 'profile_img', 'https://financialinsiders.ca/profile/agentsite/profile-img.png');
       
-		$arr = array('agent_full_name', 'agent_designation', 'agent_company_name', 'profile_img', 'profile_bg_img', 'agent_about_profile_short_desc', 'agent_about_featured_img', 'agent_about_page_html', 'cares_reg_bot_id', 'cares_short_desc', 'cares_title', 'cta_bot_id', 'bot_listing_text_header', 'approach_short_desc', 'approach_page_title', 'footer_cta_headline_1','footer_cta_headline_2', 'footer_cta_bg_img', 'cta_btn_text' );
+		$arr = array('agent_full_name', 'agent_designation', 'agent_company_name', 'profile_img', 'profile_bg_img', 'agent_about_profile_short_desc', 'agent_about_featured_img', 'agent_about_page_html', 'cares_reg_bot_id', 'cares_short_desc', 'cares_title', 'cta_bot_id', 'bot_listing_text_header', 'approach_short_desc', 'approach_page_title', 'footer_cta_headline_1','footer_cta_headline_2', 'footer_cta_bg_img', 'cta_btn_text','video_bool', 'video_url');
 		foreach($arr as $a){
-			update_user_meta($agent_id, $a, $_POST[$a]);
+			if(isset($_POST[$a])) {
+						update_user_meta($agent_id, $a, $_POST[$a]);
+						}
 		}
-		$homeBots = str_replace(' ', '', stripslashes($_POST['home_bots']));
-		$approachBlocks = str_replace(' ', '', stripslashes($_POST['approach_blocks']));
-	   	update_user_meta($agent_id, 'home_bots', $homeBots);
-        update_user_meta($agent_id, 'approach_blocks', $approachBlocks); 
+		
+	   	if(isset($_POST['home_bots'])) { update_user_meta($agent_id, 'home_bots', $_POST['home_bots']); }
+        
+        	if(isset($_POST['approach_blocks'])) { update_user_meta($agent_id, 'approach_blocks', $_POST['approach_blocks']); } 
 
-		$response = array('Status' => 'Success', 'message' => "Updated Data");
+		$response = array('Status' => 'Success', 'message' => "Updated Data", 'postDump' => $_POST );
 		echo json_encode($response);
         die(0);
 
@@ -93,9 +95,7 @@ class IC_agent_api{
 			
 		$blog_id = get_current_blog_id();
 		$agent_id = get_blog_option($blog_id, 'agent_id');
-		 $data = array(
-        	
-			'agent_full_name' => get_user_meta($agent_id, 'agent_full_name', true),
+		 $data = array('agent_full_name' => get_user_meta($agent_id, 'agent_full_name', true),
 			'agent_designation' => get_user_meta($agent_id, 'agent_designation', true),
 			'agent_company_name' => get_user_meta($agent_id, 'agent_company_name', true),
 			'profile_img' => get_user_meta($agent_id, 'profile_img', true),
@@ -104,11 +104,9 @@ class IC_agent_api{
 			//'agent_about_page_title' => get_user_meta($agent_id, 'about_page_title', true),
         	'agent_about_featured_img' => get_user_meta($agent_id, 'agent_about_featured_img', true),
         	'agent_about_page_html' => get_user_meta($agent_id, 'agent_about_page_html', true),
-        	
-        	'cares_reg_bot_id' => get_user_meta($agent_id, 'get_cares_reg_bot_id', true),
-        	'cares_short_desc' => get_user_meta($agent_id, 'get_cares_short_desc', true),
-        	'cares_title' => get_user_meta($agent_id, 'get_cares_title', true),
-
+        	'cares_reg_bot_id' => get_user_meta($agent_id, 'cares_reg_bot_id', true),
+        	'cares_short_desc' => get_user_meta($agent_id, 'cares_short_desc', true),
+        	'cares_title' => get_user_meta($agent_id, 'cares_title', true),
         	'cta_bot_id' => get_user_meta($agent_id, 'cta_bot_id', true),
         	'bot_listing_text_header' => get_user_meta($agent_id, 'bot_listing_text_header', true),
         	'approach_page_title' => get_user_meta($agent_id, 'approach_page_title', true),
@@ -117,7 +115,8 @@ class IC_agent_api{
         	'footer_cta_headline_2' => get_user_meta($agent_id, 'footer_cta_headline_2', true),
         	'footer_cta_bg_img' => get_user_meta($agent_id, 'footer_cta_headline_2', true),
         	'cta_btn_text' => get_user_meta($agent_id, 'cta_btn_text', true),
-
+		'video_bool' => get_user_meta($agent_id, 'video_bool', true),
+		'video_url' => get_user_meta($agent_id, 'video_url', true),
         	'home_bots' => get_user_meta($agent_id, 'home_bots', true),
         	'approach_blocks' => get_user_meta($agent_id, 'approach_blocks', true)
         );
@@ -4309,7 +4308,7 @@ class IC_agent_api{
 		$newdat = array();
 		foreach($data as $v){
 			$v = (array)$v;
-			$item = array('id' => $v['ID']);
+			$item = array('id' => $v['ID'], 'ID' => $v['ID']);
 			//if(!get_user_meta($item['ID'], 'imcomplete_profile', true) && get_user_meta($item['ID'], 'agent_id', true) == $_GET['agent_id']){
 
 				$endorser_id = $item['ID'];

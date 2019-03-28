@@ -113,7 +113,9 @@ class IC_agent_api{
 			  		'avatar_image' => $value['avatar_image'] ? $value['avatar_image'] : '',
 			  		'drag_order' => $value['drag_order'] ? $value['drag_order'] : 0,
 			  		'video' => $value['video'] ? $value['video'] : '',
-			  		'videotype' => $value['videotype'] ? $value['videotype'] : ''
+			  		'videotype' => $value['videotype'] ? $value['videotype'] : '',
+			  		'validation_pattern'=> $value['validation_pattern'] ? $value['validation_pattern'] : '',
+			  		'validation_msg'=> $value['validation_msg'] ? $value['validation_msg'] : ''
 				));
 
 				$parent_id = $wpdb->insert_id;
@@ -154,6 +156,8 @@ class IC_agent_api{
 			  		'avatar' => $value['avatar'] ? $value['avatar'] : 0,
 			  		'avatar_image' => $value['avatar_image'] ? $value['avatar_image'] : '',
 			  		'drag_order' => $value['drag_order'] ? $value['drag_order'] : 0,
+			  		'validation_pattern'=> $value['validation_pattern'] ? $value['validation_pattern'] : '',
+			  		'validation_msg'=> $value['validation_msg'] ? $value['validation_msg'] : ''
 				));
 			}
 		}
@@ -4247,7 +4251,7 @@ class IC_agent_api{
 		$newdat = array();
 		foreach($data as $v){
 			$v = (array)$v;
-			$item = array('id' => $v['ID']);
+			$item = array('id' => $v['ID'], 'ID' => $v['ID']);
 			//if(!get_user_meta($item['ID'], 'imcomplete_profile', true) && get_user_meta($item['ID'], 'agent_id', true) == $_GET['agent_id']){
 
 				$endorser_id = $item['ID'];

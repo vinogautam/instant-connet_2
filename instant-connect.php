@@ -810,6 +810,8 @@
 			  image tinytext NOT NULL,
 			  video tinytext NOT NULL,
 			  videotype tinytext NOT NULL,
+			  validation_pattern tinytext NOT NULL,
+			  validation_msg tinytext NOT NULL,
 			  type tinytext NOT NULL,
 			  drag_order int(1),
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";

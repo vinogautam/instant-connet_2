@@ -172,7 +172,7 @@ class IC_agent_api{
 					'type' => $value['type'],
 					'chat_id' => $cid,
 			  		'parent' => $pid,
-			  		'label' => $value['label'],
+			  		'clabel' => $value['label'],
 			  		'data' => $value['data'] ? serialize($value['data']) : '',
 			  		'labelref' => $value['labelref'] ? $value['labelref'] : '',
 			  		'inputref' => $value['inputref'] ? $value['inputref'] : '',
@@ -199,8 +199,8 @@ class IC_agent_api{
 					$wpdb->insert($wpdb->prefix ."chat_bot_data", array(
 						'chat_id' => $cid,
 				  		'parent' => $parent_id,
-				  		'option' => 1,
-				  		'label' => $value1['option'],
+				  		'coption' => 1,
+				  		'clabel' => $value1['option'],
 				  		'type' => $value1['opttype'] ? $value1['opttype'] : '',
 				  		'action' => $value1['action'] ? $value1['action'] : ''
 					));
@@ -213,7 +213,7 @@ class IC_agent_api{
 				$wpdb->insert($wpdb->prefix ."chat_bot_data", array(
 					'chat_id' => $cid,
 			  		'parent' => $pid,
-			  		'label' => $value['label'],
+			  		'clabel' => $value['label'],
 			  		'data' => $value['data'] ? serialize($value['data']) : '',
 			  		'labelref' => $value['labelref'] ? $value['labelref'] : '',
 			  		'inputref' => $value['inputref'] ? $value['inputref'] : '',
@@ -344,7 +344,8 @@ class IC_agent_api{
 		$res = array();
 		foreach ($chat_data[$ind] as $key => $value) {
 			$value = (array)$value;
-			$value['label'] = stripslashes($value['label']);
+			$value['option'] = $value['coption'];
+			$value['label'] = stripslashes($value['clabel']);
 			$value['data'] = $value['data'] ? unserialize($value['data']) : '';
 			if($value['opt'] == 'option'){
 
@@ -355,7 +356,7 @@ class IC_agent_api{
 					$tmp['choice'][] = array(
 						'id' => $value1['id'],
 						'opttype' => $value1['type'],
-						'option' => $value1['label'],
+						'option' => $value1['clabel'],
 						'action' => $value1['action'],
 						'logic_jump' => $this->get_chat_data($chat_data, $value1['id'])
 					);
@@ -3187,7 +3188,7 @@ class IC_agent_api{
 		
 		$resuts = $wpdb->get_results('select * from wp_leads where email = "'. $lead['email'].'"');
 		
-		$leadtoinsert = array('endorser_id' => $lead['endorser_id'], 'email' => $lead['email'], 'first_name' => $lead['first_name'], 'last_name' => $lead['last_name'], 'agent_id' => $lead['agent_id'], 'created' => date("Y-m-d H:i:s"));
+		$leadtoinsert = array('endorser_id' => $lead['endorser_id'], 'email' => $lead['email'], 'first_name' => $lead['first_name'], 'last_name' => $lead['last_name'], 'agent_id' => $lead['agent_id'], 'created' => date("Y-m-d H:i:s"), 'fb_ref' => $lead['fb_ref']);
 		
 		if(count($resuts)){
 			

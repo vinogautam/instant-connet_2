@@ -56,7 +56,8 @@ class IC_agent_api{
 			'ic_get_static_page_templates', 'ic_upload_image', 'ic_profile_image', 'ic_get_base64_image',
 			'ic_chat_bot_category', 'ic_chat_bot_new', 'ic_retrieve_chat_bot', 'ic_retrieve_chat_list',
 			'ic_new_endorsement_invitation', 'ic_delete_bot', 'ic_chat_bot_update', 'ic_chat_toggle_status',
-			'ic_copy_chat_bot', 'ic_agent_status_frontend', 'ic_update_profile_page_data', 'ic_get_profile_page_data'
+			'ic_copy_chat_bot', 'ic_agent_status_frontend', 'ic_update_profile_page_data', 'ic_get_profile_page_data',
+			'ic_add_session_timeline'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -64,6 +65,22 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_add_session_timeline(){
+		global $wpdb;
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$ress = $wpdb->get_results('select * from wp_leads where fb_ref = "'.$_POST['cid'].'"');
+		
+		if(count($ress)){
+			track_api('ic_new_session', get_current_blog_id(), $ress[0,->id, $_POST);
+			$response = array('Status' => 'Success', 'message' => "Stored in Timeline");
+		} else {
+			$response = array('Status' => 'Error');
+		}
+		echo json_encode($response);
+        die(0);
 	}
 
 	function ic_update_profile_page_data() {

@@ -73,8 +73,21 @@ class IC_agent_api{
 
 		$ress = $wpdb->get_results('select * from wp_leads where fb_ref = "'.$_POST['cid'].'"');
 		
-		if(count($ress)){
-			track_api('ic_new_session', get_current_blog_id(), $ress[0,->id, $_POST);
+		if(count($ress)){	
+			$blog_id = get_active_blog_for_user( $_POST['agentId'] )->blog_id;
+			$this->track_api('ic_new_session', $blog_id, $ress[0]->id, $_POST);
+			$wpdb->insert($wpdb->prefix ."notes", 
+				array(
+					'agent_id' => $_POST['agentId'],
+			  		'lead_id' => $ress[0]->id,
+			  		'endorser_id' => $ress[0]->endorser_id,
+			  		'notes' => 'New Session - '.$_POST['sid'],
+			  		'events' => $_POST['cid'],
+			  		'created' => date('Y-m-d H-i-s')
+				)
+			);
+
+
 			$response = array('Status' => 'Success', 'message' => "Stored in Timeline");
 		} else {
 			$response = array('Status' => 'Error');

@@ -57,7 +57,7 @@ class IC_agent_api{
 			'ic_chat_bot_category', 'ic_chat_bot_new', 'ic_retrieve_chat_bot', 'ic_retrieve_chat_list',
 			'ic_new_endorsement_invitation', 'ic_delete_bot', 'ic_chat_bot_update', 'ic_chat_toggle_status',
 			'ic_copy_chat_bot', 'ic_agent_status_frontend', 'ic_update_profile_page_data', 'ic_get_profile_page_data',
-			'ic_add_session_timeline'
+			'ic_add_session_timeline', 'getIntro'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -4264,6 +4264,20 @@ class IC_agent_api{
 		} else {
 			$response = array('status' => 'Error', 'msg' => 'User already exists.  Password inherited.');
 		}
+
+		echo json_encode($response);
+		die(0);
+	}
+
+	function getIntro(){
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$user_id = $_POST['endorserId'];
+
+		$video = get_user_meta($user_id, 'video', true);
+		$landingPageContent = get_user_meta($user_id, 'landingPageContent', true);
+
+		$response = array('status' => 'Success', 'data' => array('video' => $video, 'landingPageContent' => $landingPageContent));
 
 		echo json_encode($response);
 		die(0);

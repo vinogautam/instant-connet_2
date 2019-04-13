@@ -793,6 +793,19 @@
 			dbDelta($sql_one);
 		}
 
+		$mailtemplates = "wp_links";
+
+		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){
+			$sql_one = "CREATE TABLE " . $mailtemplates . "(
+			  id int(11) NOT NULL AUTO_INCREMENT,
+			  link tinytext NOT NULL,
+			  params text,
+			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
+
+			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+			dbDelta($sql_one);
+		}
+
 		$mailtemplates = $wpdb->prefix ."chat_bot_data";
 
 		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){

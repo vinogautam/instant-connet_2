@@ -57,7 +57,7 @@ class IC_agent_api{
 			'ic_chat_bot_category', 'ic_chat_bot_new', 'ic_retrieve_chat_bot', 'ic_retrieve_chat_list',
 			'ic_new_endorsement_invitation', 'ic_delete_bot', 'ic_chat_bot_update', 'ic_chat_toggle_status',
 			'ic_copy_chat_bot', 'ic_agent_status_frontend', 'ic_update_profile_page_data', 'ic_get_profile_page_data',
-			'ic_add_session_timeline', 'getIntro'
+			'ic_add_session_timeline', 'getIntro', 'ic_link', 'ic_shorten_link'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -67,9 +67,46 @@ class IC_agent_api{
 	    
 	}
 
-	function ic_add_session_timeline(){
+	function ic_link(){
+		global $wpdb;
+
+		$res = $wpdb->get_row('select * from wp_links where id='.$_GET['id']);
+
+		$link = $res->link.'?';
+
+		$params = [];
+		foreach(unserialize($res->params) as $k=>$v){
+			$params[] = $k.'='.$v;
+		}
+
+		$params = implode('&', $params);
+
+		$link .= $params;
+
+		wp_redirect($link);
+		exit;
+	}
+
+	function ic_shorten_link(){
 		global $wpdb;
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$wpdb->insert($wpdb->prefix ."wp_links", 
+				array(
+					'link' => $_POST['link'],
+			  		'params' => serializ($_POST['params'])
+				)
+			);
+
+		$response = array('Status' => 'Success', 'id' => $wpdb->insert_id);
+
+		echo json_encode($response);
+        die(0);
+	}
+
+	function ic_add_session_timeline(){
+		global $wpdb;
+		$_POST = isset($_POST['cid']) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
 		$ress = $wpdb->get_results('select * from wp_leads where fb_ref = "'.$_POST['cid'].'"');
 		
@@ -4270,9 +4307,7 @@ class IC_agent_api{
 	}
 
 	function getIntro(){
-		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-
-		$user_id = $_POST['endorserId'];
+		$user_id = $_GET['endorserId'];
 
 		$video = get_user_meta($user_id, 'video', true);
 		$landingPageContent = get_user_meta($user_id, 'landingPageContent', true);

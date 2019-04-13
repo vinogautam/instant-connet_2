@@ -83,6 +83,15 @@ class IC_agent_api{
 
 		$link .= $params;
 
+		if(isset($_POST['meta'])){
+			?>
+			<meta property="og:title" content="">
+			<meta property="og:site_name" content="Financial Insiders">
+			<meta property="og:url" content="<?= $link;?>">
+			<?php
+		} else {
+
+		}
 		wp_redirect($link);
 		exit;
 	}

@@ -85,6 +85,7 @@ class IC_agent_api{
 				$data['last_name'] = $value['last_name'];
 				$data['email'] = $value['email'];
 				$data['video_url'] = $_POST['video_url'];
+				$data['attention_message'] = $_POST['attention_message'];
 
 				$wpdb->insert($wpdb->prefix ."wp_links", 
 					array(
@@ -130,8 +131,10 @@ class IC_agent_api{
 
 		$link = $res->link.'?';
 
+		$data = unserialize($res->params);
+
 		$params = [];
-		foreach(unserialize($res->params) as $k=>$v){
+		foreach($data as $k=>$v){
 			$params[] = $k.'='.$v;
 		}
 
@@ -144,6 +147,15 @@ class IC_agent_api{
 			<meta property="og:title" content="">
 			<meta property="og:site_name" content="Financial Insiders">
 			<meta property="og:url" content="<?= $link;?>">
+
+			<?php if(isset($data['video_url'])){?>
+			<meta property="og:image" content="<?= $data['video_url'].'png';?>">
+			<?php }?>
+
+			<?php if(isset($data['attention_message'])){?>
+			<meta property="og:description" content="<?= $data['attention_message'];?>">
+			<?php }?>
+
 			<?php
 		} else {
 			wp_redirect($link);

@@ -57,7 +57,7 @@ class IC_agent_api{
 			'ic_chat_bot_category', 'ic_chat_bot_new', 'ic_retrieve_chat_bot', 'ic_retrieve_chat_list',
 			'ic_new_endorsement_invitation', 'ic_delete_bot', 'ic_chat_bot_update', 'ic_chat_toggle_status',
 			'ic_copy_chat_bot', 'ic_agent_status_frontend', 'ic_update_profile_page_data', 'ic_get_profile_page_data',
-			'ic_add_session_timeline', 'getIntro', 'ic_link', 'ic_shorten_link'
+			'ic_add_session_timeline', 'getIntro', 'ic_link', 'ic_shorten_link', 'ic_create_introduction'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -66,6 +66,61 @@ class IC_agent_api{
 		}
 	    
 	}
+
+	function ic_create_introduction(){
+		global $wpdb;
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$data = array(
+			'video_url' => $_POST['video_url'],
+			'bot_id'	=> $_POST['bot_id'],
+			'page_id'	=> $_POST['page_id'],
+			'message'	=> $_POST['message']
+		);
+
+		if($_POST['type'] == 'email'){
+			$respdata = array();
+			foreach ($_POST['contacts'] as $key => $value) {
+				$data['first_name'] = $value['first_name'];
+				$data['last_name'] = $value['last_name'];
+				$data['email'] = $value['email'];
+
+				$wpdb->insert($wpdb->prefix ."wp_links", 
+					array(
+						'link' => $_POST['link'],
+				  		'params' => serialize($data)
+					)
+				);
+
+				$link = site_url('wp-admin/admin-ajax.php?action=ic_link&id='.$wpdb->insert_id);
+
+				if(isset($_POST['video_url'])){
+					//email with video thumb and bonus code
+				} else{
+					//email without video thumb
+				}
+
+				$respdata[] = $link;
+			}
+
+			$response = array('Status' => 'Success', 'data' => $respdata);
+		} elseif($_POST['type'] == 'share'){
+			$wpdb->insert($wpdb->prefix ."wp_links", 
+				array(
+					'link' => $_POST['link'],
+			  		'params' => serialize($data)
+				)
+			);
+
+			$response = array('Status' => 'Success', 'data' => site_url('wp-admin/admin-ajax.php?action=ic_link&id='.$wpdb->insert_id));
+		} else {
+			$response = array('Status' => 'Error', 'msg' => 'Invalid type');
+		}
+
+		echo json_encode($response);
+        die(0);
+	}
+
 
 	function ic_link(){
 		global $wpdb;
@@ -90,9 +145,9 @@ class IC_agent_api{
 			<meta property="og:url" content="<?= $link;?>">
 			<?php
 		} else {
-
+			wp_redirect($link);
 		}
-		wp_redirect($link);
+		
 		exit;
 	}
 
@@ -103,7 +158,7 @@ class IC_agent_api{
 		$wpdb->insert($wpdb->prefix ."wp_links", 
 				array(
 					'link' => $_POST['link'],
-			  		'params' => serializ($_POST['params'])
+			  		'params' => serialize($_POST['params'])
 				)
 			);
 

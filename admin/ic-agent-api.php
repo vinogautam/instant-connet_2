@@ -84,6 +84,7 @@ class IC_agent_api{
 				$data['first_name'] = $value['first_name'];
 				$data['last_name'] = $value['last_name'];
 				$data['email'] = $value['email'];
+				$data['video_url'] = $_POST['video_url'];
 
 				$wpdb->insert($wpdb->prefix ."wp_links", 
 					array(

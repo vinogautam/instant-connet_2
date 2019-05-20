@@ -318,6 +318,7 @@ class IC_agent_api{
 			  		'parent' => $pid,
 			  		'clabel' => $value['label'],
 			  		'data' => $value['data'] ? serialize($value['data']) : '',
+			  		'elements' => $value['elements'] ? serialize($value['elements']) : '',
 			  		'labelref' => $value['labelref'] ? $value['labelref'] : '',
 			  		'inputref' => $value['inputref'] ? $value['inputref'] : '',
 			  		'ref' => $value['ref'] ? $value['ref'] : '',
@@ -359,6 +360,7 @@ class IC_agent_api{
 			  		'parent' => $pid,
 			  		'clabel' => $value['label'],
 			  		'data' => $value['data'] ? serialize($value['data']) : '',
+			  		'elements' => $value['elements'] ? serialize($value['elements']) : '',
 			  		'labelref' => $value['labelref'] ? $value['labelref'] : '',
 			  		'inputref' => $value['inputref'] ? $value['inputref'] : '',
 			  		'ref' => $value['ref'] ? $value['ref'] : '',
@@ -491,8 +493,9 @@ class IC_agent_api{
 			$value['option'] = $value['coption'];
 			$value['label'] = stripslashes($value['clabel']);
 			$value['data'] = $value['data'] ? unserialize($value['data']) : '';
-			if($value['opt'] == 'option'){
+			$value['elements'] = $value['elements'] ? unserialize($value['elements']) : '';
 
+			if($value['opt'] == 'option'){
 				$tmp = $value;
 				$tmp['choice'] = array();
 				foreach ($chat_data[$value['id']] as $key1 => $value1) {

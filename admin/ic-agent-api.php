@@ -379,6 +379,10 @@ class IC_agent_api{
 			  		'validation_pattern'=> $value['validation_pattern'] ? $value['validation_pattern'] : '',
 			  		'validation_msg'=> $value['validation_msg'] ? $value['validation_msg'] : ''
 				));
+
+				if($value['opt'] == 'bot' && is_array($value['elements'])){
+						$this->store_elements($cid, $wpdb->insert_id, $value['elements']);
+				}
 			}
 		}
 	}
@@ -493,7 +497,10 @@ class IC_agent_api{
 			$value['option'] = $value['coption'];
 			$value['label'] = stripslashes($value['clabel']);
 			$value['data'] = $value['data'] ? unserialize($value['data']) : '';
-			$value['elements'] = $value['elements'] ? unserialize($value['elements']) : '';
+			unset($value['elements']);
+			if($value['opt'] == 'bot'){
+				$value['elements'] = $this->get_chat_data($chat_data, $value['id']);
+			}
 
 			if($value['opt'] == 'option'){
 				$tmp = $value;

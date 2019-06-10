@@ -793,7 +793,7 @@
 			dbDelta($sql_one);
 		}
 
-		$mailtemplates = "wp_links";
+		$mailtemplates = "wp_short_link";
 
 		if($wpdb->get_var('SHOW TABLES LIKE ' . $mailtemplates) != $mailtemplates){
 			$sql_one = "CREATE TABLE " . $mailtemplates . "(

@@ -68,8 +68,8 @@ class IC_agent_api{
 	}
 
 	function ic_create_introduction(){
-		global $wpdb;
-		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+		global $wpdb, $ntm_mail;
+		$_POST = (array) json_decode(file_get_contents('php://input'));
 
 		$data = array(
 			'video_url' => $_POST['video_url'],
@@ -87,19 +87,33 @@ class IC_agent_api{
 				$data['video_url'] = $_POST['video_url'];
 				$data['attention_message'] = $_POST['attention_message'];
 
-				$wpdb->insert($wpdb->prefix ."wp_links", 
+				$wpdb->insert("wp_short_link", 
 					array(
-						'link' => $_POST['link'],
+						'link' => get_permalink($data['page_id']),
 				  		'params' => serialize($data)
 					)
 				);
 
 				$link = site_url('wp-admin/admin-ajax.php?action=ic_link&id='.$wpdb->insert_id);
 
+				$blog_id = get_current_blog_id();
+				$agent_id = get_blog_option($blog_id, 'agent_id');
+				$agent_full_name = get_user_meta($agent_id, 'agent_full_name', true);
+
+				$endorser_id = $_POST['endorser_id'];
+				$endorser_name = get_user_meta($endorser_id, 'first_name', true).' '.get_user_meta($endorser_id, 'last_name', true);
+
+				$content = "<div>$endorser_name wants to introduce you to $agent_full_name from Financial Insiders <a href='$link'>Click Here to View</div>";
+
+				$subject = "$endorser_name wants to introduce $agent_full_name of Financial Insiders";
+
 				if(isset($_POST['video_url'])){
-					//email with video thumb and bonus code
+					$vid_src = $_POST['video_url'].'.png';
+					$content .= "<div><img src='$vid_src'></div>";
+
+					$ntm_mail->send_mail($value['email'], $subject, $content, '', '');
 				} else{
-					//email without video thumb
+					$ntm_mail->send_mail($value['email'], $subject, $content, '', '');
 				}
 
 				$respdata[] = $link;
@@ -107,10 +121,10 @@ class IC_agent_api{
 
 			$response = array('Status' => 'Success', 'data' => $respdata);
 		} elseif($_POST['type'] == 'share'){
-			$wpdb->insert($wpdb->prefix ."wp_links", 
+			$wpdb->insert("wp_short_link", 
 				array(
-					'link' => $_POST['link'],
-			  		'params' => serialize($data)
+					'link' => get_permalink($data['page_id']),
+			  		'params' => serialize($_POST)
 				)
 			);
 
@@ -127,7 +141,7 @@ class IC_agent_api{
 	function ic_link(){
 		global $wpdb;
 
-		$res = $wpdb->get_row('select * from wp_links where id='.$_GET['id']);
+		$res = $wpdb->get_row('select * from wp_short_link where id='.$_GET['id']);
 
 		$link = $res->link.'?';
 
@@ -168,7 +182,7 @@ class IC_agent_api{
 		global $wpdb;
 		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 
-		$wpdb->insert($wpdb->prefix ."wp_links", 
+		$wpdb->insert("wp_short_link", 
 				array(
 					'link' => $_POST['link'],
 			  		'params' => serialize($_POST['params'])

@@ -78,6 +78,14 @@ class IC_front{
 				} else {
 					?>
 						$fiApp.botId = "<?php echo $botId;?>";
+						$fiApp.params = {};
+						<?php 
+							foreach ($_GET as $key => $value) {
+								?>
+								$fiApp.params['<?= $key;?>'] = '<?= $value;?>';
+								<?php
+							}
+						?>
 						<?php if(isset($fullScreen)) { ?>
 						$fiApp.isFullScreen = "<?php echo $fullScreen;?>";
 						<?php  } ?>

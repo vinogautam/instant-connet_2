@@ -120,7 +120,7 @@ class IC_agent_api{
 			}
 
 			$response = array('Status' => 'Success', 'data' => $respdata);
-		} elseif($_POST['type'] == 'share'){
+		} elseif(isset($_POST['type']) && $_POST['type']){
 			$wpdb->insert("wp_short_link", 
 				array(
 					'link' => get_permalink($data['page_id']),

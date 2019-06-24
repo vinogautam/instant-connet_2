@@ -94,7 +94,7 @@ class IC_agent_api{
 					)
 				);
 
-				$link = site_url('wp-admin/admin-ajax.php?action=ic_link&id='.$wpdb->insert_id);
+				$link = site_url('introduction.php?id='.$wpdb->insert_id);
 
 				$blog_id = get_current_blog_id();
 				$agent_id = get_blog_option($blog_id, 'agent_id');
@@ -128,7 +128,7 @@ class IC_agent_api{
 				)
 			);
 
-			$response = array('Status' => 'Success', 'data' => site_url('wp-admin/admin-ajax.php?action=ic_link&id='.$wpdb->insert_id));
+			$response = array('Status' => 'Success', 'data' => site_url('introduction.php?id='.$wpdb->insert_id));
 		} else {
 			$response = array('Status' => 'Error', 'msg' => 'Invalid type');
 		}
@@ -145,7 +145,17 @@ class IC_agent_api{
 
 		$link = $res->link.'?';
 
-		$data = unserialize($res->params);
+		$data = unserialize($res->params);//print_r($data);exit;
+if(isset($data['agent_id'])) {		
+			echo $siteID = get_active_blog_for_user( $data['agent_id'] )->blog_id;
+			switch_to_blog( $siteID );
+		}
+	
+if(isset($data['bot_id'])){
+			$link = get_permalink($data['bot_id']).'?';
+		} elseif(isset($data['page_id'])){
+			$link = get_permalink($data['page_id']).'?';
+		}
 
 		$params = [];
 		foreach($data as $k=>$v){
@@ -172,7 +182,8 @@ class IC_agent_api{
 
 			<?php
 		} else {
-			wp_redirect($link);
+			echo $link;exit;
+wp_redirect($link);
 		}
 		
 		exit;

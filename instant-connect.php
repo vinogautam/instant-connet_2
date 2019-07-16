@@ -815,6 +815,7 @@
 			  parent int(11),
 			  coption int(1),
 			  clabel text,
+			  elements text,
 			  data text,
 			  back int(1),
 			  skip int(1),

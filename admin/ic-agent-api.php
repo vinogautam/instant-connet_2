@@ -81,6 +81,7 @@ class IC_agent_api{
 		if($_POST['type'] == 'email'){
 			$respdata = array();
 			foreach ($_POST['contacts'] as $key => $value) {
+				$value = (array)$value;
 				$data['first_name'] = $value['first_name'];
 				$data['last_name'] = $value['last_name'];
 				$data['email'] = $value['email'];
@@ -258,7 +259,7 @@ wp_redirect($link);
 		
 		//update_user_meta( $agent_id, 'profile_img', 'https://financialinsiders.ca/profile/agentsite/profile-img.png');
         
-		$arr = array('agent_full_name', 'agent_designation', 'agent_company_name', 'profile_img', 'profile_bg_img', 'agent_about_profile_short_desc', 'agent_about_featured_img', 'agent_about_page_html', 'cares_reg_bot_id', 'cares_short_desc', 'cares_title', 'cta_bot_id', 'bot_listing_text_header', 'approach_short_desc', 'approach_page_title', 'footer_cta_headline_1','footer_cta_headline_2', 'footer_cta_bg_img', 'cta_btn_text','video_bool', 'video_url', 'conversation_bot_id');
+		$arr = array('agent_full_name', 'agent_designation', 'agent_company_name', 'profile_img', 'profile_bg_img', 'agent_about_profile_short_desc', 'agent_about_featured_img', 'agent_about_page_html', 'cares_reg_bot_id', 'cares_short_desc', 'cares_title', 'cta_bot_id', 'bot_listing_text_header', 'approach_short_desc', 'approach_page_title', 'footer_cta_headline_1','footer_cta_headline_2', 'footer_cta_bg_img', 'cta_btn_text','video_bool', 'video_url', 'conversation_bot_id', 'about_conversation_bot_id', 'approach_conversation_bot_id');
 		foreach($arr as $a){
 			if(isset($_POST[$a])) {
 						update_user_meta($agent_id, $a, $_POST[$a]);
@@ -305,6 +306,8 @@ wp_redirect($link);
         	'cares_reg_bot_id' => get_user_meta($agent_id, 'cares_reg_bot_id', true),
         	'cares_short_desc' => get_user_meta($agent_id, 'cares_short_desc', true),
         	'cares_title' => get_user_meta($agent_id, 'cares_title', true),
+        	'about_conversation_bot_id' => get_user_meta($agent_id, 'about_conversation_bot_id', true),
+        	'approach_conversation_bot_id' => get_user_meta($agent_id, 'approach_conversation_bot_id', true),
         	'conversation_bot_id' => get_user_meta($agent_id, 'conversation_bot_id', true),
         	'cta_bot_id' => get_user_meta($agent_id, 'cta_bot_id', true),
         	'bot_listing_text_header' => get_user_meta($agent_id, 'bot_listing_text_header', true),

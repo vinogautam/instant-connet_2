@@ -75,15 +75,17 @@ class IC_agent_api{
 			'video_url' => $_POST['video_url'],
 			'bot_id'	=> $_POST['bot_id'],
 			'page_id'	=> $_POST['page_id'],
-			'message'	=> $_POST['message']
+			'message'	=> $_POST['message'],
+			'endorser_id' => $_POST['endorser_id'],
+			'agent_id' => $_POST['agent_id']
 		);
 
 		if($_POST['type'] == 'email'){
 			$respdata = array();
 			foreach ($_POST['contacts'] as $key => $value) {
 				$value = (array)$value;
-				$data['first_name'] = $value['first_name'];
-				$data['last_name'] = $value['last_name'];
+				$data['first_name'] = $value['name'];
+				$data['last_name'] = $value['name'];
 				$data['email'] = $value['email'];
 				$data['video_url'] = $_POST['video_url'];
 				$data['attention_message'] = $_POST['attention_message'];

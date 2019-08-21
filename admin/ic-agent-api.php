@@ -1521,7 +1521,7 @@ wp_redirect($link);
 	function ic_agent_status_frontend(){
 		$status = $_GET['online'];
 		$agent_id = $_GET['agent_id'];
-		if($status){
+		if(isset($_GET['online'])){
 			
 			$arr = array(1 => 'Online', 2 => 'Offline', 3 => 'Meeting', 4 => 'Away');
 

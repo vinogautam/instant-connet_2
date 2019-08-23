@@ -68,7 +68,7 @@ class IC_agent_api{
 	}
 
 	function ic_create_introduction(){
-		global $wpdb, $ntm_mail;
+		global $wpdb, $ntm_mail, $endorsements;
 		$_POST = (array) json_decode(file_get_contents('php://input'));
 
 		$data = array(
@@ -79,6 +79,23 @@ class IC_agent_api{
 			'endorser_id' => $_POST['endorser_id'],
 			'agent_id' => $_POST['agent_id']
 		);
+
+		$blog_id = get_current_blog_id();
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+		$endorser_id = $_POST['endorser_id'];
+
+		if(isset($_POST['video_url']) && $_POST['video_url']){
+			$chat_bot_data = $wpdb->get_row('select * from '.$wpdb->prefix.'chat_bot_data where reflabel = "Intro Bot" and chat_id = '.$_POST['bot_id']);
+
+			$dataa = unserialize($chat_bot_data['data']);
+
+			if($dataa['extrapoint']){
+				$type = 'Extra points for video';
+				$new_balance = $endorsements->get_endorser_points($endorser_id)['points'] + $dataa['extrapoint'];
+				$data = array('points' => $dataa['extrapoint'], 'agent_id' => $agent_id, 'endorser_id' => $endorser_id, 'created' => date("Y-m-d H:i:s"), 'type' => 'extra_points', 'notes' => $type);
+				$endorsements->add_points($data);
+			}
+		}
 
 		if($_POST['type'] == 'email'){
 			
@@ -100,11 +117,8 @@ class IC_agent_api{
 
 				$link = site_url('introduction.php?id='.$wpdb->insert_id);
 
-				$blog_id = get_current_blog_id();
-				$agent_id = get_blog_option($blog_id, 'agent_id');
 				$agent_full_name = get_user_meta($agent_id, 'agent_full_name', true);
 
-				$endorser_id = $_POST['endorser_id'];
 				$endorser_name = get_user_meta($endorser_id, 'first_name', true).' '.get_user_meta($endorser_id, 'last_name', true);
 
 				$content = "<div>$endorser_name wants to introduce you to $agent_full_name from Financial Insiders <a href='$link'>Click Here to View</div>";
@@ -121,6 +135,17 @@ class IC_agent_api{
 					$ntm_mail->send_mail($value['email'], $subject, $content, '', '');
 					
 				}
+
+				$endorsement_settings = get_user_meta($agent_id, 'endorsement_settings', true);
+				$points = $endorsement_settings['email_point_value'] ? $endorsement_settings['email_point_value'] : 0;
+
+				if($points){
+					$type = 'Email Invitation';
+					$new_balance = $endorsements->get_endorser_points($endorser_id)['points'] + $points;
+					$data = array('points' => $points, 'agent_id' => $agent_id, 'endorser_id' => $endorser_id, 'created' => date("Y-m-d H:i:s"), 'type' => 'email_invitation', 'notes' => $type);
+					$endorsements->add_points($data);
+				}
+				
 
 				$respdata[] = $link;
 			}

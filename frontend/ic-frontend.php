@@ -61,6 +61,7 @@ class IC_front{
 					s.style.left = 0;
 					s.style.top = 0;
 					s.style['z-index'] = 9999;
+					s.allow = 'camera; microphone';
 					d.body.appendChild(s);
 					<?php
 				} elseif($chat_type == 'Endorser Registeration'){
@@ -74,6 +75,7 @@ class IC_front{
 					s.style.top = 0;
 					s.style['z-index'] = 9999;
 					d.body.appendChild(s);
+					s.allow = 'camera; microphone';
 					<?php
 				} else {
 					?>
@@ -94,6 +96,7 @@ class IC_front{
 				            s.type = "text/javascript";
 				            s.src = "//chat.app.financialinsiders.ca/fichat.script.js";
 				            d.body.appendChild(s);
+				            s.allow = 'camera; microphone';
 						}
 					<?php
 				}
@@ -112,6 +115,7 @@ class IC_front{
 			            s.type = "text/javascript";
 			            s.src = "//chat.app.financialinsiders.ca/fichat.script.js";
 			            d.body.appendChild(s);
+			            s.allow = 'camera; microphone';
 					}
 				<?php
 			}

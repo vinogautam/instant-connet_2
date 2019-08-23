@@ -81,6 +81,7 @@ class IC_agent_api{
 		);
 
 		if($_POST['type'] == 'email'){
+			
 			$respdata = array();
 			foreach ($_POST['contacts'] as $key => $value) {
 				$value = (array)$value;
@@ -116,7 +117,9 @@ class IC_agent_api{
 
 					$ntm_mail->send_mail($value['email'], $subject, $content, '', '');
 				} else{
+					
 					$ntm_mail->send_mail($value['email'], $subject, $content, '', '');
+					
 				}
 
 				$respdata[] = $link;

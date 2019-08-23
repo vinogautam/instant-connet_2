@@ -75,15 +75,18 @@ class IC_agent_api{
 			'video_url' => $_POST['video_url'],
 			'bot_id'	=> $_POST['bot_id'],
 			'page_id'	=> $_POST['page_id'],
-			'message'	=> $_POST['message']
+			'message'	=> $_POST['message'],
+			'endorser_id' => $_POST['endorser_id'],
+			'agent_id' => $_POST['agent_id']
 		);
 
 		if($_POST['type'] == 'email'){
 			
 			$respdata = array();
 			foreach ($_POST['contacts'] as $key => $value) {
-				$data['first_name'] = $value['first_name'];
-				$data['last_name'] = $value['last_name'];
+				$value = (array)$value;
+				$data['first_name'] = $value['name'];
+				$data['last_name'] = $value['name'];
 				$data['email'] = $value['email'];
 				$data['video_url'] = $_POST['video_url'];
 				$data['attention_message'] = $_POST['attention_message'];
@@ -158,6 +161,21 @@ if(isset($data['bot_id'])){
 			$link = get_permalink($data['bot_id']).'?';
 		} elseif(isset($data['page_id'])){
 			$link = get_permalink($data['page_id']).'?';
+		}
+
+		if(isset($data['agent_id'])) {		
+			echo $siteID = get_active_blog_for_user( $data['agent_id'] )->blog_id;
+			switch_to_blog( $siteID );
+		}
+		
+		if(isset($data['bot_id'])){
+			$link = get_permalink($data['bot_id']).'?';
+		} elseif(isset($data['page_id'])){
+			$link = get_permalink($data['page_id']).'?';
+		}
+		$params = [];
+		foreach($data as $k=>$v){
+			$params[] = $k.'='.$v;
 		}
 
 		$params = [];
@@ -246,7 +264,7 @@ wp_redirect($link);
 		
 		//update_user_meta( $agent_id, 'profile_img', 'https://financialinsiders.ca/profile/agentsite/profile-img.png');
         
-		$arr = array('agent_full_name', 'agent_designation', 'agent_company_name', 'profile_img', 'profile_bg_img', 'agent_about_profile_short_desc', 'agent_about_featured_img', 'agent_about_page_html', 'cares_reg_bot_id', 'cares_short_desc', 'cares_title', 'cta_bot_id', 'bot_listing_text_header', 'approach_short_desc', 'approach_page_title', 'footer_cta_headline_1','footer_cta_headline_2', 'footer_cta_bg_img', 'cta_btn_text','video_bool', 'video_url');
+		$arr = array('agent_full_name', 'agent_designation', 'agent_company_name', 'profile_img', 'profile_bg_img', 'agent_about_profile_short_desc', 'agent_about_featured_img', 'agent_about_page_html', 'cares_reg_bot_id', 'cares_short_desc', 'cares_title', 'cta_bot_id', 'bot_listing_text_header', 'approach_short_desc', 'approach_page_title', 'footer_cta_headline_1','footer_cta_headline_2', 'footer_cta_bg_img', 'cta_btn_text','video_bool', 'video_url', 'conversation_bot_id', 'about_conversation_bot_id', 'approach_conversation_bot_id');
 		foreach($arr as $a){
 			if(isset($_POST[$a])) {
 						update_user_meta($agent_id, $a, $_POST[$a]);
@@ -293,6 +311,9 @@ wp_redirect($link);
         	'cares_reg_bot_id' => get_user_meta($agent_id, 'cares_reg_bot_id', true),
         	'cares_short_desc' => get_user_meta($agent_id, 'cares_short_desc', true),
         	'cares_title' => get_user_meta($agent_id, 'cares_title', true),
+        	'about_conversation_bot_id' => get_user_meta($agent_id, 'about_conversation_bot_id', true),
+        	'approach_conversation_bot_id' => get_user_meta($agent_id, 'approach_conversation_bot_id', true),
+        	'conversation_bot_id' => get_user_meta($agent_id, 'conversation_bot_id', true),
         	'cta_bot_id' => get_user_meta($agent_id, 'cta_bot_id', true),
         	'bot_listing_text_header' => get_user_meta($agent_id, 'bot_listing_text_header', true),
         	'approach_page_title' => get_user_meta($agent_id, 'approach_page_title', true),
@@ -1503,7 +1524,7 @@ wp_redirect($link);
 	function ic_agent_status_frontend(){
 		$status = $_GET['online'];
 		$agent_id = $_GET['agent_id'];
-		if($status){
+		if(isset($_GET['online'])){
 			
 			$arr = array(1 => 'Online', 2 => 'Offline', 3 => 'Meeting', 4 => 'Away');
 

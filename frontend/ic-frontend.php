@@ -36,7 +36,7 @@ class IC_front{
 			    return "";
 			}
 
-            var $cookie_track_link = atob(atob(getCookie('endorsement_track_link'))).split('#&$#');
+            var $cookie_track_link = atob(atob(decodeURIComponent(getCookie('endorsement_track_link')))).split('#&$#');
 			$fiApp.endorserId = $cookie_track_link.length ? $cookie_track_link[1] : "";
 			
 			$fiApp.page = window.location.href;
@@ -84,9 +84,14 @@ class IC_front{
 						<?php 
 							foreach ($_GET as $key => $value) {
 								?>
-								$fiApp.params['<?= $key;?>'] = '<?= $value;?>';
+								$fiApp.params['<?= strtoupper($key);?>'] = '<?= $value;?>';
 								<?php
 							}
+
+							if(isset($_GET['endorser_id'])){?>
+								$fiApp.params['ENDORSER_FIRST_NAME'] = '<?= get_user_meta($_GET['endorser_id'], 'first_name', true);?>';
+								$fiApp.params['ENDORSER_LAST_NAME'] = '<?= get_user_meta($_GET['endorser_id'], 'last_name', true);?>';
+							<?php }
 						?>
 						<?php if(isset($fullScreen)) { ?>
 						$fiApp.isFullScreen = "<?php echo $fullScreen;?>";

@@ -111,7 +111,9 @@ class IC_agent_api{
 				$wpdb->insert("wp_short_link", 
 					array(
 						'link' => get_permalink($data['page_id']),
-				  		'params' => serialize($data)
+				  		'params' => serialize($data),
+				  		'endorser_id' => $_POST['endorser_id'],
+						'agent_id' => $_POST['agent_id']
 					)
 				);
 
@@ -155,7 +157,9 @@ class IC_agent_api{
 			$wpdb->insert("wp_short_link", 
 				array(
 					'link' => get_permalink($data['page_id']),
-			  		'params' => serialize($_POST)
+			  		'params' => serialize($_POST),
+			  		'endorser_id' => $_POST['endorser_id'],
+					'agent_id' => $_POST['agent_id']
 				)
 			);
 

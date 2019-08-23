@@ -2444,7 +2444,8 @@ wp_redirect($link);
 	function ic_agent_endorsement_settings(){
 
 		$res = get_user_meta($_GET['agent_id'], 'endorsement_settings', true);
-		echo json_encode($res);
+		
+		if($res)echo json_encode($res);
 		die(0);
 	}
 

@@ -85,14 +85,10 @@ class IC_agent_api{
 		$endorser_id = $_POST['endorser_id'];
 
 		if(isset($_POST['video_url']) && $_POST['video_url']){
-			$chat_bot_data = $wpdb->get_row('select * from '.$wpdb->prefix.'chat_bot_data where reflabel = "Intro Bot" and chat_id = '.$_POST['bot_id']);
-
-			$dataa = unserialize($chat_bot_data['data']);
-
-			if($dataa['extrapoint']){
+			if($_POST['extrapoint']){
 				$type = 'Extra points for video';
-				$new_balance = $endorsements->get_endorser_points($endorser_id)['points'] + $dataa['extrapoint'];
-				$data = array('points' => $dataa['extrapoint'], 'agent_id' => $agent_id, 'endorser_id' => $endorser_id, 'created' => date("Y-m-d H:i:s"), 'type' => 'extra_points', 'notes' => $type);
+				$new_balance = $endorsements->get_endorser_points($endorser_id)['points'] + $_POST['extrapoint'];
+				$data = array('points' => $_POST['extrapoint'], 'agent_id' => $agent_id, 'endorser_id' => $endorser_id, 'created' => date("Y-m-d H:i:s"), 'type' => 'extra_points', 'notes' => $type);
 				$endorsements->add_points($data);
 			}
 		}

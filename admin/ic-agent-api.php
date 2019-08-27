@@ -3588,7 +3588,7 @@ wp_redirect($link);
 		}
 	}
 	
-	function ic_instant_meeting($agent_id, $id)
+	function ic_instant_meeting($agent_id=0, $id=0)
 	{
 		global $wpdb, $ntm_mail;
 		

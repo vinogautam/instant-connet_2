@@ -1770,6 +1770,27 @@ wp_redirect($link);
 		update_user_meta($user,'disable_agent_app', 0);
 	}
 
+	function ic_resend_autologin_link(){
+		global $ntm_mail;
+
+		$userpass = wp_generate_password( $length=12, $include_standard_special_chars=false );
+		$user_info = get_userdata($_POST['id']);
+		$username = $user_info->user_login;
+
+		if($_POST['opt'] == 'expire'){
+			$ntm_mail->send_welcome_mail($user_info->user_email, $_POST['id'], $username.'#exp-'.$_POST['id'].'-'.strtotime('now'));
+		} else {
+			wp_set_password( $userpass, $_POST['id'] );
+			$ntm_mail->send_welcome_mail($user_info->user_email, $_POST['id'], $username.'#'.$userpass);
+		}
+		
+
+		$response = array('status' => 'Success');
+		
+		echo json_encode($response);
+		die(0);
+	}
+
 	function ic_resend_auto_link(){
 		global $ntm_mail;
 

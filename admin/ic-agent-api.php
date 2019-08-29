@@ -1776,12 +1776,17 @@ wp_redirect($link);
 		$userpass = wp_generate_password( $length=12, $include_standard_special_chars=false );
 		$user_info = get_userdata($_POST['id']);
 		$username = $user_info->user_login;
+		$video = $_POST['video'];
+
+		if($_POST['bot']){
+			update_user_meta($_POST['id'], 'campaign', $_POST['bot']);
+		}
 
 		if($_POST['opt'] == 'expire'){
-			$ntm_mail->send_welcome_mail($user_info->user_email, $_POST['id'], $username.'#exp-'.$_POST['id'].'-'.strtotime('now'));
+			$ntm_mail->send_welcome_mail($user_info->user_email, $_POST['id'], $username.'#exp-'.$_POST['id'].'-'.strtotime('now'), $video);
 		} else {
 			wp_set_password( $userpass, $_POST['id'] );
-			$ntm_mail->send_welcome_mail($user_info->user_email, $_POST['id'], $username.'#'.$userpass);
+			$ntm_mail->send_welcome_mail($user_info->user_email, $_POST['id'], $username.'#'.$userpass, $video);
 		}
 		
 

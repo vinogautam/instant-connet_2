@@ -3171,38 +3171,52 @@ wp_redirect($link);
 		$creds['user_password'] = $autologin[1];
 		$creds['remember'] = true;
 		$current_user = wp_signon( $creds, false );
-		$current_user_data = get_userdata($current_user->ID);
-		$points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where queue = 0 and endorser_id=".$current_user->ID);
-
-			$points2 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where queue = 1 and endorser_id=".$current_user->ID);
-		$invitation_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and endorser_id='".$current_user->ID."'");
-		$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
-			$agent_id = get_blog_option($blog_id, 'agent_id');
-
-		/*$endorser_letter = get_user_meta($current_user->ID, 'endorsement_letter', true);
-		if($endorser_letter)
-		{
-			$res = $wpdb->get_row("select * from ".$wpdb->prefix . "mailtemplates where id=".$endorser_letter);
-			$mailtemplate = $res->content;
-		}
-		else
-		{
-			$mailtemplate 	 	= 	$ntm_mail->get_invitation_mail ();
-			$mailtemplate = $mailtemplate['content'];
-		}*/
-
-		$campaign = get_user_meta($current_user->ID, 'campaign', true);
 		
-			$templates = $wpdb->get_row("select * from wp_".$blog_id."_campaign_templates where name = 'Endorsement Letter' and campaign_id=".$campaign);
+		$split = explode("-", $creds['user_password']);
 
-			$content = str_replace("<br />", "", stripslashes(stripslashes($templates->template)));
-
-			$mailtemplate = '<html><head><style>'.stripslashes(strip_tags(get_option('mail_template_css'))).'</style></head><body>'.$content.'</body></html>';
-
-		$mailtemplate = '<html><head><style>'.stripslashes(strip_tags(get_option('mail_template_css'))).'</style></head><body>'.$content.'</body></html>';
-		//$landingPageContent = $wpdb->get_results("select landing_page from wp_".$blog_id."_campaigns where id=".$campaign);
+		if(count($split) == 3 && $split[0] == 'exp' && ((strtotime('now') - $split[2]) / 86400) <= 7){
+			$current_user = (object) array('ID' => $split[1]);
+		}
 
 		if(!is_wp_error($current_user)) {
+			$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
+			$agent_id = get_blog_option($blog_id, 'agent_id');
+
+			$li = get_user_meta($current_user->ID, 'login_link_opened', true);
+			$li = $li ? $li : 0;
+			update_user_meta($current_user->ID, 'login_link_opened', $li+1);
+
+			$current_user_data = get_userdata($current_user->ID);
+			$points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where queue = 0 and endorser_id=".$current_user->ID);
+
+				$points2 = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where queue = 1 and endorser_id=".$current_user->ID);
+			$invitation_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where created like '".date("Y-m-")."%' and type in ('email_invitation', 'fbShare', 'liShare') and endorser_id='".$current_user->ID."'");
+			
+
+			/*$endorser_letter = get_user_meta($current_user->ID, 'endorsement_letter', true);
+			if($endorser_letter)
+			{
+				$res = $wpdb->get_row("select * from ".$wpdb->prefix . "mailtemplates where id=".$endorser_letter);
+				$mailtemplate = $res->content;
+			}
+			else
+			{
+				$mailtemplate 	 	= 	$ntm_mail->get_invitation_mail ();
+				$mailtemplate = $mailtemplate['content'];
+			}*/
+
+			$campaign = get_user_meta($current_user->ID, 'campaign', true);
+			
+				$templates = $wpdb->get_row("select * from wp_".$blog_id."_campaign_templates where name = 'Endorsement Letter' and campaign_id=".$campaign);
+
+				$content = str_replace("<br />", "", stripslashes(stripslashes($templates->template)));
+
+				$mailtemplate = '<html><head><style>'.stripslashes(strip_tags(get_option('mail_template_css'))).'</style></head><body>'.$content.'</body></html>';
+
+			$mailtemplate = '<html><head><style>'.stripslashes(strip_tags(get_option('mail_template_css'))).'</style></head><body>'.$content.'</body></html>';
+			//$landingPageContent = $wpdb->get_results("select landing_page from wp_".$blog_id."_campaigns where id=".$campaign);
+
+
 			update_user_meta( $current_user->ID, 'last_login', time() );
 			$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
 			$agent_id = get_blog_option($blog_id, 'agent_id');
@@ -3250,7 +3264,7 @@ wp_redirect($link);
 				);
 			$response = array('status' => 'Success', 'data' => $data);
 		} else {
-			$response = array('status' => 'Error', 'msg' => 'Invalid link!!');
+			$response = array('status' => 'Error', 'msg' => 'Invalid link/expired!!');
 		}
 
 		echo json_encode($response);
@@ -3302,6 +3316,7 @@ wp_redirect($link);
 			'agent_id' => $agent_id,
 			'site_id' => $blog_id,
 			'campaign' => get_user_meta($endorser_id, 'campaign', true),
+			'login_link_opened' => get_user_meta($endorser_id, 'login_link_opened', true),
 			'last_login' => $the_login_date
 		);
 

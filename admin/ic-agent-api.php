@@ -57,7 +57,8 @@ class IC_agent_api{
 			'ic_chat_bot_category', 'ic_chat_bot_new', 'ic_retrieve_chat_bot', 'ic_retrieve_chat_list',
 			'ic_new_endorsement_invitation', 'ic_delete_bot', 'ic_chat_bot_update', 'ic_chat_toggle_status',
 			'ic_copy_chat_bot', 'ic_agent_status_frontend', 'ic_update_profile_page_data', 'ic_get_profile_page_data',
-			'ic_add_session_timeline', 'getIntro', 'ic_link', 'ic_shorten_link', 'ic_create_introduction'
+			'ic_add_session_timeline', 'getIntro', 'ic_link', 'ic_shorten_link', 'ic_create_introduction',
+			'ic_timekit_google_callback'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -65,6 +66,11 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_timekit_google_callback(){
+		file_put_contents('log.txt', serialize(array('post' => $_POST, 'body' => (array) json_decode(file_get_contents('php://input')))));
+		die(0);
 	}
 
 	function ic_create_introduction(){
@@ -4436,6 +4442,8 @@ wp_redirect($link);
 			$data = (array) $user->data;
 			$userBlogs = get_blogs_of_user((int)$user->data->ID);
 			$timekitGmail = get_user_meta((int)$user->data->ID, 'timekits_gmail_email', true);
+			$timekit_resource_id = update_user_meta((int)$user->data->ID, 'timekit_resource_id', true);
+			$timekit_calendar_id = update_user_meta((int)$user->data->ID, 'timekit_calendar_id', true);
 			$timekitTimeZone = get_user_meta((int)$user->data->ID, 'timekits_time_zone', true);
 			$siteUrl = get_site_url(get_user_meta((int)$user->data->ID, 'primary_blog', true));
 			$stripeCustomerId = get_user_meta((int)$user->data->ID, "pmpro_stripe_customerid");
@@ -4445,6 +4453,8 @@ wp_redirect($link);
 			$data['timekit_gmail'] = $timekitGmail;
 			$data['stripePublishAPI'] = $stripeAPI;
             $data['timekit_time_zone'] = $timekitTimeZone;
+            $data['timekit_resource_id'] = $timekit_resource_id;
+            $data['timekit_calendar_id'] = $timekit_calendar_id;
             $data['stripe_customer_id'] = $stripeCustomerId[0];
             $data['points_per_dollar'] = get_blog_option($blog_id, 'points_per_dollar');
             $data['admin_fee'] = get_blog_option($blog_id, 'admin_fee');

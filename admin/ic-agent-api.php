@@ -69,7 +69,7 @@ class IC_agent_api{
 	}
 
 	function ic_timekit_google_callback(){
-		file_put_contents('log.txt', serialize(array('post' => $_POST, 'body' => (array) json_decode(file_get_contents('php://input')))));
+		file_put_contents('log.txt', json_encode(array('post' => $_POST, 'body' => (array) json_decode(file_get_contents('php://input')))));
 		die(0);
 	}
 
@@ -3559,11 +3559,20 @@ wp_redirect($link);
 	{
 		global $wpdb;
 		
-		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
-		
-		$encd = base6_decode(base6_decode($_POST['id']));
+		$_POST = (array) json_decode(file_get_contents('php://input'));
 
-		$wpdb->update($wpdb->prefix . "meeting", array('meeting_date' => $_POST['meeting_date'], 'timekit_meeting_id' => $_POST['timekit_meeting_id']), array('id' => $encd[0]));
+		file_put_contents('log.json', json_encode($_POST));
+
+		$where = explode('=', $_POST['where']);
+		
+		$agent_id = str_replace('&id', '', $where[1]);
+
+		$siteID = get_active_blog_for_user( $agent_id )->blog_id;
+		switch_to_blog( $siteID );
+
+		$encd = explode('#',base64_decode(base64_decode($where[2])));
+		
+		$wpdb->update($wpdb->prefix . "meeting", array('meeting_date' => '2019-09-26 17:00:00', 'timekit_meeting_id' => $_POST['id']), array('id' => $encd[0]));
 
 		die(0);
 		exit;

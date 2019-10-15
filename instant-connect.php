@@ -834,6 +834,7 @@
 			  validation_pattern tinytext NOT NULL,
 			  validation_msg tinytext NOT NULL,
 			  type tinytext NOT NULL,
+			  refid tinytext NOT NULL,
 			  drag_order int(1),
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";
 

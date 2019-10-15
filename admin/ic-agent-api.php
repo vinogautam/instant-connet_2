@@ -393,7 +393,9 @@ wp_redirect($link);
 
 			if($value['opt'] == 'option'){
 				$wpdb->insert($wpdb->prefix ."chat_bot_data", array(
+					'action' => $value['action'] ? $value['action'] : '',
 					'type' => $value['type'],
+					'refid' => $value['refid'] ? $value['refid'] : '',
 					'chat_id' => $cid,
 			  		'parent' => $pid,
 			  		'clabel' => $value['label'],
@@ -436,9 +438,11 @@ wp_redirect($link);
 
 			} else {
 				$wpdb->insert($wpdb->prefix ."chat_bot_data", array(
+					'action' => $value['action'] ? $value['action'] : '',
 					'chat_id' => $cid,
 			  		'parent' => $pid,
 			  		'clabel' => $value['label'],
+			  		'refid' => $value['refid'] ? $value['refid'] : '',
 			  		'data' => $value['data'] ? serialize($value['data']) : '',
 			  		'elements' => $value['elements'] ? serialize($value['elements']) : '',
 			  		'labelref' => $value['labelref'] ? $value['labelref'] : '',

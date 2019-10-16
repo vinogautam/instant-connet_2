@@ -2428,7 +2428,7 @@ wp_redirect($link);
 				//$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);
 				//$ntm_mail->send_notification_mail($user_id);
 				
-				$response = array('status' => 'Success', 'data' => $user_id, 'msg' => 'Endorser created successfully', 'link' => get_permalink($user['bot']).'?autologin='.base64_encode(base64_encode($autologin)));
+				$response = array('status' => 'Success', 'data' => $user_id, 'msg' => 'Endorser created successfully', 'exist' => $exist, 'link' => get_permalink($user['bot']).'?autologin='.base64_encode(base64_encode($autologin)));
 			}
 		} else {
 			$response = array('status' => 'Error', 'msg' => 'User already exists.  Password inherited.');

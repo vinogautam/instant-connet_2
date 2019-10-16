@@ -2395,13 +2395,26 @@ wp_redirect($link);
 			switch_to_blog( $siteID );
 		}
 		$user_id = username_exists( $user['user_login'] );
-		if ( !$user_id and email_exists($user['user_email']) == false ) {
-			if(isset($user['password'])) {
-				$user['user_pass'] = $user['password'];
+		if ( !$user_id) {
+			$user_id = email_exists($user['user_email']) ;
+			if($user_id){
+				$exist = 1;
+				$password = wp_generate_password( $length=12, $include_standard_special_chars=false );
+				wp_set_password( $password, $user_id);
+				$user_info = get_userdata($user_id);
+      			$user_login = $user_info->user_login;
+				$autologin = $user_login.'#'.$password;
 			} else {
-				$user['user_pass'] = wp_generate_password( $length=12, $include_standard_special_chars=false );
-			}
+				$exist = 0;
+				if(isset($user['password'])) {
+					$user['user_pass'] = $user['password'];
+				} else {
+					$user['user_pass'] = wp_generate_password( $length=12, $include_standard_special_chars=false );
+				}
+				$autologin = $user['user_login'].'#'.$user['user_pass'];
 				$user_id = wp_insert_user( $user ) ;
+			}
+			
 			if (  is_wp_error( $user_id ) ) {
 				$response = array('status' => 'Error', 'msg' => 'Something went wrong. Try Again!!!.');
 			}
@@ -2414,7 +2427,7 @@ wp_redirect($link);
 				update_user_meta($user_id, 'issuePoints', false);
 				//$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);
 				//$ntm_mail->send_notification_mail($user_id);
-				$autologin = $user['user_login'].'#'.$user['user_pass'];
+				
 				$response = array('status' => 'Success', 'data' => $user_id, 'msg' => 'Endorser created successfully', 'link' => get_permalink($user['bot']).'?autologin='.base64_encode(base64_encode($autologin)));
 			}
 		} else {

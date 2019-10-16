@@ -2384,8 +2384,14 @@ wp_redirect($link);
 		$user['user_email'] = $user['email'];
 		$user['user_login'] = strtolower($user['firstname'].'_'.$user['lastname']).rand(1111,9999);
 		$this->track_api('ic_endorser_register', $blog_id, $_POST['agent_id'], $res);
-		if(isset($user['agent_id'])) {		
+		if(isset($user['agent_id'])) {	
+			$agent_id = $user['agent_id'];	
 			$siteID = get_active_blog_for_user( $user['agent_id'] )->blog_id;
+			switch_to_blog( $siteID );
+		}
+		if(isset($user['agentID'])) {	
+			$agent_id = $user['agentID'];	
+			$siteID = get_active_blog_for_user( $user['agentID'] )->blog_id;
 			switch_to_blog( $siteID );
 		}
 		$user_id = username_exists( $user['user_login'] );
@@ -2401,14 +2407,15 @@ wp_redirect($link);
 			}
 			else
 			{
-				update_user_meta($user_id, 'agent_id', $user['agent_id']);
+				update_user_meta($user_id, 'agent_id', $agent_id);
 				update_user_meta($user_id, 'first_name', $user['firstname']);
 				update_user_meta($user_id, 'last_name', $user['lastname']);
+				update_user_meta($user_id, 'campaign', $user['bot']);
 				update_user_meta($user_id, 'issuePoints', false);
 				//$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);
 				//$ntm_mail->send_notification_mail($user_id);
-
-				$response = array('status' => 'Success', 'data' => $user_id, 'msg' => 'Endorser created successfully');
+				$autologin = $user['user_login'].'#'.$user['user_pass'];
+				$response = array('status' => 'Success', 'data' => $user_id, 'msg' => 'Endorser created successfully', 'link' => get_permalink($user['bot']).'?autologin='.base64_encode(base64_encode($autologin)));
 			}
 		} else {
 			$response = array('status' => 'Error', 'msg' => 'User already exists.  Password inherited.');

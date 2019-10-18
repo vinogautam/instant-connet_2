@@ -1792,12 +1792,24 @@ wp_redirect($link);
 			update_user_meta($_POST['id'], 'campaign', $_POST['bot']);
 		}
 
-		if($_POST['opt'] == 'expire'){
-			$ntm_mail->send_welcome_mail($user_info->user_email, $_POST['id'], $username.'#exp-'.$_POST['id'].'-'.strtotime('now'), $video);
+		$link = '';
+
+		if($_POST['act'] == 'create_link'){
+			if($_POST['opt'] == 'expire'){
+				$link = get_permalink($_POST['bot']).'?autologin='.base64_encode(base64_encode($username.'#exp-'.$_POST['id'].'-'.strtotime('now'))).'&videoURL='.$video;
+			} else {
+				wp_set_password( $userpass, $_POST['id'] );
+				$link = get_permalink($_POST['bot']).'?autologin='.base64_encode(base64_encode($username.'#'.$userpass)).'&videoURL='.$video;
+			}
 		} else {
-			wp_set_password( $userpass, $_POST['id'] );
-			$ntm_mail->send_welcome_mail($user_info->user_email, $_POST['id'], $username.'#'.$userpass, $video);
+			if($_POST['opt'] == 'expire'){
+				$ntm_mail->send_welcome_mail($user_info->user_email, $_POST['id'], $username.'#exp-'.$_POST['id'].'-'.strtotime('now'), $video);
+			} else {
+				wp_set_password( $userpass, $_POST['id'] );
+				$ntm_mail->send_welcome_mail($user_info->user_email, $_POST['id'], $username.'#'.$userpass, $video);
+			}
 		}
+		
 		
 
 		$response = array('status' => 'Success');

@@ -1812,7 +1812,7 @@ wp_redirect($link);
 		
 		
 
-		$response = array('status' => 'Success');
+		$response = array('status' => 'Success', 'link' => $link);
 		
 		echo json_encode($response);
 		die(0);

@@ -58,7 +58,7 @@ class IC_agent_api{
 			'ic_new_endorsement_invitation', 'ic_delete_bot', 'ic_chat_bot_update', 'ic_chat_toggle_status',
 			'ic_copy_chat_bot', 'ic_agent_status_frontend', 'ic_update_profile_page_data', 'ic_get_profile_page_data',
 			'ic_add_session_timeline', 'getIntro', 'ic_link', 'ic_shorten_link', 'ic_create_introduction',
-			'ic_timekit_google_callback'
+			'ic_timekit_google_callback', 'approve_endorser'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -2391,7 +2391,7 @@ wp_redirect($link);
 
 		$user = isset($_POST['firstname']) ? $_POST : (array) json_decode(file_get_contents('php://input'));
 		$user['role'] = 'endorser';
-		$user['user_email'] = $user['email'];
+		$user['user_email'] = $user['user_email'];
 		$user['user_login'] = strtolower($user['firstname'].'_'.$user['lastname']).rand(1111,9999);
 		$this->track_api('ic_endorser_register', $blog_id, $_POST['agent_id'], $res);
 		if(isset($user['agent_id'])) {	
@@ -2431,8 +2431,8 @@ wp_redirect($link);
 			else
 			{
 				update_user_meta($user_id, 'agent_id', $agent_id);
-				update_user_meta($user_id, 'first_name', $user['firstname']);
-				update_user_meta($user_id, 'last_name', $user['lastname']);
+				update_user_meta($user_id, 'first_name', $user['first_name']);
+				update_user_meta($user_id, 'last_name', $user['last_name']);
 				update_user_meta($user_id, 'campaign', $user['bot']);
 				update_user_meta($user_id, 'issuePoints', 0);
 				//$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);
@@ -4884,6 +4884,14 @@ wp_redirect($link);
 		wpmu_delete_user($_GET['id']);
 
 		$response = array('status' => 'Success', 'msg' => 'Endorser deleted successfully');
+		echo json_encode($response);
+		die(0);
+	}
+
+	function approve_endorser(){
+		update_user_meta($_GET['id'], 'issuePoints', 1);
+
+		$response = array('status' => 'Success', 'msg' => 'Endorser approved successfully');
 		echo json_encode($response);
 		die(0);
 	}

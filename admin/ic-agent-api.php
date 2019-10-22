@@ -1810,8 +1810,6 @@ wp_redirect($link);
 			}
 		}
 		
-		
-
 		$response = array('status' => 'Success', 'link' => $link);
 		
 		echo json_encode($response);
@@ -2316,7 +2314,7 @@ wp_redirect($link);
 		die(0);
 	}
 
-	function ic_get_tmp_user(){
+	function ic_get_tmp_userbk(){
 		global $wpdb;
 
 		$blog_id = get_current_blog_id();
@@ -2436,7 +2434,7 @@ wp_redirect($link);
 				update_user_meta($user_id, 'first_name', $user['firstname']);
 				update_user_meta($user_id, 'last_name', $user['lastname']);
 				update_user_meta($user_id, 'campaign', $user['bot']);
-				update_user_meta($user_id, 'issuePoints', false);
+				update_user_meta($user_id, 'issuePoints', 0);
 				//$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass']);
 				//$ntm_mail->send_notification_mail($user_id);
 				
@@ -4545,7 +4543,7 @@ wp_redirect($link);
 				update_user_meta($user_id, 'social_campaign', $user['social_campaign']);
 				update_user_meta($user_id, 'landingPageContent', $user['landingPageContent']);
 				if(isset($user['password'])) {
-					update_user_meta($user_id, 'issuePoints', $user['issue_points']);
+					update_user_meta($user_id, 'issuePoints', $user['issue_points'] ? 1 : 0);
 				}
 				if( isset($user['video']) ){
 					$ntm_mail->send_welcome_mail($user['user_email'], $user_id, $user['user_login'].'#'.$user['user_pass'], $user['video']);
@@ -4665,7 +4663,8 @@ wp_redirect($link);
 		foreach($data as $v){
 			$v = (array)$v;
 			$item = array('id' => $v['ID'], 'ID' => $v['ID']);
-			//if(!get_user_meta($item['ID'], 'imcomplete_profile', true) && get_user_meta($item['ID'], 'agent_id', true) == $_GET['agent_id']){
+			$item['issuePoints'] = get_user_meta($item['ID'], 'issuePoints', true);
+			if($item['issuePoints'] == '' || $item['issuePoints'] == 1){ // get_user_meta($item['ID'], 'agent_id', true) == $_GET['agent_id']
 
 				$endorser_id = $item['ID'];
 				$endorser = get_userdata($endorser_id);
@@ -4699,7 +4698,85 @@ wp_redirect($link);
 				} else {
 					$newdat[] = $item;
 				}
-			//}
+			}
+		}
+
+		$recordsTotal = $newdat;
+		$start = $_GET['start'];
+		$length = $_GET['length'];
+		
+
+		function sortByOrder($a, $b) {
+			$order = $_GET['columns'][$_GET['order'][0]['column']]['data'];
+			$orderby = $_GET['order'][0]['dir'];
+			if(strtoupper($orderby) == 'ASC')
+				return $a[$order] > $b[$order] ? 1 : -1;
+			else
+				return $b[$order] > $a[$order] ? 1 : -1;
+		}
+
+		usort($newdat, 'sortByOrder');
+		$recordsFiltered = array_slice($newdat, $start, $length);
+
+		$response = array('status' => 'Success', 
+							'draw' => (int)$_GET['draw'],
+							'data' => $recordsFiltered,
+						  	'recordsTotal' => count($recordsTotal),
+						  	'recordsFiltered' => count($recordsTotal),
+						);
+
+		echo json_encode($response);
+		die(0);
+		
+	}
+
+	function ic_get_tmp_user(){
+		global $wpdb;
+		$blog_id = get_current_blog_id();
+		$arr = array('blog_id' => $blog_id, 'role'=>'endorser');
+
+		$data = (array)get_users($arr);
+		$search = $_GET['search']['value'];
+		$newdat = array();
+		foreach($data as $v){
+			$v = (array)$v;
+			$item = array('id' => $v['ID'], 'ID' => $v['ID']);
+			$item['issuePoints'] = get_user_meta($item['ID'], 'issuePoints', true);
+			if($item['issuePoints'] != '' && $item['issuePoints'] != 1){ // get_user_meta($item['ID'], 'agent_id', true) == $_GET['agent_id']
+
+				$endorser_id = $item['ID'];
+				$endorser = get_userdata($endorser_id);
+
+				$item['name'] = get_user_meta($endorser_id, 'first_name', true). ' '. get_user_meta($endorser_id, 'last_name', true);
+				$item['email'] = $endorser->user_email;
+				
+				$total_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where type!='Redeem Point' and queue = 0 and endorser_id = ".$endorser_id);
+
+				$non_queue_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where type!='Redeem Point' and queue = 1 and endorser_id = ".$endorser_id);
+
+				$redeem_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where type='Redeem Point' and endorser_id = ".$endorser_id);
+
+				$chat_conversion = $wpdb->get_row("select count(*) as cnt from wp_".$blog_id."_points_transaction where type='chat_conversion' and endorser_id = ".$endorser_id);
+
+				$meeting_conversion = $wpdb->get_row("select count(*) as cnt from wp_".$blog_id."_points_transaction where type='meeting_conversion' and endorser_id = ".$endorser_id);
+
+
+				$item['total_points'] = $total_points ? $total_points->points : 0;
+				$item['non_queue_points'] = $non_queue_points ? $non_queue_points->points : 0;
+				$item['redeem_points'] = $redeem_points ? $redeem_points->points : 0;
+				$item['chat_conversion'] = $chat_conversion ? $chat_conversion->cnt : 0;
+				$item['meeting_conversion'] = $meeting_conversion ? $meeting_conversion->cnt : 0;
+
+				$last_login = get_user_meta($endorser_id, 'last_login', true);
+				$the_login_date = human_time_diff($last_login);
+				$item['last_login'] = $the_login_date;
+
+				if($search && (strpos($item['name'], $search) || strpos($item['email'], $search))){
+					$newdat[] = $item;
+				} else {
+					$newdat[] = $item;
+				}
+			}
 		}
 
 		$recordsTotal = $newdat;

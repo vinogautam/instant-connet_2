@@ -110,8 +110,23 @@ class IC_front{
 			} else {
 				$botId = get_user_meta($agent_id, 'status_data_Welcome', true);
 				// $fullScreen = "false";
+
+				if(isset($_GET['greetingID']) || isset($_GET['conversationID'])){
+					$botId = $_GET['greetingID'];
+					$botId2 = $_GET['conversationID'];
+				} elseif(get_the_title() == 'Home'){
+					$botId = get_user_meta($agent_id, 'conversation_bot_id', true);
+					$botId2 = get_user_meta($agent_id, 'greetings_bot_id', true);
+				} elseif(get_the_title() == 'About') {
+					$botId = get_user_meta($agent_id, 'about_conversation_bot_id', true);
+					$botId2 = get_user_meta($agent_id, 'about_greetings_bot_id', true);
+				} elseif(get_the_title() == 'Our approach'){
+					$botId = get_user_meta($agent_id, 'approach_conversation_bot_id', true);
+					$botId2 = get_user_meta($agent_id, 'approach_greetings_bot_id', true);
+				}
 				?>
 					$fiApp.botId = "<?php echo $botId;?>";
+					$fiApp.botId2 = "<?php echo $botId2;?>";
 					<?php if(isset($fullScreen)) { ?>
 					$fiApp.isFullScreen = "<?php echo $fullScreen;?>";
 					<?php  } ?>

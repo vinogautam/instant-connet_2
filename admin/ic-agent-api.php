@@ -585,7 +585,7 @@ wp_redirect($link);
 			$value = (array)$value;
 			$value['option'] = $value['coption'];
 			$value['label'] = stripslashes($value['clabel']);
-			$value['data'] = $value['data'] ? unserialize($value['data']) : '';
+			$value['data'] = $value['data'] ? unserialize($value['data']) : ((object)array());
 			unset($value['elements']);
 			if($value['opt'] == 'bot'){
 				$value['elements'] = $this->get_chat_data($chat_data, $value['id']);

@@ -585,7 +585,10 @@ wp_redirect($link);
 			$value = (array)$value;
 			$value['option'] = $value['coption'];
 			$value['label'] = stripslashes($value['clabel']);
-			$value['data'] = $value['data'] ? unserialize($value['data']) : ((object)array());
+			$value['data'] = $value['data'] ? (array) unserialize($value['data']) : ((object)array());
+			if(is_array($value['data']) && isset($value['data']['skipLabel'])){
+				$value['data']['skipLabel'] = str_replace('\\', '', $value['data']['skipLabel']);
+			}
 			unset($value['elements']);
 			if($value['opt'] == 'bot'){
 				$value['elements'] = $this->get_chat_data($chat_data, $value['id']);
@@ -4732,7 +4735,6 @@ wp_redirect($link);
 
 		echo json_encode($response);
 		die(0);
-		
 	}
 
 	function ic_get_tmp_user(){
@@ -4889,6 +4891,7 @@ wp_redirect($link);
 		wpmu_delete_user($_GET['id']);
 
 		$response = array('status' => 'Success', 'msg' => 'Endorser deleted successfully');
+		
 		echo json_encode($response);
 		die(0);
 	}
@@ -4897,6 +4900,7 @@ wp_redirect($link);
 		update_user_meta($_GET['id'], 'issuePoints', 1);
 
 		$response = array('status' => 'Success', 'msg' => 'Endorser approved successfully');
+		
 		echo json_encode($response);
 		die(0);
 	}
@@ -4907,6 +4911,7 @@ wp_redirect($link);
 		$wpdb->delete($wpdb->prefix . "mailtemplates", array( 'id' => $_GET['id'] ) );
 
 		$response = array('status' => 'Success', 'msg' => 'Mail Letter template deleted successfully');
+		
 		echo json_encode($response);
 		die(0);
 	}
@@ -4921,6 +4926,7 @@ wp_redirect($link);
 			$response = array('status' => 'Success', 'msg' => 'Notifications send to user');
 		else
 			$response = array('status' => 'Error', 'msg' => 'Notifications failed to send');
+		
 		echo json_encode($response);
 		die(0);
 	}

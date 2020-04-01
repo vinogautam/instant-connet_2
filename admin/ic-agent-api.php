@@ -3229,6 +3229,8 @@ wp_redirect($link);
 		if(!is_wp_error($current_user)) {
 			$blog_id = get_active_blog_for_user( $current_user->ID )->blog_id;
 			$agent_id = get_blog_option($blog_id, 'agent_id');
+			$agentProfileImg = get_user_meta($agent_id, 'profile_img', true);
+			$agentCredentials = get_user_meta($agent_id, 'agent_designation', true);
 
 			$li = get_user_meta($current_user->ID, 'login_link_opened', true);
 			$li = $li ? $li : 0;
@@ -3297,6 +3299,8 @@ wp_redirect($link);
 					//'mailtemplate' => str_replace('[ENDORSERS NOTES]', '<div id="dynamicNoteContainer" ng-click="editNote()" dynamic="bodyContent" style="background-color: white;"></div><a href="javascript:void(0)" style="float: right; top: -30px; position: relative; right: 10px;" ng-click="editNote()">Edit</a>', $content),
 					'blog_id' => $blog_id,
 					'agent_id' => $agent_id,
+					'agent_profile_img' => $agentProfileImg,
+					'agent_credentials' => $agentCredentials,
 					'points_per_dollar' => get_option('points_per_dollar'),
 					'twitter_text' => get_option('twitter_text'),
 					'fb_text' => $dcampaign->facebook,

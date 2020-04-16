@@ -1804,10 +1804,10 @@ wp_redirect($link);
 
 		if($_POST['act'] == 'create_link'){
 			if($_POST['opt'] == 'expire'){
-				$link = get_permalink($_POST['bot']).'?autologin='.base64_encode(base64_encode($username.'#exp-'.$_POST['id'].'-'.strtotime('now'))).'&videoURL='.$video;
+				$link = get_permalink($_POST['bot']).'?autologin='.base64_encode(base64_encode($username.'#exp-'.$_POST['id'].'-'.strtotime('now'))).'&videoURL='.$video. '&messagetxt=' . $_POST['landingPageContent'];
 			} else {
 				wp_set_password( $userpass, $_POST['id'] );
-				$link = get_permalink($_POST['bot']).'?autologin='.base64_encode(base64_encode($username.'#'.$userpass)).'&videoURL='.$video;
+				$link = get_permalink($_POST['bot']).'?autologin='.base64_encode(base64_encode($username.'#'.$userpass)).'&videoURL='.$video . '&messagetxt=' . $_POST['landingPageContent'];
 			}
 		} else {
 			if($_POST['opt'] == 'expire'){

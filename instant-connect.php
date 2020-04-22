@@ -657,6 +657,7 @@
 			   file_name tinytext NOT NULL,
 			   name tinytext NOT NULL,
 			   file_url tinytext NOT NULL,
+			   file_thumb tinytext NOT NULL,
 			   template_type tinytext NOT NULL,
 			   created datetime,
 			  PRIMARY KEY  (id) ) ENGINE=InnoDB";

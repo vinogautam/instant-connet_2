@@ -3836,7 +3836,7 @@ wp_redirect($link);
 	function ic_add_points(){
 		global $wpdb, $ntm_mail;
 
-		$_POST = (array) json_decode(file_get_contents('php://input'));
+		//$_POST = (array) json_decode(file_get_contents('php://input'));
 
 		$blog_id = get_active_blog_for_user( $_POST['endorser_id'] )->blog_id;
 

@@ -60,6 +60,7 @@ class IC_front{
 					s.style.height = "100%";
 					s.style.left = 0;
 					s.style.top = 0;
+					s.style.border = "none";
 					s.style['z-index'] = 9999;
 					s.allow = 'camera; microphone';
 					d.body.appendChild(s);
@@ -73,6 +74,7 @@ class IC_front{
 					s.style.height = "100%";
 					s.style.left = 0;
 					s.style.top = 0;
+					s.style.border = "none";
 					s.style['z-index'] = 9999;
 					d.body.appendChild(s);
 					s.allow = 'camera; microphone';

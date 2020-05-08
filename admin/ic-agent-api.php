@@ -1796,6 +1796,10 @@ wp_redirect($link);
 		$username = $user_info->user_login;
 		$video = $_POST['video'];
 
+		$user_id  = $_POST['id'];
+		$blog_id = get_active_blog_for_user( $user_id )->blog_id;
+		$agent_id = get_blog_option($blog_id, 'agent_id');
+
 		if($_POST['bot']){
 			update_user_meta($_POST['id'], 'campaign', $_POST['bot']);
 		}
@@ -1804,11 +1808,31 @@ wp_redirect($link);
 
 		if($_POST['act'] == 'create_link'){
 			if($_POST['opt'] == 'expire'){
-				$link = get_permalink($_POST['bot']).'?autologin='.base64_encode(base64_encode($username.'#exp-'.$_POST['id'].'-'.strtotime('now'))).'&videoURL='.$video. '&messagetxt=' . $_POST['landingPageContent'];
+				$autologin = $username.'#exp-'.$_POST['id'].'-'.strtotime('now');
 			} else {
 				wp_set_password( $userpass, $_POST['id'] );
-				$link = get_permalink($_POST['bot']).'?autologin='.base64_encode(base64_encode($username.'#'.$userpass)).'&videoURL='.$video . '&messagetxt=' . $_POST['landingPageContent'];
+				$autologin = $username.'#'.$userpass;
 			}
+
+
+			$dt = array(
+				'messagetxt' => $_POST['landingPageContent'],
+				'videoURL' => $video,
+				'endorser_id' => $user_id,
+				'agent_id' => $agent_id,
+				'bot_id' => $_POST['bot'],
+				'autologin' => base64_encode(base64_encode($autologin))
+			);
+			$wpdb->insert("wp_short_link", 
+				array(
+					'link' => '',
+			  		'params' => serialize($dt),
+			  		'endorser_id' => $user_id,
+					'agent_id' => $agent_info->ID
+				)
+			);
+
+			$link = site_url('introduction.php?id='.$wpdb->insert_id);
 		} else {
 			if($_POST['opt'] == 'expire'){
 				$ntm_mail->send_welcome_mail($user_info->user_email, $_POST['id'], $username.'#exp-'.$_POST['id'].'-'.strtotime('now'), $video);
@@ -3101,7 +3125,7 @@ wp_redirect($link);
 			</div>';
 			$ntm_mail->send_mail($_POST['email'], 'Reset your password', $reset_link);
 
-			$response = array('status' => 'Success', 'msg' => 'Reset link sent to you email');
+			$response = array('status' => 'Success', 'msg' => 'Reset link sent to your email');
 		}
 		else {
 			$response = array('status' => 'Error', 'msg' => 'Invalid Email');

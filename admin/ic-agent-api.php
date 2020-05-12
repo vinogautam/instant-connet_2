@@ -1789,7 +1789,7 @@ wp_redirect($link);
 	}
 
 	function ic_resend_autologin_link(){
-		global $ntm_mail;
+		global $ntm_mail, $wpdb;
 
 		$userpass = wp_generate_password( $length=12, $include_standard_special_chars=false );
 		$user_info = get_userdata($_POST['id']);
@@ -1828,10 +1828,9 @@ wp_redirect($link);
 					'link' => '',
 			  		'params' => serialize($dt),
 			  		'endorser_id' => $user_id,
-					'agent_id' => $agent_info->ID
+					'agent_id' => $agent_id
 				)
 			);
-
 			$link = site_url('introduction.php?id='.$wpdb->insert_id);
 		} else {
 			if($_POST['opt'] == 'expire'){
@@ -3363,11 +3362,20 @@ wp_redirect($link);
 
 		$redeem_points = $wpdb->get_row("select sum(points) as points from wp_".$blog_id."_points_transaction where type='Redeem Point' and endorser_id = ".$endorser_id);
 
+		$fbShare = $wpdb->get_row("select count(*) as cnt from wp_".$blog_id."_points_transaction where type = 'fbShare' and endorser_id='".$endorser_id."'");
+
+		$liShare = $wpdb->get_row("select count(*) as cnt from wp_".$blog_id."_points_transaction where type = 'liShare' and endorser_id='".$endorser_id."'");
+
+
 		$invitations = $wpdb->get_row("select count(*) as count from wp_".$blog_id."_endorsements where endorser_id = ".$endorser_id);
 
 		$open = $wpdb->get_row("select count(*) as count from wp_".$blog_id."_endorsements where open_status=1 and endorser_id = ".$endorser_id);
 
 		$clicked = $wpdb->get_row("select count(*) as count from wp_".$blog_id."_endorsements where track_status=1 and endorser_id = ".$endorser_id);
+
+		$chat_conversion = $wpdb->get_row("select count(*) as cnt from wp_".$blog_id."_points_transaction where type='chat_conversion' and endorser_id = ".$endorser_id);
+
+		$meeting_conversion = $wpdb->get_row("select count(*) as cnt from wp_".$blog_id."_points_transaction where type='meeting_conversion' and endorser_id = ".$endorser_id);
 
 		$fb_invitation = get_user_meta($endorser_id, "tracked_fb_invitation", true);
 
@@ -3385,6 +3393,10 @@ wp_redirect($link);
 			'invitation_clicked' => $clicked->count ? $clicked->count : 0,
 			'fb_invitation' => $fb_invitation ? $fb_invitation : 0,
 			'tw_invitation' => $tw_invitation ? $tw_invitation : 0,
+			'fbShare' => $fbShare->cnt ? $fbShare->cnt : 0,
+			'liShare' => $liShare->cnt ? $liShare->cnt : 0,
+			'chat_conversion' => $chat_conversion->cnt ? $chat_conversion->cnt : 0,
+			'meeting_conversion' => $meeting_conversion->cnt ? $meeting_conversion->cnt : 0,
 			'leads' => $leads,
 			'name' => get_user_meta($endorser_id, 'first_name', true). ' '. get_user_meta($endorser_id, 'last_name', true),
 			'email' => $endorser->user_email,

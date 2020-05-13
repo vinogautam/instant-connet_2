@@ -58,7 +58,7 @@ class IC_agent_api{
 			'ic_new_endorsement_invitation', 'ic_delete_bot', 'ic_chat_bot_update', 'ic_chat_toggle_status',
 			'ic_copy_chat_bot', 'ic_agent_status_frontend', 'ic_update_profile_page_data', 'ic_get_profile_page_data',
 			'ic_add_session_timeline', 'getIntro', 'ic_link', 'ic_shorten_link', 'ic_create_introduction',
-			'ic_timekit_google_callback', 'approve_endorser'
+			'ic_timekit_google_callback', 'approve_endorser', 'ic_shorten_link_info'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -71,6 +71,21 @@ class IC_agent_api{
 	function ic_timekit_google_callback(){
 		file_put_contents('log.txt', json_encode(array('post' => $_POST, 'body' => (array) json_decode(file_get_contents('php://input')))));
 		die(0);
+	}
+
+	function ic_shorten_link_info(){
+		global $wpdb;
+
+		$data = (array) $wpdb->get_row('select * from wp_short_link where id = '.$_GET['id']);
+
+		if(isset($data['params'])){
+			$data['params'] = unserialize($data['params']);
+		}
+
+		$response = array('Status' => 'Success', 'data' => $data);
+
+		echo json_encode($response);
+        die(0);
 	}
 
 	function ic_create_introduction(){
@@ -1831,7 +1846,7 @@ wp_redirect($link);
 					'agent_id' => $agent_id
 				)
 			);
-			$link = site_url('introduction.php?id='.$wpdb->insert_id);
+			$link = get_permalink($_POST['bot']).'?detailInfo='.$wpdb->insert_id;
 		} else {
 			if($_POST['opt'] == 'expire'){
 				$ntm_mail->send_welcome_mail($user_info->user_email, $_POST['id'], $username.'#exp-'.$_POST['id'].'-'.strtotime('now'), $video);
@@ -3236,7 +3251,17 @@ wp_redirect($link);
 	function ic_auto_login(){
 		global $wpdb, $ntm_mail;
 
-		$autologin = explode("#", base64_decode(base64_decode($_GET['autologin'])));
+		
+		$wp_short_link = array();
+		if(is_numeric($_GET['autologin'])){
+			$rres = (array) $wpdb->get_row('select * from wp_short_link where id = '.$_GET['autologin']);
+			$wp_short_link = (array) unserialize($rres['params']);
+			$autologin = explode("#", base64_decode(base64_decode($wp_short_link['autologin'])));
+			//print_r($autologin);
+		} else {
+			$autologin = explode("#", base64_decode(base64_decode($_GET['autologin'])));
+		}
+
 		$creds = array();
 		$creds['user_login'] = $autologin[0];
 		$creds['user_password'] = $autologin[1];
@@ -3337,7 +3362,7 @@ wp_redirect($link);
 					'video' => $video
 
 				);
-			$response = array('status' => 'Success', 'data' => $data);
+			$response = array('status' => 'Success', 'data' => $data, 'shortlinkDetail' => $wp_short_link);
 		} else {
 			$response = array('status' => 'Error', 'msg' => 'Invalid link/expired!!');
 		}

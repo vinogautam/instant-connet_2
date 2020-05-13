@@ -54,7 +54,7 @@ class IC_front{
 				if($chat_type == 'Endorser Send Invitation'){
 					?>
 					var d = document, s = d.createElement('iframe'); 
-					s.src = "https://financialinsiders.github.io/endorsers/#!/cb/<?= $botId?>?autologin=<?= $_GET['autologin']?>&videoURL=<?= $_GET['videoURL']?>&messagetxt=<?= $_GET['messagetxt']?>";
+					s.src = "https://financialinsiders.github.io/endorsers/#!/cb/<?= $botId?>?detailInfo=<?= $_GET['detailInfo']?>";
 					s.style.position = 'fixed';
 					s.style.width = "100%";
 					s.style.height = "100%";

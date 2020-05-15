@@ -92,14 +92,8 @@ class IC_agent_api{
 		global $wpdb, $ntm_mail, $endorsements;
 		$_POST = (array) json_decode(file_get_contents('php://input'));
 
-		$data = array(
-			'video_url' => $_POST['video_url'],
-			'bot_id'	=> $_POST['bot_id'],
-			'page_id'	=> $_POST['page_id'],
-			'message'	=> $_POST['message'],
-			'endorser_id' => $_POST['endorser_id'],
-			'agent_id' => $_POST['agent_id']
-		);
+		$data = $_POST;
+		unset($data['contacts']);
 
 		$blog_id = get_current_blog_id();
 		$agent_id = get_blog_option($blog_id, 'agent_id');
@@ -109,8 +103,9 @@ class IC_agent_api{
 			if($_POST['extrapoint']){
 				$type = 'Extra points for video';
 				$new_balance = $endorsements->get_endorser_points($endorser_id)['points'] + $_POST['extrapoint'];
-				$data = array('points' => $_POST['extrapoint'], 'agent_id' => $agent_id, 'endorser_id' => $endorser_id, 'created' => date("Y-m-d H:i:s"), 'type' => 'extra_points', 'notes' => $type);
-				$endorsements->add_points($data);
+				$data2 = array('points' => $_POST['extrapoint'], 'agent_id' => $agent_id, 'endorser_id' => $endorser_id, 'created' => date("Y-m-d H:i:s"), 'type' => 'extra_points', 'notes' => $type);
+
+				$endorsements->add_points($data2);
 			}
 		}
 
@@ -173,7 +168,7 @@ class IC_agent_api{
 		} elseif(isset($_POST['type']) && $_POST['type']){
 			$wpdb->insert("wp_short_link", 
 				array(
-					'link' => get_permalink($data['page_id']),
+					'link' => get_permalink($data['bot_id']),
 			  		'params' => serialize($_POST),
 			  		'endorser_id' => $_POST['endorser_id'],
 					'agent_id' => $_POST['agent_id']

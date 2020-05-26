@@ -98,6 +98,10 @@ class IC_front{
 						<?php if(isset($fullScreen)) { ?>
 						$fiApp.isFullScreen = "<?php echo $fullScreen;?>";
 						<?php  } ?>
+						$fiApp.previewMode = false;
+						<?php if(isset($_GET['preview_mode'])) { ?>
+						$fiApp.previewMode = true;
+						<?php  } ?>
 						if($fiApp.endorserId || $fiApp.siteId){
 							var d = document, s = d.createElement('script'); 
 				            s.type = "text/javascript";

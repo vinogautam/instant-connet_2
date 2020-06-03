@@ -58,7 +58,8 @@ class IC_agent_api{
 			'ic_new_endorsement_invitation', 'ic_delete_bot', 'ic_chat_bot_update', 'ic_chat_toggle_status',
 			'ic_copy_chat_bot', 'ic_agent_status_frontend', 'ic_update_profile_page_data', 'ic_get_profile_page_data',
 			'ic_add_session_timeline', 'getIntro', 'ic_link', 'ic_shorten_link', 'ic_create_introduction',
-			'ic_timekit_google_callback', 'approve_endorser', 'ic_shorten_link_info'
+			'ic_timekit_google_callback', 'approve_endorser', 'ic_shorten_link_info',
+			'ic_widget_settings'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -66,6 +67,19 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_widget_settings(){
+		$_POST = (array) json_decode(file_get_contents('php://input'));
+
+		if(isset($_POST['widgetSettings'])){
+			update_user_meta($_POST['user_id'], 'widgetSettings', $_POST['widgetSettings']);
+		}
+
+		$response = array('Status' => 'Success', 'data' => get_user_meta($_POST['user_id'], 'widgetSettings', true));
+
+		echo json_encode($response);
+        die(0);
 	}
 
 	function ic_timekit_google_callback(){
@@ -495,7 +509,7 @@ wp_redirect($link);
 		$id = wp_insert_post($args);
 
 
-		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'fbText', 'fb_image', 'twText', 'tw_image', 'piText', 'pi_image', 'liText', 'li_image', 'inviteContent', 'backgroundImage', 'fullscreen', 'emailInvite');
+		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'fbText', 'fb_image', 'twText', 'tw_image', 'piText', 'pi_image', 'liText', 'li_image', 'inviteContent', 'backgroundImage', 'fullscreen', 'emailInvite', 'appearance');
 
 		foreach($arr as $a){
 			update_post_meta($id, $a, $_POST[$a]);
@@ -522,7 +536,7 @@ wp_redirect($link);
 		$id = wp_insert_post($args);
 
 
-		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'fbText', 'fb_image', 'twText', 'tw_image', 'piText', 'pi_image', 'liText', 'li_image', 'inviteContent', 'backgroundImage', 'fullscreen', 'emailInvite');
+		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'fbText', 'fb_image', 'twText', 'tw_image', 'piText', 'pi_image', 'liText', 'li_image', 'inviteContent', 'backgroundImage', 'fullscreen', 'emailInvite', 'appearance');
 
 		foreach($arr as $a){
 			update_post_meta($id, $a, $botData[$a]);
@@ -651,7 +665,7 @@ wp_redirect($link);
 			'link' => get_permalink($value->ID)
 		);
 
-		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'fbText', 'fb_image', 'twText', 'tw_image', 'piText', 'pi_image', 'liText', 'li_image', 'inviteContent', 'backgroundImage', 'fullscreen', 'emailInvite');
+		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'fbText', 'fb_image', 'twText', 'tw_image', 'piText', 'pi_image', 'liText', 'li_image', 'inviteContent', 'backgroundImage', 'fullscreen', 'emailInvite', 'appearance');
 
 		foreach($arr as $a){
 			$chat[$a] = get_post_meta($value->ID, $a, true);

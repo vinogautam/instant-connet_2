@@ -100,7 +100,8 @@ class IC_front{
 						<?php  } ?>
 						$fiApp.previewMode = 'false';
 						<?php if(isset($_GET['preview_mode'])) { ?>
-						$fiApp.previewMode = 'true';
+								$fiApp.previewMode = 'true';
+						 		document.body.setAttribute("style", "padding-top:40px");
 						<?php  } ?>
 						if($fiApp.endorserId || $fiApp.siteId){
 							var d = document, s = d.createElement('script'); 

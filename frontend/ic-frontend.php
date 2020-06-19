@@ -44,7 +44,7 @@ class IC_front{
 			$fiApp.blogUrl = "<?php echo get_site_url($siteidd);?>";
 			$fiApp.visited_page = getCookie('fa_surfing_page');
 			$fiApp.introVideo = "<?php if(!empty($_GET['video'])) { echo $_GET['video']; } ?>";
-			
+			<?php $previewMode = isset($_GET['preview_mode']) ? 'previewMode=1' : ''; ?>
 			<?php
 			if(get_post_type( get_the_ID() ) == 'ic-chat-bot'){
 				$botId = get_the_ID();
@@ -54,7 +54,7 @@ class IC_front{
 				if($chat_type == 'Endorser Send Invitation'){
 					?>
 					var d = document, s = d.createElement('iframe'); 
-					s.src = "https://financialinsiders.github.io/endorsers/#!/cb/<?= $botId?>?detailInfo=<?= $_GET['detailInfo']?>";
+					s.src = "https://financialinsiders.github.io/endorsers/#!/cb/<?= $botId?>?detailInfo=<?= $_GET['detailInfo']?>&<?= $previewMode?>";
 					s.style.position = 'fixed';
 					s.style.width = "100%";
 					s.style.height = "100%";
@@ -68,7 +68,7 @@ class IC_front{
 				} elseif($chat_type == 'Endorser Registeration'){
 					?>
 					var d = document, s = d.createElement('iframe'); 
-					s.src = "https://financialinsiders.github.io/endorsers/#!/register/<?= $botId?>/<?= $agent_id?>";
+					s.src = "https://financialinsiders.github.io/endorsers/#!/register/<?= $botId?>/<?= $agent_id?>?<?= $previewMode?>";
 					s.style.position = 'fixed';
 					s.style.width = "100%";
 					s.style.height = "100%";

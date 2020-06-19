@@ -573,7 +573,7 @@ wp_redirect($link);
 
 		$id = wp_update_post($args);
 
-		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'fbText', 'fb_image', 'twText', 'tw_image', 'piText', 'pi_image', 'liText', 'li_image', 'inviteContent', 'backgroundImage', 'fullscreen', 'emailInvite');
+		$arr = array('keywords', 'chat_category', 'avatarImage', 'chat_type', 'fbText', 'fb_image', 'twText', 'tw_image', 'piText', 'pi_image', 'liText', 'li_image', 'inviteContent', 'backgroundImage', 'fullscreen', 'emailInvite', 'appearance');
 
 		foreach($arr as $a){
 			update_post_meta($_POST['ID'], $a, $_POST[$a]);

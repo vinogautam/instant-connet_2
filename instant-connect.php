@@ -53,6 +53,8 @@
 		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_date_picker' ));
 		add_filter( 'page_template', array( &$this, 'wpa3396_page_template' ));
 		//add_action('wp_login', array( &$this, 'after_login' ), 10, 2); // We will use firebase fo this purpose
+
+		add_filter('single_template', array( &this, 'chat_post_template'));
 		
 		add_action( 'add_meta_boxes', array( &$this, 'ic_meta_boxes' ));
 		add_action( 'save_post', array( &$this, 'ic_save_meta_box' ));
@@ -65,6 +67,19 @@
 		new IC_ajax();
 		new IC_front();
 		new IC_agent_api();
+	}
+
+	function chat_post_template($single){
+		global $post;
+
+	    /* Checks for single template by post type */
+	    if ( $post->post_type == 'ic-chat-bot' ) {
+	        if ( file_exists( PLUGIN_PATH . '/chat_post_template.php' ) ) {
+	            return PLUGIN_PATH . '/chat_post_template.php';
+	        }
+	    }
+
+	    return $single;
 	}
 
 	function ic_profile_image(){

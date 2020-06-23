@@ -74,8 +74,8 @@
 
 	    /* Checks for single template by post type */
 	    if ( $post->post_type == 'ic-chat-bot' ) {
-	        if ( file_exists( PLUGIN_PATH . '/chat_post_template.php' ) ) {
-	            return PLUGIN_PATH . '/chat_post_template.php';
+	        if ( file_exists( IC_PLUGIN_DIR . '/chat_post_template.php' ) ) {
+	            return IC_PLUGIN_DIR . '/chat_post_template.php';
 	        }
 	    }
 

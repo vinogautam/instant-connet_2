@@ -49,7 +49,8 @@ class IC_front{
 			if(get_post_type( get_the_ID() ) == 'ic-chat-bot'){
 				$botId = get_the_ID();
 				$chat_type = get_post_meta($botId, 'chat_type', true);
-				$fullScreen = "true";
+				$appearance = (array) get_post_meta($botId, 'appearance', true);
+				$fullScreen = $appearance['fullscreen'];
 
 				if($chat_type == 'Endorser Send Invitation'){
 					?>

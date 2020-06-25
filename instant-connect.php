@@ -54,7 +54,7 @@
 		add_filter( 'page_template', array( &$this, 'wpa3396_page_template' ));
 		//add_action('wp_login', array( &$this, 'after_login' ), 10, 2); // We will use firebase fo this purpose
 
-		add_filter('single_template', array( &this, 'chat_post_template'));
+		add_filter('single_template', array( &$this, 'chat_post_template'));
 		
 		add_action( 'add_meta_boxes', array( &$this, 'ic_meta_boxes' ));
 		add_action( 'save_post', array( &$this, 'ic_save_meta_box' ));

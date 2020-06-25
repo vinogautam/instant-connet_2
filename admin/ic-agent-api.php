@@ -59,7 +59,7 @@ class IC_agent_api{
 			'ic_copy_chat_bot', 'ic_agent_status_frontend', 'ic_update_profile_page_data', 'ic_get_profile_page_data',
 			'ic_add_session_timeline', 'getIntro', 'ic_link', 'ic_shorten_link', 'ic_create_introduction',
 			'ic_timekit_google_callback', 'approve_endorser', 'ic_shorten_link_info',
-			'ic_widget_settings'
+			'ic_widget_settings', 'get_geo'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -67,6 +67,11 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function get_geo(){
+		$loc = file_get_contents('http://api.ipstack.com/check?access_key=ba0006dcf32e6aa480a9729f70193c49');
+    	echo $loc;
 	}
 
 	function ic_widget_settings(){

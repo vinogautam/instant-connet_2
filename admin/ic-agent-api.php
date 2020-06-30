@@ -59,7 +59,7 @@ class IC_agent_api{
 			'ic_copy_chat_bot', 'ic_agent_status_frontend', 'ic_update_profile_page_data', 'ic_get_profile_page_data',
 			'ic_add_session_timeline', 'getIntro', 'ic_link', 'ic_shorten_link', 'ic_create_introduction',
 			'ic_timekit_google_callback', 'approve_endorser', 'ic_shorten_link_info',
-			'ic_widget_settings', 'get_geo'
+			'ic_widget_settings', 'get_geo', 'ic_update_lead_info'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -72,6 +72,23 @@ class IC_agent_api{
 	function get_geo(){
 		$loc = file_get_contents('http://api.ipstack.com/check?access_key=ba0006dcf32e6aa480a9729f70193c49');
     	echo $loc;
+	}
+
+	function ic_update_lead_info() {
+		global $wpdb;
+
+		$lead = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$wpdb->update("wp_leads", $lead, array('id' => $_GET['id']));
+
+		if($lead_id) {
+			$response = array('status' => 'Success', 'msg' => 'Lead updated successfully');
+		} else {
+			$response = array('status' => 'Error', 'msg' => 'Try again later!!');
+		}
+		
+		echo json_encode($response);
+		die(0);
 	}
 
 	function ic_widget_settings(){

@@ -20,7 +20,7 @@ $appearance = (array)get_post_meta($chat_id, 'appearance', true);
 						<img width="100%" src="<?= $appearance['img_after_content']?>">
 					<?php }?>
 					<?php if($appearance['button_text']){?>
-						<button class="btn btn-primary">
+						<button id="startConversation" class="btn btn-primary">
 							<i class="fa <?= $appearance['button_icon2']?>"></i>
 							<?= $appearance['button_text']?>
 						</button>

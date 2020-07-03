@@ -1,4 +1,4 @@
-<?php get_header();
+<?php get_header('chatbot');
 $chat_id = get_the_ID();
 $appearance = (array)get_post_meta($chat_id, 'appearance', true);
 ?>
@@ -29,4 +29,4 @@ $appearance = (array)get_post_meta($chat_id, 'appearance', true);
 			</div>
 		</div>
 </section>
-<?php get_footer();
+<?php get_footer('chatbot');

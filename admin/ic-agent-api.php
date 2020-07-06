@@ -59,7 +59,7 @@ class IC_agent_api{
 			'ic_copy_chat_bot', 'ic_agent_status_frontend', 'ic_update_profile_page_data', 'ic_get_profile_page_data',
 			'ic_add_session_timeline', 'getIntro', 'ic_link', 'ic_shorten_link', 'ic_create_introduction',
 			'ic_timekit_google_callback', 'approve_endorser', 'ic_shorten_link_info',
-			'ic_widget_settings', 'get_geo', 'ic_update_lead_info'
+			'ic_widget_settings', 'get_geo', 'ic_update_lead_info', 'ic_get_endorser_intro'
 	    );
 		
 		foreach ($functions as $key => $value) {
@@ -67,6 +67,17 @@ class IC_agent_api{
 			add_action( 'wp_ajax_nopriv_'.$value, array( &$this, $value) );
 		}
 	    
+	}
+
+	function ic_get_endorser_intro(){
+		$_POST = count($_POST) ? $_POST : (array) json_decode(file_get_contents('php://input'));
+
+		$response = array('status' => 'Success', 'data' => array());
+		$response['data']['video'] = get_user_meta($_POST['endorserId'], 'video', true);
+		$response['data']['landingPageContent'] = get_user_meta($_POST['endorserId'], 'landingPageContent', true);
+
+		echo json_encode($response);
+		die(0);
 	}
 
 	function get_geo(){
@@ -4640,11 +4651,12 @@ wp_redirect($link);
 				update_user_meta($user_id, 'first_name', $user['first_name']);
 				update_user_meta($user_id, 'last_name', $user['last_name']);
 				update_user_meta($user_id, 'phone', $user['phone']);
-				update_user_meta($user_id, 'video', $user['video']);
+				
 				update_user_meta($user_id, 'endorser_letter', $user['endorser_letter']);
 				update_user_meta($user_id, 'endorsement_letter', $user['endorsement_letter']);
 				update_user_meta($user_id, 'campaign', $user['campaign']);
 				update_user_meta($user_id, 'social_campaign', $user['social_campaign']);
+				update_user_meta($user_id, 'video', $user['video']);
 				update_user_meta($user_id, 'landingPageContent', $user['landingPageContent']);
 				if(isset($user['password'])) {
 					update_user_meta($user_id, 'issuePoints', $user['issue_points'] ? 1 : 0);

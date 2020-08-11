@@ -48,3 +48,4 @@ function opentok_generate_token($sessionID) {
     	'expireTime' => time()+(7 * 24 * 60 * 60)));
 	return $token;
 }
+
